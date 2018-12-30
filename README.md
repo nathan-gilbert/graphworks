@@ -1,11 +1,11 @@
-GRAPHWORKS 0.3
+# GRAPHWORKS
 
-Requires:
-	1. Python 2.4+	
-	2. Numeric Python
-	3. dotty - Graphviz software/libraries.
-	4. numpy
-	
-Notes: 
+## Requires:
+* Python 2.4+
+* Numeric Python
+* dotty - Graphviz software/libraries.
+* numpy
 
-	1. Currently, weighted graphs can only be entered using an adjacency matrix. 
+## Notes
+
+1. Currently, weighted graphs can only be entered using an adjacency matrix.
