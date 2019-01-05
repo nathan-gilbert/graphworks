@@ -3,8 +3,8 @@
 ## A graph theoretic module for Python
 
 This is a very old project I created for a class as an Undergrad. It's not in a
-working state at the moment but I'm interested in getting back into mathematics
-so am slowly reworking it and improving the code quality.
+working state at the moment but I'm getting back into the mathematics involved here
+and am slowly reworking and improving the code quality.
 
 ## Requirements
 

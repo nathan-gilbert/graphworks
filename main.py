@@ -22,8 +22,7 @@ def main(argv):
     inFile = " "
 
     # TODO convert to argparse
-    #Some form of command line option buffer needs to be created in order to ensure multiple commands get executed.
-    if ("--debug" in argv):
+    if "--debug" in argv:
         DEBUG = True
         try:
             currTime = asctime().split()[3]
@@ -33,7 +32,7 @@ def main(argv):
             print("Error opening debug file.")
             sys.exit(1)
 
-    if ("-h" in argv) or ("--help" in argv):
+    if "-h" in argv or "--help" in argv:
         print("""\n\tGrapfworks 0.3\n\tA Graph Theoretic black hole.""")
         print("""
               -al <file> or --adjacency-list <file>        - <file> is given in adjacency list format.
@@ -45,29 +44,30 @@ def main(argv):
         sys.exit(0)
 
     #The next two arguments determine the input type of the graph.
-    if ("-al" in argv) or ("--adjaceny-list" in argv):
-              try:
-                  inFile = argv[argv.index("-al") + 1]
-                  haveFile = True
-                  adjList = True
-              except ValueError:
-                         try:
-                             inFile = argv[argv.index("--adjaceny-list") + 1]
-                             haveFile = True
-                         except:
-                                    print("Command line arguments incorrect. 1")
+    if "-al" in argv or "--adjaceny-list" in argv:
+        try:
+            inFile = argv[argv.index("-al") + 1]
+            haveFile = True
+            adjList = True
+        except ValueError:
+            try:
+                inFile = argv[argv.index("--adjaceny-list") + 1]
+                haveFile = True
+            except:
+                print("Command line arguments incorrect. 1")
 
-    if ("-am" in argv) or ("--adjaceny-matrix" in argv):
-              try:
-                  inFile = argv[argv.index("-am") + 1]
-                  haveFile = True
-              except ValueError:
-                         try:
-                             inFile = argv[argv.index("--adjaceny-matrix") + 1]
-                             haveFile = True
-                         except:
-                                    print("Command line arguments incorrect. 2")
-    if ("-f" in argv):
+    if "-am" in argv or "--adjaceny-matrix" in argv:
+        try:
+            inFile = argv[argv.index("-am") + 1]
+            haveFile = True
+        except ValueError:
+            try:
+                inFile = argv[argv.index("--adjaceny-matrix") + 1]
+                haveFile = True
+            except:
+                print("Command line arguments incorrect. 2")
+
+    if "-f" in argv:
         try:
             inFile = argv[argv.index("-f") + 1]
             haveFile = True
@@ -75,9 +75,8 @@ def main(argv):
         except ValueError:
             print("Command line arguments incorrect. 3")
 
-    if ("-x" in argv) or ("--export" in argv):
+    if "-x" in argv or "--export" in argv:
         EXPORT = True
-
         try:
             inFile = argv[argv.index("-x") + 1]
             readInAdjFile(inFile)
@@ -101,17 +100,17 @@ def main(argv):
         #run random graph generator
         randroidGraph()
 
-    if ("-v" in argv) or ("--version" in argv):
+    if "-v" in argv or "--version" in argv:
         print("Graphworks 0.3.1")
         sys.exit(0)
 
     if "--gui" in argv:
-              try:
-                  gui = True
-                  print("Start GUI")
-                  print("Nothing much yet. :)")
-              except ValueError:
-                    print("Command line arguments incorrect. 4")
+        try:
+            gui = True
+            print("Start GUI")
+            print("Nothing much yet. :)")
+        except ValueError:
+            print("Command line arguments incorrect. 4")
 
     if(adjList and haveFile):
         BUFFER.append("Reading in file...")
@@ -123,7 +122,8 @@ def main(argv):
         BUFFER.append("Done.")
     else:
         #if GUI was selected, try to run the GUI.
-        if(gui):
+        if gui:
+            # TODO
             print("GUI!")
         else:
             commandLine()
@@ -137,11 +137,9 @@ def readInAdjFile(inputFile):
 
     global CURRENT
     inFile = open(inputFile, "r")
-    dict = {}
-
+    d = {}
     for line in inFile:
-
-        if(line[0] == "#"):
+        if line[0] == "#":
             continue
 
         if line.find("Name:") != -1:
@@ -152,34 +150,29 @@ def readInAdjFile(inputFile):
         #Need to add re to take into account for ""*
         if line == "\n":
             continue
-
         if line.find("+DIRECTED") != -1:
             CURRENT.directed = True
             continue
-
         if line.find("+WEIGHTED") != -1:
-            print("Sorry, weighted graphs can only be enterd with a matrix file. See docs for details.")
+            print("Weighted graphs can only be enterd with a matrix file.")
             sys.exit(1)
 
         key = line[0]
         data = line[4:].split()
-        dict[key] = data
-
+        d[key] = data
     inFile.close()
-    CURRENT.makeGraphList(dict)
-
-    if(not EXPORT):
+    CURRENT.makeGraphList(d)
+    if not EXPORT:
         init()
 
 
 def readInMatrixFile(inputFile):
-
     inFile = open(inputFile, "r")
     row = []
     name = ""
 
     for line in inFile:
-        if(line[0] == "#"):
+        if line[0] == "#":
             continue
 
         if line.find("Name:") != -1:
@@ -208,6 +201,8 @@ def readInMatrixFile(inputFile):
 
 #6/6/06
 #This needs fixing, for one, this currently just produces directed graphs. `
+
+
 def randroidGraph():
     """Creates a random graph. """
     global CURRENT
@@ -242,6 +237,7 @@ def completeGraph():
     init()
     CURRENT.name = "K_" + str(n)
 
+
 def newGraph():
     """Creates a blank new graph. """
     global CURRENT
@@ -259,14 +255,12 @@ def newGraph():
 
 def init():
     """Performs several initial caculations with new graph."""
-
     global FUNCTHAND
     global CURRENT
 
     FUNCTHAND.graph = CURRENT
     FUNCTHAND.sparse()
-
-    if(FUNCTHAND.cycle()):
+    if FUNCTHAND.cycle():
         BUFFER.append("Has cycle(s)")
     else:
         BUFFER.append("Has no cycles.")
@@ -293,14 +287,12 @@ def trimBuffer():
 
 def exportGraph():
     """This function exports the current graph to the Graphviz standard layout.  """
-
     global CURRENT
-
     exportHandler = export.ExportHandler(CURRENT)
     exportHandler.makeGraphviz()
     file = exportHandler.getFileName()
 
-    if(not EXPORT):
+    if not EXPORT:
         BUFFER.append("Export Done.")
         BUFFER.append("Graph deposited in " + file)
 
@@ -310,11 +302,10 @@ def saveGraph():
 
     exportHandler = export.ExportHandler(CURRENT)
     exportHandler.saveGraph()
-
     BUFFER.append(CURRENT.name.strip() + " saved.")
 
 
-def help():
+def printHelp():
     tmp = """
     (command) Name:  				Description.
     (1) New Graph:   				Create a new graph.
@@ -356,17 +347,14 @@ def functionMenu():
     """Function handler menu. """
 
     global FUNCTHAND
-
     #Function Handler menu.
-    while (1):
-
+    while True:
         if POSIX:
             os.system("clear")
         else:
             os.system("cls")
 
         header()
-
         print("""
         Functions:
         1. Dominating Set
@@ -377,18 +365,16 @@ def functionMenu():
 
         try:
             {'1': FUNCTHAND.dom,
-                            '2': stub,
-                            '3': FUNCTHAND.connected,
-                            'exit': commandLine}[answer.strip().lower()]()
+             '2': stub,
+             '3': FUNCTHAND.connected,
+             'exit': commandLine}[answer.strip().lower()]()
         except KeyError:
             BUFFER.append("Incorrect option.")
 
 
 def header():
     """ Prints std header for graphworks. """
-
     global BUFFER
-
     print(f"\n\n\t\tGraphworks\t{graphworks.__version__}\n\n")
     print("\tCurrent Graph:")
     print("\t\t %s" % CURRENT)
@@ -402,25 +388,27 @@ def renameGraph():
     newName = input("New name: ")
     CURRENT.name = newName.strip()
 
-#Needs work.
-#	1. Work on the numbering/naming scheme for the vertices.
-#  2. Make sure the proper conditions are met through rigorous tests.
+# TODO
+# 1. Work on the numbering/naming scheme for the vertices.
+# 2. Make sure the proper conditions are met through rigorous tests.
 
 
 def cProduct():
-    """Creates the cross product of two graphs. The two graphs being the CURRENT graph and the top graph on the stack. """
+    """
+    Creates the cross product of two graphs.
+    The two graphs being the CURRENT graph and the top graph on the stack.
+    """
     global CURRENT
-
-    if len(GRAPHLST) == 0:
+    if not GRAPHLST:
         BUFFER.append("Nothing on the stack.")
         return
-
     newList = {}
 
     list(CURRENT.adj.keys()).sort()
     list(GRAPHLST[0].adj.keys()).sort()
 
-    #for the cartesian product to come out properly we have to ensure the vertices don't have the same name.
+    # for the cartesian product to come out properly we have to
+    # ensure the vertices don't have the same name.
     i = 1
     j = 0
     for key in list(CURRENT.adj.keys()):
@@ -439,7 +427,6 @@ def cProduct():
                 n.append(str(k))
         newList[key] = deepcopy(n)
         n = []
-
     BUFFER.append(newList)
 
     tmpList = {}
@@ -489,7 +476,7 @@ def zeroDivisor(n=None):
     header()
 
     print()
-    if(n == None):
+    if n is None:
         n = eval(input("Enter the modulus: "))
 
     alpha = "ABCDEFGIJKLMNOPQRSTUVWXYZ"
@@ -550,21 +537,15 @@ def zeroDivisor(n=None):
 
 def commandLine():
     """The command line is the front line. """
-
     answer = ""
-
     #This is control loop of the program.
-    while (1):
-
+    while True:
         trimBuffer()
-
         if POSIX:
             os.system("clear")
         else:
             os.system("cls")
-
         header()
-
         print()
         print("\tCommands: ")
         print("\t\t1. New Graph ")
@@ -574,29 +555,29 @@ def commandLine():
 
         answer = input("Awaiting Your Command: ")
 
-        #Python flavored switch statement.
-        #May have to implement this statement differently to allow for easier cli usage. i.e. so some functions can have
-        #arguments passed to them.
+        # Python flavored switch statement. May have to implement this statement
+        # differently to allow for easier cli usage. i.e. so some functions can
+        # have arguments passed to them.
         try:
             {'1': stub,
              '2': functionMenu,
-                            '3': stub,
-                            '4': exit,
+             '3': stub,
+             '4': exit,
              'clear': clear,
              'comp': complement,
              'cprod': cProduct,
              'exit': exit,
              'export': exportGraph,
-                            'export all': stub,
-                            'help': help,
-                            'new': stub,
+             'export all': stub,
+             'help': printHelp,
+             'new': stub,
              'new random': randroidGraph,
-                            'push': push,
-                            'pop': pop,
+             'push': push,
+             'pop': pop,
              'rename': renameGraph,
              'new complete': completeGraph,
              'save': saveGraph,
-                            'utils': stub,
+             'utils': stub,
              'zdg': zeroDivisor
              }[answer.strip().lower()]()
         except KeyError:
