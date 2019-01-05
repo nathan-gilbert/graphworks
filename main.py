@@ -1,11 +1,13 @@
 import os
 import sys
-import string
 from copy import deepcopy
 from random import randrange
 from time import asctime
 import numpy
-from graphworks import graph, functions, export
+import graphworks
+from graphworks import export
+from graphworks.graph import Graph
+from graphworks.functions import FunctionHandler
 
 
 def main(argv):
@@ -19,8 +21,7 @@ def main(argv):
     #locals
     inFile = " "
 
-    #Command line craziness.
-
+    # TODO convert to argparse
     #Some form of command line option buffer needs to be created in order to ensure multiple commands get executed.
     if ("--debug" in argv):
         DEBUG = True
@@ -33,15 +34,15 @@ def main(argv):
             sys.exit(1)
 
     if ("-h" in argv) or ("--help" in argv):
-              print("""\n\tGrapfworks 0.3\n\tA Graph Theoretic black hole.""")
-              print("""
+        print("""\n\tGrapfworks 0.3\n\tA Graph Theoretic black hole.""")
+        print("""
               -al <file> or --adjacency-list <file>        - <file> is given in adjacency list format.
               -am <file> or --adjacency-matrix <file>      - <file> is given in adjacency matrix format.
               -x <file>                                    - <file> is exported as a Graphviz file.
               --gui                                        - Grapfwerks GUI.
               """)
-              print("""\tAuthor: Nathan Gilbert (nathan.gilbert@gmail.com) """)
-              sys.exit(0)
+        print("""\tAuthor: Nathan Gilbert (nathan.gilbert@gmail.com) """)
+        sys.exit(0)
 
     #The next two arguments determine the input type of the graph.
     if ("-al" in argv) or ("--adjaceny-list" in argv):
@@ -388,7 +389,7 @@ def header():
 
     global BUFFER
 
-    print("\n\n\t\tGraphworks\t0.3\n\n")
+    print(f"\n\n\t\tGraphworks\t{graphworks.__version__}\n\n")
     print("\tCurrent Graph:")
     print("\t\t %s" % CURRENT)
     print()
@@ -467,7 +468,7 @@ def complement():
             else:
                 CURRENT.matrix[x, y] = 1
 
-    newMatrix = CURRENT.matrix - identity(size)
+    newMatrix = CURRENT.matrix - numpy.identity(size)
 
     g = Graph("_" + name.strip() + "_")
     CURRENT = g
@@ -603,25 +604,15 @@ def commandLine():
 
 
 if __name__ == "__main__":
-
-    #Useful Idiots/Globals
     CURRENT = Graph("Default")
     GRAPHLST = []
     BUFFER = ["Messages:"]
     FUNCTHAND = FunctionHandler(BUFFER, CURRENT)
     DEBUG = False
     EXPORT = False
-
-    #Checking OS type. Could prove useful, and will help improve portability.
-    #I chose to create a variable like this because I believed in the long run it would be faster to
-    #call the local variable, then to call the 'os' library everytime I wanted to know what OS the user
-    #is running.
     if os.name == 'posix':
         POSIX = True
     else:
         POSIX = False
 
     main(sys.argv[1:])
-
-    if(DEBUG):
-        debugLog.close()

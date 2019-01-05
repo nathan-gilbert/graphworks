@@ -30,6 +30,9 @@ class FunctionHandler:
                     return newpath
         return None
 
+    def find_path(self, node, end, path):
+        return []
+
     def find_all_paths(self, start, end, path=[]):
         """Finds all paths. A generalization of the algorithm above."""
         path = path + [start]
