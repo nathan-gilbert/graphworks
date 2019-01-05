@@ -1,10 +1,15 @@
-# GRAPHWORKS
+# Graphworks
 
-## Requires:
+## A graph theoretic module for Python
+
+### Requires:
+
 * Python 2.4+
 * Numeric Python
 * dotty - Graphviz software/libraries.
 * numpy
+
+### Usage
 
 ## Notes
 
