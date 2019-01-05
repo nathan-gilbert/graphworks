@@ -32,18 +32,18 @@ def main(argv):
 			debugLog = open("#graphworks:%s.debug" % currTime, "w")
 			debugLog.write("Debug Log for %s" % currTime)
 		except ValueError:
-			print "Error opening debug file."
+			print("Error opening debug file.")
 			sys.exit(1)
 
 	if ("-h" in argv) or ("--help" in argv):
-			  print """\n\tGrapfworks 0.3\n\tA Graph Theoretic black hole."""
-			  print """
+			  print("""\n\tGrapfworks 0.3\n\tA Graph Theoretic black hole.""")
+			  print("""
 			  -al <file> or --adjacency-list <file>        - <file> is given in adjacency list format.
 			  -am <file> or --adjacency-matrix <file>      - <file> is given in adjacency matrix format.
 			  -x <file>                                    - <file> is exported as a Graphviz file.
 			  --gui                                        - Grapfwerks GUI.
-			  """
-			  print """\tAuthor: Nathan Gilbert (nathan.gilbert@gmail.com) """
+			  """)
+			  print("""\tAuthor: Nathan Gilbert (nathan.gilbert@gmail.com) """)
 			  sys.exit(0)
 
 	#The next two arguments determine the input type of the graph.
@@ -57,7 +57,7 @@ def main(argv):
 							 inFile = argv[argv.index("--adjaceny-list") + 1]
 							 haveFile = True
 						 except:
-									print "Command line arguments incorrect. 1"
+									print("Command line arguments incorrect. 1")
 
 	if ("-am" in argv) or ("--adjaceny-matrix" in argv):
 			  try:
@@ -68,14 +68,14 @@ def main(argv):
 							 inFile = argv[argv.index("--adjaceny-matrix") + 1]
 							 haveFile = True
 						 except:
-									print "Command line arguments incorrect. 2"
+									print("Command line arguments incorrect. 2")
 	if ("-f" in argv):
 		try:
 			inFile = argv[argv.index("-f") + 1]
 			haveFile = True
 			adjList = True
 		except ValueError:
-			print "Command line arguments incorrect. 3"
+			print("Command line arguments incorrect. 3")
 
 	if ("-x" in argv) or ("--export" in argv):
 		EXPORT = True
@@ -92,7 +92,7 @@ def main(argv):
 				exportGraph()
 				sys.exit(0)
 		  	except ValueError:
-			 	print "Command line arguments incorrect. 3"
+			 	print("Command line arguments incorrect. 3")
 
 	if "--zdg" in argv:
 		#run zdg generator
@@ -104,16 +104,16 @@ def main(argv):
 		randroidGraph()
 
 	if ("-v" in argv) or ("--version" in argv):
-		print "Graphworks 0.3.1"
+		print("Graphworks 0.3.1")
 		sys.exit(0)
 
 	if "--gui" in argv:
 			  try:
 				  gui = True
-				  print "Start GUI"
-				  print "Nothing much yet. :)"
+				  print("Start GUI")
+				  print("Nothing much yet. :)")
 			  except ValueError:
-					print "Command line arguments incorrect. 4"
+					print("Command line arguments incorrect. 4")
 
 	if(adjList and haveFile):
 		BUFFER.append("Reading in file...")
@@ -126,7 +126,7 @@ def main(argv):
 	else:
 		#if GUI was selected, try to run the GUI.
 		if(gui):
-			print "GUI!"
+			print("GUI!")
 		else:
 			commandLine()
 
@@ -160,7 +160,7 @@ def readInAdjFile(inputFile):
 			continue
 
 		if line.find("+WEIGHTED") != -1:
-			print "Sorry, weighted graphs can only be enterd with a matrix file. See docs for details."
+			print("Sorry, weighted graphs can only be enterd with a matrix file. See docs for details.")
 			sys.exit(1)
 
 		key = line[0]
@@ -242,8 +242,8 @@ def completeGraph():
 
 	header()
 
-	print
-	n = input("How many nodes? ")
+	print()
+	n = eval(input("How many nodes? "))
 
 	completeGraph = (ones([n, n]) - identity(n))
 
@@ -263,7 +263,7 @@ def newGraph():
 	else:
 		os.system("cls")
 
-	name = raw_input("Name: ")
+	name = input("Name: ")
 	GRAPHLST.append(CURRENT)
 	CURRENT = Graph(name)
 
@@ -378,13 +378,13 @@ def functionMenu():
 
 		header()
 
-		print """
+		print("""
 		Functions:
 		1. Dominating Set
 		2. All Paths
 		3. Connected
-		"""
-		answer = raw_input("Awaiting Your Command: ")
+		""")
+		answer = input("Awaiting Your Command: ")
 
 		try:
 			{'1': FUNCTHAND.dom,
@@ -400,17 +400,17 @@ def header():
 
 	global BUFFER
 
-	print "\n\n\t\tGraphworks\t0.3\n\n"
-	print "\tCurrent Graph:"
-	print "\t\t %s" % CURRENT
-	print
+	print("\n\n\t\tGraphworks\t0.3\n\n")
+	print("\tCurrent Graph:")
+	print("\t\t %s" % CURRENT)
+	print()
 	for line in BUFFER:
-		print "\t%s" % line
+		print("\t%s" % line)
 
 
 def renameGraph():
 	"""Renames the current graph. """
-	newName = raw_input("New name: ")
+	newName = input("New name: ")
 	CURRENT.name = newName.strip()
 
 #Needs work.
@@ -428,22 +428,22 @@ def cProduct():
 
 	newList = {}
 
-	CURRENT.adj.keys().sort()
-	GRAPHLST[0].adj.keys().sort()
+	list(CURRENT.adj.keys()).sort()
+	list(GRAPHLST[0].adj.keys()).sort()
 
 	#for the cartesian product to come out properly we have to ensure the vertices don't have the same name.
 	i = 1
 	j = 0
-	for key in CURRENT.adj.keys():
-		for k in GRAPHLST[0].adj.keys():
+	for key in list(CURRENT.adj.keys()):
+		for k in list(GRAPHLST[0].adj.keys()):
 			newList[(key + str(i), k + str(j))] = []
 			j = j + 1
 		i = i + 1
 		j = 0
 
 	n = []
-	for key in newList.keys():
-		for k in newList.keys():
+	for key in list(newList.keys()):
+		for k in list(newList.keys()):
 			if key == k:
 				continue
 			if ((key[0] == k[0]) and (k[1].strip('0123456789') in GRAPHLST[0].adj[key[1].strip('0123456789')])) or ((key[1] == k[1]) and (k[0].strip('0123456789') in GRAPHLST[0].adj[key[0].strip('0123456789')])):
@@ -454,7 +454,7 @@ def cProduct():
 	BUFFER.append(newList)
 
 	tmpList = {}
-	for key in newList.keys():
+	for key in list(newList.keys()):
 		tmpList[str(key)] = newList[key]
 
 	g = Graph(CURRENT.name + " X " + GRAPHLST[0].name)
@@ -499,9 +499,9 @@ def zeroDivisor(n=None):
 
 	header()
 
-	print
+	print()
 	if(n == None):
-		n = input("Enter the modulus: ")
+		n = eval(input("Enter the modulus: "))
 
 	alpha = "ABCDEFGIJKLMNOPQRSTUVWXYZ"
 	numberLst = []
@@ -534,15 +534,15 @@ def zeroDivisor(n=None):
 	#This has to be here b/c Python doesn't destroy the above 'i'.
 	i = 0
 	for z in zd:
-		if not zdgd.has_key(z[0]):
+		if z[0] not in zdgd:
 			zdgd[z[0]] = alpha[i]
 			i = i + 1
 
-		if not zdgd.has_key(z[1]):
+		if z[1] not in zdgd:
 			zdgd[z[1]] = alpha[i]
 			i = i + 1
 
-	for key in zdgd.keys():
+	for key in list(zdgd.keys()):
 		tmp = []
 
 		for k in zd:
@@ -576,14 +576,14 @@ def commandLine():
 
 		header()
 
-		print
-		print "\tCommands: "
-		print "\t\t1. New Graph "
-		print "\t\t2. Functions"
-		print "\t\t3. Utilities"
-		print "\t\t4. Exit\n "
+		print()
+		print("\tCommands: ")
+		print("\t\t1. New Graph ")
+		print("\t\t2. Functions")
+		print("\t\t3. Utilities")
+		print("\t\t4. Exit\n ")
 
-		answer = raw_input("Awaiting Your Command: ")
+		answer = input("Awaiting Your Command: ")
 
 		#Python flavored switch statement.
 		#May have to implement this statement differently to allow for easier cli usage. i.e. so some functions can have

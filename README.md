@@ -2,9 +2,9 @@
 
 ## A graph theoretic module for Python
 
-### Requires:
+### Requirements
 
-* Python 2.4+
+* Python 3.7+
 * Numeric Python
 * dotty - Graphviz software/libraries.
 * numpy
