@@ -1,14 +1,9 @@
-#!/usr/bin/python
-#Export module for grapfwerk.
-#
-#Exports current graph to a graphviz file.
-#use the program dot
-
 from time import gmtime, strftime
 from copy import deepcopy
 
 
 class ExportHandler:
+    """  Exports to a Graphviz file. """
     def __init__(self, g):
         self.graph = g
         self.outFile = None

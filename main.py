@@ -7,7 +7,7 @@ import numpy
 import graphworks
 from graphworks import export
 from graphworks.graph import Graph
-from graphworks.functions import FunctionHandler
+from graphworks.algorithms.dag import FunctionHandler
 
 
 def main(argv):
