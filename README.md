@@ -1,6 +1,6 @@
 # Graphworks
 
-## A graph theoretic module for Python
+## A Python module for efficient graph theoretic processing
 
 This is a very old project I created for a class as an Undergrad. It's not in a
 working state at the moment but I'm getting back into the mathematics involved here
@@ -45,3 +45,8 @@ TODO
 ## Notes
 
 1. Currently, weighted graphs can only be entered using an adjacency matrix.
+
+## TODO
+
+1. Rework this a proper python module 
+1. Remove the 'main.py' file, move some of that functionality down
