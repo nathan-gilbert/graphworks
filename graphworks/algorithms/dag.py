@@ -1,5 +1,6 @@
+from numpy import identity
+from numpy import zeros
 
-from numpy import *
 
 class FunctionHandler:
     """A class to handle the various algorithms, the core graph-theoretic handler """
