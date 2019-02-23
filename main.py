@@ -492,11 +492,11 @@ def zeroDivisor(n=None):
         numberLst.append(i)
 
     for i in numberLst:
-         for j in numberLst:
+        for j in numberLst:
             if (i * j) % n == 0:
                 zd.extend([[i, j]])
 
-   #removes double entries i.e. (10, 12) == (12, 10)
+    #removes double entries i.e. (10, 12) == (12, 10)
     for i in zd:
         x = i[1]
         y = i[0]
