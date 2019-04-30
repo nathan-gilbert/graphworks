@@ -1,5 +1,6 @@
-from time import gmtime, strftime
 from copy import deepcopy
+from time import gmtime
+from time import strftime
 
 
 class ExportHandler:

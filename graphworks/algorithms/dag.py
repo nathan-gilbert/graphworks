@@ -59,7 +59,6 @@ class FunctionHandler:
 
         #0 = white
         #1 = grey
-        color = {}
         pred = {}
         queue = []
 
@@ -84,7 +83,6 @@ class FunctionHandler:
                     if vertex == s and u != "$":
                         return True
             queue.pop()
-
         self.GRAPH.clearVisited()
         return False
 
