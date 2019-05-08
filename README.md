@@ -1,4 +1,4 @@
-# Graphworks
+# Graphworks Project
 
 ## A Python module for efficient graph theoretic processing
 
