@@ -1,12 +1,18 @@
-from numpy import zeros
 import copy
+
+from numpy import array
+from numpy import zeros
+
+from graphworks.algorithms.dag import FunctionHandler
 
 
 class Graph:
     """ The graph implementation """
-    def __init__(self, l):
+
+    def __init__(self, label):
+
         # A string representing the graphs name.
-        self.name = l
+        self.name = label
         # A dictionary where the keys are nodes and values are a Python list of neighbors.
         self.adj = {}
         # A numpy adjacency matrix.
@@ -16,11 +22,11 @@ class Graph:
         # Number of vertices.
         self.vertices = 0
         # Used for initial read in purposes.
-        self.adjl = False
+        self.is_adjacency_list = False
         # Are both representations up to date?
         self.matrixUpToDate = False
         # Are both representations up to date?
-        self.listUpToDate = False
+        self.is_list_up_to_date = False
         # Does the graph have direction? Do I?
         self.directed = False
         # Do the edges have weights?
@@ -32,65 +38,65 @@ class Graph:
         return self.name
 
     def __str__(self):
-        adjList = ''
-        keyList = list(self.adj.keys())
-        keyList.sort()
-        for key in keyList:
-            adjList += str(key) + " -> "
+        adjacency_list = ''
+        key_list = list(self.adj.keys())
+        key_list.sort()
+        for key in key_list:
+            adjacency_list += str(key) + " -> "
             for neighbor in self.adj[key]:
-                adjList += " " + neighbor
-            adjList += "\n"
+                adjacency_list += " " + neighbor
+            adjacency_list += "\n"
 
-        return "%s\n%s\n%s" % (self.name, adjList, self.matrix)
+        return "%s\n%s\n%s" % (self.name, adjacency_list, self.matrix)
 
-    def setName(self, s):
-        self.name = s
+    def set_name(self, n):
+        self.name = n
 
-    def makeGraphList(self, adjList):
+    def make_graph_list(self, adjacency_list):
         """Creates and updates internal graph representations. """
-        self.adj = adjList
-        self.adjl = True
+        self.adj = adjacency_list
+        self.is_adjacency_list = True
         self.matrixUpToDate = False
         self.update()
 
-    def makeGraphMatrix(self, m):
+    def make_graph_matrix(self, m):
         """ Creates and updates graph representations. """
         self.matrix = m
-        self.listUpToDate = False
+        self.is_list_up_to_date = False
         self.update()
 
-    def clearVisited(self):
+    def clear_visited(self):
         """Clears the internal visited listed in a Graph. """
         for key in list(self.adj.keys()):
             self.color[key] = 0
 
     def update(self):
-        """ Switching from adjacentency list to matrix and vice versa. -1 means the vertices share no edge. """
-        #in case any graph operations changes the number of vertices
-        #or edges.
+        """ Switching from adjacency list to matrix and vice versa. -1 means the vertices share no edge. """
+
+        # in case any graph operations changes the number of vertices
+        # or edges.
         self.vertices = 0
         self.edges = 0
 
-        #if list is upToDate then make the matrix
-        if(self.adjl):
-            row = 0
-            keyList = list(self.adj.keys())
-            keyList.sort()
-            neighbor = []
-            rank = len(keyList)
+        # if list is upToDate then make the matrix
+        if self.is_adjacency_list:
+            key_list = list(self.adj.keys())
+            key_list.sort()
+            rank = len(key_list)
 
-            #Creating a temp matrix for later use.
-            tmpMatrix = zeros((rank, rank))
+            # Creating a temp matrix for later use.
+            tmp_matrix = zeros((rank, rank))
 
-            for key in keyList:
+            current_row = 0
+            for key in key_list:
                 neighbor = self.adj[key]
                 for n in neighbor:
-                    tmpMatrix[row, (ord(n) - 65)] = 1
-                row += 1
+                    tmp_matrix[current_row, (ord(n) - 65)] = 1
+                current_row += 1
 
-            self.matrix = tmpMatrix
+            self.matrix = tmp_matrix
 
-        #else make the list
+        # else make the list
         else:
             self.adj = {}
             neighbor = []
@@ -106,15 +112,14 @@ class Graph:
                 neighbor = []
                 index = -1
 
-        #Setting number of edges & vertices in graph.
+        # Setting number of edges & vertices in graph.
         self.edges = self.matrix.shape[0]
-
         for key in list(self.adj.keys()):
             self.color[key] = 0
             self.vertices += len(self.adj[key])
 
 
-#Below is for testing purposes.
+# Below is for testing purposes.
 if __name__ == '__main__':
 
     g = Graph("g")
@@ -123,12 +128,12 @@ if __name__ == '__main__':
     name = ''
 
     for line in inFile:
-        if(line[0] == "#"):
+        if line[0] == "#":
             continue
 
         if line.find("Name:") != -1:
             name = line[5:]
-            g.setName(name)
+            g.set_name(name)
             continue
 
         if line == "\n":
@@ -145,7 +150,7 @@ if __name__ == '__main__':
         row.append(line.split())
 
     matrix = array(row)
-    g.makeGraphMatrix(matrix)
+    g.make_graph_matrix(matrix)
 
     inFile.close()
 
@@ -162,7 +167,7 @@ if __name__ == '__main__':
 
     f.DFS(start, end)
 
-    if(f.cycle('A')):
+    if f.cycle():
         print("Has cycle(s)")
     else:
         print("No cycles.")
