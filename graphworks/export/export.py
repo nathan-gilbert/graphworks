@@ -21,7 +21,7 @@ class ExportHandler:
         keyList = list(self.graph.adj.keys())
         keyList.sort()
 
-        #Graphviz needs a file that looks something like a directed graph, even though it isn't per se.
+        # Graphviz needs a file that looks something like a is_directed graph, even though it isn't per se.
         #Removing such pecularities.
         newDict = deepcopy(self.graph.adj)
 

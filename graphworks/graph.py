@@ -10,8 +10,7 @@ class Graph:
     """ The graph implementation """
 
     def __init__(self, label):
-
-        # A string representing the graphs name.
+        # A string label for the graph
         self.name = label
         # A dictionary where the keys are nodes and values are a Python list of neighbors.
         self.adj = {}
@@ -22,15 +21,15 @@ class Graph:
         # Number of vertices.
         self.vertices = 0
         # Used for initial read in purposes.
-        self.is_adjacency_list = False
+        self.is_adjacency_list_representation = False
         # Are both representations up to date?
-        self.matrixUpToDate = False
+        self.is_matrix_up_to_date = False
         # Are both representations up to date?
         self.is_list_up_to_date = False
         # Does the graph have direction? Do I?
-        self.directed = False
+        self.is_directed = False
         # Do the edges have weights?
-        self.weighted = False
+        self.is_weighted = False
         # Visited list.
         self.color = {}
 
@@ -55,8 +54,8 @@ class Graph:
     def make_graph_list(self, adjacency_list):
         """Creates and updates internal graph representations. """
         self.adj = adjacency_list
-        self.is_adjacency_list = True
-        self.matrixUpToDate = False
+        self.is_adjacency_list_representation = True
+        self.is_matrix_up_to_date = False
         self.update()
 
     def make_graph_matrix(self, m):
@@ -79,7 +78,7 @@ class Graph:
         self.edges = 0
 
         # if list is upToDate then make the matrix
-        if self.is_adjacency_list:
+        if self.is_adjacency_list_representation:
             key_list = list(self.adj.keys())
             key_list.sort()
             rank = len(key_list)
@@ -140,11 +139,11 @@ if __name__ == '__main__':
             continue
 
         if line.find("+DIRECTED") != -1:
-            g.directed = True
+            g.is_directed = True
             continue
 
         if line.find("+WEIGHTED") != -1:
-            g.weighted = True
+            g.is_weighted = True
             continue
 
         row.append(line.split())
