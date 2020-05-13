@@ -1,9 +1,12 @@
 import unittest
 
+from graphworks.graph import Graph
 
-class MyTestCase(unittest.TestCase):
-    def test_something(self):
-        self.assertEqual(True, False)
+
+class GraphTests(unittest.TestCase):
+    def test_name(self):
+        g = Graph("graph")
+        self.assertEqual(g.name, 'graph')
 
 
 if __name__ == '__main__':

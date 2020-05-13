@@ -1,0 +1,1 @@
+{ "name": "Graph1", "edges": { "A": "B", "B": "A", "C": null } }

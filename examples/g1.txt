@@ -1,5 +1,0 @@
-Name: Graph1
-
-A -> B 
-B -> A
-C ->
