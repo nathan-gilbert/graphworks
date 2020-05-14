@@ -31,8 +31,17 @@ class Graph:
         key_list.sort()
         for key in key_list:
             adjacency_list += str(key) + " -> "
-            for neighbor in self.edges[key]:
-                adjacency_list += " " + neighbor
+            if self.edges[key] is not None:
+                for neighbor in self.edges[key]:
+                    adjacency_list += neighbor
+            else:
+                adjacency_list += "0"
             adjacency_list += "\n"
 
-        return f"${self.name}\n${adjacency_list}"
+        return f"{self.name}\n{adjacency_list}"
+
+
+if __name__ == "__main__":
+    json_graph = {"name": "my graph", "edges": {"A": "B", "B": None}}
+    g = Graph("my graph", input_str=json.dumps(json_graph))
+    print(g)
