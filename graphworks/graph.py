@@ -5,18 +5,17 @@ class Graph:
     """ The graph implementation as a simple adjacency map"""
 
     def __init__(self, label, input_file=None, input_str=None):
-        # A string label for the graph
         self.name = label
-        # A dictionary where the keys are nodes and values are a Python list of neighbors.
         self.edges = {}
 
-        # h
+        # process either a file or string representing the graph
         if input_file is not None:
             with open(input_file, 'r') as inFile:
                 lines = ''.join(inFile.readlines())
                 json_data = json.loads(lines)
                 self.name = json_data.get("name", "")
                 self.edges = json_data.get("edges", {})
+
         if input_file is None and input_str is not None:
             json_data = json.loads(input_str)
             self.name = json_data.get("name", "")

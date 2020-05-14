@@ -42,9 +42,12 @@ pip install -r requirements.txt
 
 Run the unit tests: `python -m unittest discover tests '*_tests.py'`
 
-Run unit test coverage: `coverage run -m unittest discover tests '*_tests.py'`
+Run unit test coverage: `coverage run --source=graphworks/ -m unittest discover tests '*_tests.py'`
 
-Look at the test coverage: `coverage report --omit="*/test*"` or `coverage report html --omit="*/test*"`
+Generate test coverage reports (either works): 
+
+* `coverage report --omit="*/test*"` 
+* `coverage html --omit="*/test*"` 
 
 Using the library: TODO
 
