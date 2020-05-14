@@ -13,7 +13,8 @@ class Graph:
         # h
         if input_file is not None:
             with open(input_file, 'r') as inFile:
-                json_data = json.loads(inFile.read())
+                lines = ''.join(inFile.readlines())
+                json_data = json.loads(lines)
                 self.name = json_data.get("name", "")
                 self.edges = json_data.get("edges", {})
         if input_file is None and input_str is not None:

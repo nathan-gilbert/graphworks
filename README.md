@@ -40,7 +40,13 @@ pip install -r requirements.txt
 
 ## Usage
 
-TODO
+Run the unit tests: `python -m unittest discover tests '*_tests.py'`
+
+Run unit test coverage: `coverage run -m unittest discover tests '*_tests.py'`
+
+Look at the test coverage: `coverage report --omit="*/test*"` or `coverage report html --omit="*/test*"`
+
+Using the library: TODO
 
 ## Notes
 
