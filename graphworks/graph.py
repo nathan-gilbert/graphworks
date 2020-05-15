@@ -40,7 +40,3 @@ class Graph:
         return f"{self.name}\n{adjacency_list}"
 
 
-if __name__ == "__main__":
-    json_graph = {"name": "my graph", "edges": {"A": "B", "B": None}}
-    g = Graph("my graph", input_str=json.dumps(json_graph))
-    print(g)

@@ -20,6 +20,10 @@ class GraphTests(unittest.TestCase):
         graph = Graph("graph")
         self.assertEqual(graph.name, 'graph')
 
+    def test_repr(self):
+        graph = Graph("graph")
+        self.assertEqual(repr(graph), 'graph')
+
     def test_edges(self):
         json_graph = {"name": "my graph", "edges": {"A": "B", "B": None}}
         graph = Graph("graph", input_str=json.dumps(json_graph))
