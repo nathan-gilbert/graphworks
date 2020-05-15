@@ -1,10 +1,9 @@
-# Graphworks Project
+# Graphworks
 
-## A Python module for efficient graph theoretic processing
+## A Python module for efficient graph theoretic programming
 
-This is a very old project I created for a class as an Undergrad. It's not in a
-working state at the moment but I'm getting back into the mathematics involved here
-and am slowly reworking and improving the code quality.
+This is a very old project I created for my undergrad capstone project. 
+It's not in a working state at the moment but I'm bringing it back to life.
 
 ## Requirements
 
@@ -51,11 +50,7 @@ Generate test coverage reports (either works):
 
 Using the library: TODO
 
-## Notes
-
-1. Currently, weighted graphs can only be entered using an adjacency matrix.
-
 ## TODO
 
-1. Rework this a proper python module 
-1. Remove the 'main.py' file, move some of that functionality down
+1. Start with a simple map representation of a graph
+2. Implement the basic graph algorithms on this representation
