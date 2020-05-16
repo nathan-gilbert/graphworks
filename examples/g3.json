@@ -1,0 +1,9 @@
+{
+  "name": "small graph",
+  "directed": true,
+  "edges": {
+    "A": ["B", "C"],
+    "B": ["C"],
+    "C": []
+  }
+}

@@ -1,1 +1,5 @@
-{ "name": "Graph1", "edges": { "A": ["B", "C"], "B": ["A"], "C": [] } }
+{
+  "name": "Graph1",
+  "directed": false,
+  "edges": { "A": ["B", "C"], "B": ["A"], "C": [] }
+}

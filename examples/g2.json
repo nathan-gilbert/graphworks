@@ -1,0 +1,5 @@
+{
+  "name": "Graph2",
+  "directed": false,
+  "edges": { "A": ["B", "C"], "B": ["A"], "C": ["A"] }
+}
