@@ -9,12 +9,12 @@ class ExportHandler:
         self.graph = g
         self.outFile = None
         curTime = strftime("%m-%d-%Y-%H:%M:%S-0500", gmtime())
-        self.fileName = self.graph.name.strip().replace(" ", "") + ":" + \
-                    curTime.strip() + ".dot"
+        self.fileName = self.graph.__label.strip().replace(" ", "") + ":" + \
+                        curTime.strip() + ".dot"
 
     def makeGraphviz(self):
         self.outFile = open(self.fileName, "w")
-        header = "digraph " + self.graph.name.strip().replace(" ", "") + \
+        header = "digraph " + self.graph.__label.strip().replace(" ", "") + \
                     " {\nnode[shape=circle,width=0.2,height=0.2]\nedge[dir=none]\n"
 
         theMagic = ""
@@ -43,7 +43,7 @@ class ExportHandler:
     def saveGraph(self):
         """This function saves the current graph into a *.gwk file.  """
 
-        name = self.graph.name
+        name = self.graph.__label
         buf = ""
 
         outFile = open(name.strip() + ".gwk", "w")

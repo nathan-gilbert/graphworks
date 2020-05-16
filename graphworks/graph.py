@@ -4,8 +4,8 @@ import json
 class Graph:
     """ The graph implementation as a simple adjacency map"""
 
-    def __init__(self, label, input_file=None, input_str=None):
-        self.name = label
+    def __init__(self, label=None, input_file=None, input_str=None):
+        self.__label = label if label is not None else None
         self.edges = {}
 
         # process either a file or string representing the graph
@@ -13,30 +13,33 @@ class Graph:
             with open(input_file, 'r') as inFile:
                 lines = ''.join(inFile.readlines())
                 json_data = json.loads(lines)
-                self.name = json_data.get("name", "")
+                self.__label = json_data.get("name", "")
                 self.edges = json_data.get("edges", {})
 
         if input_file is None and input_str is not None:
             json_data = json.loads(input_str)
-            self.name = json_data.get("name", "")
+            self.__label = json_data.get("name", "")
             self.edges = json_data.get("edges", {})
 
     def __repr__(self):
-        return self.name
+        return self.__label
 
     def __str__(self):
-        adjacency_list = ''
+        final_string = ''
         key_list = list(self.edges.keys())
         key_list.sort()
         for key in key_list:
-            adjacency_list += str(key) + " -> "
+            final_string += str(key) + " -> "
             if self.edges[key] is not None:
                 for neighbor in self.edges[key]:
-                    adjacency_list += neighbor
+                    final_string += neighbor
             else:
-                adjacency_list += "0"
-            adjacency_list += "\n"
+                final_string += "0"
+            final_string += "\n"
+        final_string = final_string.strip()
+        return f"{self.__label}\n{final_string}"
 
-        return f"{self.name}\n{adjacency_list}"
+    def get_label(self):
+        return self.__label
 
 
