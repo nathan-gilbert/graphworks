@@ -30,7 +30,7 @@ class Graph:
         key_list.sort()
         for key in key_list:
             final_string += str(key) + " -> "
-            if self.edges[key] is not None:
+            if self.edges[key]:
                 for neighbor in self.edges[key]:
                     final_string += neighbor
             else:
