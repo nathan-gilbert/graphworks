@@ -29,12 +29,12 @@ class GraphTests(unittest.TestCase):
 A -> B
 B -> 0"""
         json_graph = {"name": "my graph", "edges": {"A": ["B"], "B": []}}
-        graph = Graph(input_str=json.dumps(json_graph))
+        graph = Graph(input_graph=json.dumps(json_graph))
         self.assertEqual(str(graph), answer)
 
     def test_edges(self):
         json_graph = {"name": "my graph", "edges": {"A": ["B"], "B": []}}
-        graph = Graph(input_str=json.dumps(json_graph))
+        graph = Graph(input_graph=json.dumps(json_graph))
         self.assertEqual(graph.get_label(), json_graph["name"])
         self.assertEqual(graph.edges, json_graph["edges"])
 

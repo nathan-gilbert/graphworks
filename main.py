@@ -3,5 +3,5 @@ from graphworks.graph import Graph
 
 if __name__ == "__main__":
     json_graph = {"name": "my graph", "edges": {"A": ["B"], "B": []}}
-    g = Graph("my graph", input_str=json.dumps(json_graph))
+    g = Graph("my graph", input_graph=json.dumps(json_graph))
     print(g)
