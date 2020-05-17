@@ -1,10 +1,14 @@
 import json
+from .graph_iterator import GraphIterator
 
 
 class Graph:
     """ The graph implementation as a simple adjacency map"""
 
-    def __init__(self, label: str = None, input_file: str = None, input_graph: str = None):
+    def __init__(self,
+                 label: str = None,
+                 input_file: str = None,
+                 input_graph: str = None):
         """
 
         :param label: a name for this graph
@@ -46,6 +50,9 @@ class Graph:
             final_string += "\n"
         final_string = final_string.strip()
         return f"{self.__label}\n{final_string}"
+
+    def __iter__(self):
+        return GraphIterator(self)
 
     def get_label(self) -> str:
         return self.__label

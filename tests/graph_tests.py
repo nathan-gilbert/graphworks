@@ -36,6 +36,7 @@ B -> 0"""
         json_graph = {"name": "my graph", "edges": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
         self.assertEqual(graph.get_label(), json_graph["name"])
+        self.assertEqual(graph.is_directed(), False)
         self.assertEqual(graph.edges, json_graph["edges"])
 
     def test_read_graph_from_file(self):
@@ -44,6 +45,7 @@ B -> 0"""
             outFile.write(json.dumps(json_graph))
         graph = Graph(input_file=str(path.join(self.test_dir, 'test.txt')))
         self.assertEqual(graph.get_label(), json_graph["name"])
+        self.assertEqual(graph.is_directed(), False)
         self.assertEqual(graph.edges, json_graph["edges"])
 
 
