@@ -1,7 +1,7 @@
 import json
 from graphworks.graph import Graph
 from graphworks.algorithms.basic import generate_edges, find_isolated_nodes
-from graphworks.export.graphviz import save_and_render
+from graphworks.export.graphviz import save_to_dot
 from graphworks.export.json import save_to_json
 
 if __name__ == "__main__":
