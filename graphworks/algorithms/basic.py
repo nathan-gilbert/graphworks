@@ -1,4 +1,4 @@
-from graph import Graph
+from graphworks.graph import Graph
 
 
 def generate_edges(graph: Graph) -> list:
