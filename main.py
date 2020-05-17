@@ -1,8 +1,10 @@
 import json
-from graphworks.graph import Graph
-from graphworks.algorithms.basic import generate_edges, find_isolated_nodes
+
+from graphworks.algorithms.basic import find_isolated_nodes
+from graphworks.algorithms.basic import generate_edges
 from graphworks.export.graphviz import save_to_dot
 from graphworks.export.json import save_to_json
+from graphworks.graph import Graph
 
 if __name__ == "__main__":
     json_graph = {"name": "my graph", "edges": {"A": ["B"], "B": []}}
@@ -15,5 +17,5 @@ if __name__ == "__main__":
     isolated = find_isolated_nodes(g)
     print(isolated)
 
-    # save_and_render(g, f"./{g.get_label()}.gv")
+    save_to_dot(g, f"./{g.get_label()}.gv")
     save_to_json(g, f"./{g.get_label()}.json")

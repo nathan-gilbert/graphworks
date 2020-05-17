@@ -3,9 +3,10 @@ import shutil
 import tempfile
 import unittest
 from os import path
-from graphworks.graph import Graph
-from graphworks.export.json import save_to_json
+
 from graphworks.export.graphviz import save_to_dot
+from graphworks.export.json import save_to_json
+from graphworks.graph import Graph
 
 
 class ExportTests(unittest.TestCase):
@@ -18,7 +19,8 @@ class ExportTests(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
     def test_save_to_json(self):
-        answer = "{\"label\": \"my graph\", \"directed\": false, \"edges\": {\"A\": [\"B\"], \"B\": []}}"
+        answer = "{\"label\": \"my graph\", \"directed\": false," \
+                 " \"edges\": {\"A\": [\"B\"], \"B\": []}}"
         json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
         outfile = path.join(self.test_dir, graph.get_label())

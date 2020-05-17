@@ -20,8 +20,8 @@ class Graph:
 
         # process either a file or string representing the graph
         if input_file is not None:
-            with open(input_file, 'r') as inFile:
-                lines = ''.join(inFile.readlines())
+            with open(input_file, 'r') as in_file:
+                lines = ''.join(in_file.readlines())
                 json_data = json.loads(lines)
                 self._extract_fields_from_json(json_data)
         elif input_file is None and input_graph is not None:
@@ -51,6 +51,7 @@ class Graph:
         return f"{self.__label}\n{final_string}"
 
     def __iter__(self):
+        # pylint: disable=too-few-public-methods
         class GraphIterator:
             """
             Iterator class for Graphs

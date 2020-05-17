@@ -1,7 +1,7 @@
+import json
 import shutil
 import tempfile
 import unittest
-import json
 from os import path
 
 from graphworks.graph import Graph
@@ -41,8 +41,8 @@ B -> 0"""
 
     def test_read_graph_from_file(self):
         json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
-        with open(path.join(self.test_dir, 'test.txt'), 'w') as outFile:
-            outFile.write(json.dumps(json_graph))
+        with open(path.join(self.test_dir, 'test.txt'), 'w') as out_file:
+            out_file.write(json.dumps(json_graph))
         graph = Graph(input_file=str(path.join(self.test_dir, 'test.txt')))
         self.assertEqual(graph.get_label(), json_graph["label"])
         self.assertEqual(graph.is_directed(), False)

@@ -4,6 +4,7 @@ with open('README.md') as f:
     readme = f.read()
 
 with open('LICENSE') as f:
+    # pylint: disable=redefined-builtin
     license = f.read()
 
 setup(name="graphworks",
