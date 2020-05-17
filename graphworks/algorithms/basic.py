@@ -1,4 +1,7 @@
-def generate_edges(graph) -> list:
+from graph import Graph
+
+
+def generate_edges(graph: Graph) -> list:
     edges = []
     for node in graph:
         for neighbour in graph[node]:
