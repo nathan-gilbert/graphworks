@@ -1,5 +1,4 @@
 import json
-from .graph_iterator import GraphIterator
 
 
 class Graph:
@@ -52,7 +51,24 @@ class Graph:
         return f"{self.__label}\n{final_string}"
 
     def __iter__(self):
+        class GraphIterator:
+            """
+            Iterator class for Graphs
+            """
+            def __init__(self, g: Graph):
+                self._graph = g
+                self._index = 0
+
+            def __next__(self):
+                if self._index < len(self._graph.edges.keys()):
+                    key = list(self._graph.edges.keys())[self._index]
+                    self._index += 1
+                    return key
+                raise StopIteration
         return GraphIterator(self)
+
+    def __getitem__(self, node):
+        return self.edges.get(node, [])
 
     def get_label(self) -> str:
         return self.__label

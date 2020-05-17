@@ -14,8 +14,12 @@ class GraphIteratorTests(unittest.TestCase):
         graph = Graph(input_graph=json.dumps(json_graph))
 
         iterations = 0
-        for _ in graph:
+        for key in graph:
             iterations += 1
+            if key == "A":
+                self.assertEqual(len(graph[key]), 3)
+            else:
+                self.assertEqual(len(graph[key]), 0)
         self.assertEqual(iterations, 4)
 
 
