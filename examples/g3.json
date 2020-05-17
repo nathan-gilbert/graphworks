@@ -1,5 +1,5 @@
 {
-  "name": "small graph",
+  "label": "small graph",
   "directed": true,
   "edges": {
     "A": ["B", "C"],

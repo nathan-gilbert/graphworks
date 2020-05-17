@@ -77,6 +77,6 @@ class Graph:
         return self.__is_directed
 
     def _extract_fields_from_json(self, json_data: dict):
-        self.__label = json_data.get("name", "")
+        self.__label = json_data.get("label", "")
         self.__is_directed = json_data.get("directed", False)
         self.edges = json_data.get("edges", {})

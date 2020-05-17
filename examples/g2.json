@@ -1,5 +1,5 @@
 {
-  "name": "Graph2",
+  "label": "Graph2",
   "directed": false,
   "edges": { "A": ["B", "C"], "B": ["A"], "C": ["A"] }
 }
