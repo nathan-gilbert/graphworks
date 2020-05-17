@@ -1,13 +1,15 @@
+from os import path
+
 from graphviz import Graph as GraphViz
 
 from graphworks.graph import Graph
 
 
-def save_to_dot(graph: Graph, out_file: str):
+def save_to_dot(graph: Graph, out_dir: str):
     """
 
     :param graph: the graph to render in dot
-    :param out_file: the absolute path of the gv file to write
+    :param out_dir: the absolute path of the gv file to write
     :return:
     """
     if not graph.is_directed():
@@ -17,4 +19,4 @@ def save_to_dot(graph: Graph, out_file: str):
             for edge in graph[node]:
                 dot.edge(node, edge)
 
-        dot.render(out_file + ".gv", view=False)
+        dot.render(path.join(out_dir, f"{graph.get_label()}.gv"), view=False)

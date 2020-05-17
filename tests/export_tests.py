@@ -23,9 +23,9 @@ class ExportTests(unittest.TestCase):
                  " \"edges\": {\"A\": [\"B\"], \"B\": []}}"
         json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
-        outfile = path.join(self.test_dir, graph.get_label())
-        save_to_json(graph, outfile)
+        save_to_json(graph, self.test_dir)
 
+        outfile = path.join(self.test_dir, graph.get_label() + ".json")
         with open(outfile) as dot_file:
             dot_lines = "".join(dot_file.readlines())
         self.assertEqual(dot_lines, answer)
@@ -41,10 +41,10 @@ graph {
 
         json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
-        outfile = path.join(self.test_dir, graph.get_label())
-        save_to_dot(graph, outfile)
+        save_to_dot(graph, self.test_dir)
 
-        with open(outfile + ".gv") as dot_file:
+        outfile = path.join(self.test_dir, graph.get_label() + ".gv")
+        with open(outfile) as dot_file:
             dot_lines = "".join(dot_file.readlines())
         self.assertEqual(dot_lines, answer)
 

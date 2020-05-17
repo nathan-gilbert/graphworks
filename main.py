@@ -17,5 +17,5 @@ if __name__ == "__main__":
     isolated = find_isolated_nodes(g)
     print(isolated)
 
-    save_to_dot(g, f"./{g.get_label()}.gv")
-    save_to_json(g, f"./{g.get_label()}.json")
+    save_to_dot(g, ".")
+    save_to_json(g, ".")

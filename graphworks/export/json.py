@@ -1,13 +1,14 @@
 import json
+from os import path
 
 from graphworks.graph import Graph
 
 
-def save_to_json(graph: Graph, out_file):
+def save_to_json(graph: Graph, out_dir):
     """
 
     :param graph: the graph to write to json
-    :param out_file: the absolute path to write the json file
+    :param out_dir: the absolute path to the dir to write the file
     :return:
     """
     g_dict = {
@@ -16,5 +17,5 @@ def save_to_json(graph: Graph, out_file):
         "edges": graph.edges
     }
 
-    with open(out_file, 'w') as out:
+    with open(path.join(out_dir, f"{graph.get_label()}.json"), 'w') as out:
         out.write(json.dumps(g_dict))
