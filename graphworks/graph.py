@@ -23,10 +23,10 @@ class Graph:
             with open(input_file, 'r') as in_file:
                 lines = ''.join(in_file.readlines())
                 json_data = json.loads(lines)
-                self._extract_fields_from_json(json_data)
+                self.__extract_fields_from_json(json_data)
         elif input_file is None and input_graph is not None:
             json_data = json.loads(input_graph)
-            self._extract_fields_from_json(json_data)
+            self.__extract_fields_from_json(json_data)
 
     def vertices(self):
         """ returns the vertices of a graph """
@@ -65,11 +65,6 @@ class Graph:
 
         if vertex2 not in self.__graph:
             self.__graph[vertex2] = []
-
-    def _extract_fields_from_json(self, json_data: dict):
-        self.__label = json_data.get("label", "")
-        self.__is_directed = json_data.get("directed", False)
-        self.__graph = json_data.get("graph", {})
 
     def __repr__(self):
         return self.__label
@@ -115,6 +110,11 @@ class Graph:
 
     def __getitem__(self, node):
         return self.__graph.get(node, [])
+
+    def __extract_fields_from_json(self, json_data: dict):
+        self.__label = json_data.get("label", "")
+        self.__is_directed = json_data.get("directed", False)
+        self.__graph = json_data.get("graph", {})
 
     def __generate_edges(self):
         """ A static method generating the edges of the
