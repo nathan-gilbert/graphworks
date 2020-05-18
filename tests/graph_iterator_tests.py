@@ -1,12 +1,13 @@
 import json
 import unittest
+
 from graphworks.graph import Graph
 
 
 class GraphIteratorTests(unittest.TestCase):
     def test_iterator(self):
         json_graph = {"name": "my graph",
-                      "edges": {"A": ["B", "C", "D"],
+                      "graph": {"A": ["B", "C", "D"],
                                 "B": [],
                                 "C": [],
                                 "D": []}

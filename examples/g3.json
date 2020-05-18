@@ -1,7 +1,7 @@
 {
   "label": "small graph",
   "directed": true,
-  "edges": {
+  "graph": {
     "A": ["B", "C"],
     "B": ["C"],
     "C": []

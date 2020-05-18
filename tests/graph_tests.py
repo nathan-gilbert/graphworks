@@ -18,35 +18,51 @@ class GraphTests(unittest.TestCase):
 
     def test_name(self):
         graph = Graph("graph")
-        self.assertEqual(graph.get_label(), 'graph')
+        self.assertEqual('graph', graph.get_label())
 
     def test_repr(self):
         graph = Graph("graph")
-        self.assertEqual(repr(graph), 'graph')
+        self.assertEqual('graph', repr(graph))
 
     def test_str(self):
         answer = """my graph
 A -> B
 B -> 0"""
-        json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
+        json_graph = {"label": "my graph", "graph": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
-        self.assertEqual(str(graph), answer)
+        self.assertEqual(answer, str(graph))
 
     def test_edges(self):
-        json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
+        json_graph = {"label": "my graph", "graph": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
-        self.assertEqual(graph.get_label(), json_graph["label"])
-        self.assertEqual(graph.is_directed(), False)
-        self.assertEqual(graph.edges, json_graph["edges"])
+        self.assertEqual(json_graph["label"], graph.get_label())
+        self.assertEqual(False, graph.is_directed())
+        self.assertEqual(json_graph["graph"], graph.get_graph())
+        self.assertEqual([{'B', 'A'}], graph.edges())
+
+    def test_add_vertex(self):
+        graph = Graph("my graph")
+        graph.add_vertex("A")
+        self.assertEqual(['A'], graph.vertices())
+
+    def test_add_edge(self):
+        graph = Graph("my graph")
+        graph.add_vertex("A")
+        graph.add_vertex("B")
+        graph.add_edge(("A", "B"))
+        self.assertCountEqual([{"A", "B"}], graph.edges())
+        graph.add_edge(("X", "Y"))
+        self.assertCountEqual([{"A", "B"}, {"X", "Y"}], graph.edges())
+        self.assertCountEqual(["A", "B", "X", "Y"], graph.vertices())
 
     def test_read_graph_from_file(self):
-        json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
+        json_graph = {"label": "my graph", "graph": {"A": ["B"], "B": []}}
         with open(path.join(self.test_dir, 'test.txt'), 'w') as out_file:
             out_file.write(json.dumps(json_graph))
         graph = Graph(input_file=str(path.join(self.test_dir, 'test.txt')))
-        self.assertEqual(graph.get_label(), json_graph["label"])
-        self.assertEqual(graph.is_directed(), False)
-        self.assertEqual(graph.edges, json_graph["edges"])
+        self.assertEqual(json_graph["label"], graph.get_label())
+        self.assertEqual(False, graph.is_directed())
+        self.assertEqual(json_graph["graph"], graph.get_graph())
 
 
 if __name__ == '__main__':

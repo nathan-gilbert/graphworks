@@ -20,8 +20,8 @@ class ExportTests(unittest.TestCase):
 
     def test_save_to_json(self):
         answer = "{\"label\": \"my graph\", \"directed\": false," \
-                 " \"edges\": {\"A\": [\"B\"], \"B\": []}}"
-        json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
+                 " \"graph\": {\"A\": [\"B\"], \"B\": []}}"
+        json_graph = {"label": "my graph", "graph": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
         save_to_json(graph, self.test_dir)
 
@@ -39,7 +39,7 @@ graph {
 }
 """
 
-        json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
+        json_graph = {"label": "my graph", "graph": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
         save_to_dot(graph, self.test_dir)
 

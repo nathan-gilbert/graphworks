@@ -8,14 +8,41 @@ from graphworks.graph import Graph
 
 if __name__ == "__main__":
     json_graph = {"name": "my graph", "edges": {"A": ["B"], "B": []}}
-    g = Graph("my graph", input_graph=json.dumps(json_graph))
-    print(g)
+    graph = Graph("my graph", input_graph=json.dumps(json_graph))
+    print(graph)
 
-    all_edges = generate_edges(g)
+    all_edges = generate_edges(graph)
     print(all_edges)
 
-    isolated = find_isolated_nodes(g)
+    isolated = find_isolated_nodes(graph)
     print(isolated)
 
-    save_to_dot(g, ".")
-    save_to_json(g, ".")
+    print("Vertices of graph:")
+    print(graph.vertices())
+
+    print("Edges of graph:")
+    print(graph.edges())
+
+    print("Add vertex:")
+    graph.add_vertex("D")
+
+    print("Vertices of graph:")
+    print(graph.vertices())
+
+    print("Add an edge:")
+    graph.add_edge({"A", "D"})
+
+    print("Vertices of graph:")
+    print(graph.vertices())
+
+    print("Edges of graph:")
+    print(graph.edges())
+
+    graph.add_edge({"X", "Y"})
+    print("Vertices of graph:")
+    print(graph.vertices())
+    print("Edges of graph:")
+    print(graph.edges())
+
+    save_to_dot(graph, ".")
+    save_to_json(graph, ".")
