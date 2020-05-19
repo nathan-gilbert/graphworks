@@ -1,9 +1,11 @@
+from typing import Any
 from typing import List
+from typing import Tuple
 
 from graphworks.graph import Graph
 
 
-def generate_edges(graph: Graph) -> list:
+def generate_edges(graph: Graph) -> List[Tuple[Any, Any]]:
     edges = []
     for node in graph:
         for neighbour in graph[node]:
@@ -11,7 +13,7 @@ def generate_edges(graph: Graph) -> list:
     return edges
 
 
-def find_isolated_nodes(graph) -> list:
+def find_isolated_nodes(graph: Graph) -> List[str]:
     isolated = []
     for node in graph:
         if not graph[node]:
@@ -55,7 +57,7 @@ def find_all_paths(graph: Graph, start_vertex: str, end_vertex: str, path=None) 
     return paths
 
 
-def vertex_degree(graph, vertex):
+def vertex_degree(graph: Graph, vertex: str) -> int:
     """ The degree of a vertex is the number of edges connecting it,
     i.e. the number of adjacent vertices. Loops are counted double,
     i.e. every occurrence of a vertex in the list of adjacent vertices. """

@@ -1,4 +1,6 @@
 import json
+from typing import Dict
+from typing import List
 
 
 class Graph:
@@ -28,15 +30,15 @@ class Graph:
             json_data = json.loads(input_graph)
             self.__extract_fields_from_json(json_data)
 
-    def vertices(self):
+    def vertices(self) -> List[str]:
         """ returns the vertices of a graph """
         return list(self.__graph.keys())
 
-    def edges(self):
+    def edges(self) -> List[set]:
         """ returns the edges of a graph """
         return self.__generate_edges()
 
-    def get_graph(self):
+    def get_graph(self) -> Dict[str, str]:
         return self.__graph
 
     def get_label(self) -> str:
@@ -116,7 +118,7 @@ class Graph:
         self.__is_directed = json_data.get("directed", False)
         self.__graph = json_data.get("graph", {})
 
-    def __generate_edges(self):
+    def __generate_edges(self) -> List[set]:
         """ A static method generating the edges of the
             graph "graph". Edges are represented as sets
             with one (a loop back to the vertex) or two
