@@ -1,8 +1,9 @@
 import json
 import unittest
 
+from graphworks.algorithms.basic import density
 from graphworks.algorithms.basic import find_all_paths
-from graphworks.algorithms.basic import find_isolated_nodes
+from graphworks.algorithms.basic import find_isolated_vertices
 from graphworks.algorithms.basic import find_path
 from graphworks.algorithms.basic import generate_edges
 from graphworks.algorithms.basic import vertex_degree
@@ -20,7 +21,7 @@ class BasicTests(unittest.TestCase):
     def test_find_isolated_nodes(self):
         json_graph = {"name": "", "graph": {"A": ["B"], "B": ["A"], "C": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
-        isolated = find_isolated_nodes(graph)
+        isolated = find_isolated_vertices(graph)
         self.assertEqual(len(isolated), 1)
         self.assertEqual(isolated[0], 'C')
 
@@ -67,6 +68,33 @@ class BasicTests(unittest.TestCase):
         graph = Graph(input_graph=json.dumps(json_graph))
         deg = vertex_degree(graph, 'a')
         self.assertEqual(4, deg)
+
+    def test_density(self):
+        dense_graph = {"graph": {"a": ["d", "f"],
+                                 "b": ["c", "b"],
+                                 "c": ["b", "c", "d", "e"],
+                                 "d": ["a", "c"],
+                                 "e": ["c"],
+                                 "f": ["a"]
+                                 }}
+        graph = Graph(input_graph=json.dumps(dense_graph))
+        self.assertAlmostEqual(0.466666666667, density(graph))
+
+        complete_graph = {"graph": {
+            "a": ["b", "c"],
+            "b": ["a", "c"],
+            "c": ["a", "b"]
+        }}
+        graph = Graph(input_graph=json.dumps(complete_graph))
+        self.assertEqual(1.0, density(graph))
+
+        isolated_graph = {"graph": {
+            "a": [],
+            "b": [],
+            "c": []
+        }}
+        graph = Graph(input_graph=json.dumps(isolated_graph))
+        self.assertEqual(0.0, density(graph))
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import json
 
-from graphworks.algorithms.basic import find_isolated_nodes
+from graphworks.algorithms.basic import find_isolated_vertices
 from graphworks.algorithms.basic import generate_edges
 from graphworks.export.graphviz import save_to_dot
 from graphworks.export.json import save_to_json
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     all_edges = generate_edges(graph)
     print(all_edges)
 
-    isolated = find_isolated_nodes(graph)
+    isolated = find_isolated_vertices(graph)
     print(isolated)
 
     print("Vertices of graph:")
