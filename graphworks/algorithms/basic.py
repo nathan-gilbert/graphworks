@@ -108,7 +108,7 @@ def is_degree_sequence(sequence: List[int]) -> bool:
 
 def is_erdos_gallai(dsequence: List[int]) -> bool:
     """
-    Checks if the condition of the Erdoes-Gallai inequality is fulfilled.
+    Checks if the condition of the Erdos-Gallai inequality is fulfilled.
     :param dsequence:
     :return:
     """
