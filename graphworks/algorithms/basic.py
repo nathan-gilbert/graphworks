@@ -67,7 +67,7 @@ def vertex_degree(graph: Graph, vertex: str) -> int:
     return degree
 
 
-def min_degree(graph):
+def min_degree(graph: Graph) -> int:
     """ the minimum degree of the vertices """
     minimum = sys.maxsize
     for vertex in graph:
@@ -77,7 +77,7 @@ def min_degree(graph):
     return minimum
 
 
-def max_degree(graph):
+def max_degree(graph: Graph) -> int:
     """ the maximum degree of the vertices """
     maximum = 0
     for vertex in graph:
@@ -87,7 +87,7 @@ def max_degree(graph):
     return maximum
 
 
-def degree_sequence(graph):
+def degree_sequence(graph: Graph) -> Tuple[int]:
     seq = []
     for vertex in graph:
         seq.append(vertex_degree(graph, vertex))
@@ -95,7 +95,7 @@ def degree_sequence(graph):
     return tuple(seq)
 
 
-def is_degree_sequence(sequence):
+def is_degree_sequence(sequence: List[int]) -> bool:
     """
     Method returns True, if the sequence is a degree sequence, i.e. a
     non-increasing sequence. Otherwise False.
@@ -106,7 +106,7 @@ def is_degree_sequence(sequence):
     return all(x >= y for x, y in zip(sequence, sequence[1:]))
 
 
-def is_erdos_gallai(dsequence):
+def is_erdos_gallai(dsequence: List[int]) -> bool:
     """
     Checks if the condition of the Erdoes-Gallai inequality is fulfilled.
     :param dsequence:
@@ -128,7 +128,7 @@ def is_erdos_gallai(dsequence):
     return True
 
 
-def density(graph):
+def density(graph: Graph) -> float:
     """
     The graph density is defined as the ratio of the number of edges of a given
     graph, and the total number of edges, the graph could have.
