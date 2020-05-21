@@ -1,6 +1,7 @@
 import sys
 from typing import Any
 from typing import List
+from typing import Set
 from typing import Tuple
 
 from graphworks.graph import Graph
@@ -139,3 +140,51 @@ def density(graph: Graph) -> float:
     vertices = len(graph.vertices())
     edges = len(graph.edges())
     return 2.0 * (edges / (vertices * (vertices - 1)))
+
+
+def is_connected(graph: Graph,
+                 start_vertex: str = None,
+                 vertices_encountered: Set[str] = None) -> bool:
+    """
+
+    :param graph:
+    :param start_vertex:
+    :param vertices_encountered:
+    :return:
+    """
+    if vertices_encountered is None:
+        vertices_encountered = set()
+    vertices = graph.vertices()
+    if not start_vertex:
+        # choose a vertex from graph as a starting point
+        start_vertex = vertices[0]
+    vertices_encountered.add(start_vertex)
+    if len(vertices_encountered) != len(vertices):
+        for vertex in graph[start_vertex]:
+            if vertex not in vertices_encountered:
+                if is_connected(graph, vertex, vertices_encountered):
+                    return True
+    else:
+        return True
+    return False
+
+
+def diameter(graph: Graph) -> int:
+    """
+
+    :param graph:
+    :return:
+    """
+    vee = graph.vertices()
+    pairs = [(vee[i], vee[j]) for i in range(len(vee) - 1) for j in range(i + 1, len(vee))]
+    smallest_paths = []
+    for (start, end) in pairs:
+        paths = find_all_paths(graph, start, end)
+        smallest = sorted(paths, key=len)[0]
+        smallest_paths.append(smallest)
+
+    smallest_paths.sort(key=len)
+    # longest path is at the end of list,
+    # i.e. diameter corresponds to the length of this path
+    dia = len(smallest_paths[-1]) - 1
+    return dia

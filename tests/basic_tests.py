@@ -1,16 +1,47 @@
 import json
 import unittest
 
+from graphworks.algorithms.basic import degree_sequence
 from graphworks.algorithms.basic import density
+from graphworks.algorithms.basic import diameter
 from graphworks.algorithms.basic import find_all_paths
 from graphworks.algorithms.basic import find_isolated_vertices
 from graphworks.algorithms.basic import find_path
 from graphworks.algorithms.basic import generate_edges
+from graphworks.algorithms.basic import is_connected
+from graphworks.algorithms.basic import is_degree_sequence
+from graphworks.algorithms.basic import is_erdos_gallai
+from graphworks.algorithms.basic import max_degree
+from graphworks.algorithms.basic import min_degree
 from graphworks.algorithms.basic import vertex_degree
 from graphworks.graph import Graph
 
 
 class BasicTests(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.connected_graph = {
+            "graph": {"a": ["d", "f"],
+                      "b": ["c", "b"],
+                      "c": ["b", "c", "d", "e"],
+                      "d": ["a", "c"],
+                      "e": ["c"],
+                      "f": ["a"]}
+        }
+        self.complete_graph = {
+            "graph": {"a": ["b", "c"],
+                      "b": ["a", "c"],
+                      "c": ["a", "b"]}
+        }
+        self.isolated_graph = {"graph": {"a": [], "b": [], "c": []}}
+        self.big_graph = {"graph": {
+            "a": ["c"],
+            "b": ["c", "e", "f"],
+            "c": ["a", "b", "d", "e"],
+            "d": ["c"],
+            "e": ["b", "c", "f"],
+            "f": ["b", "e"]
+        }}
 
     def test_generate_edges(self):
         json_graph = {"name": "", "graph": {"A": ["B"], "B": []}}
@@ -69,32 +100,54 @@ class BasicTests(unittest.TestCase):
         deg = vertex_degree(graph, 'a')
         self.assertEqual(4, deg)
 
+    def test_graph_min_degree(self):
+        json_graph = {"graph": {"a": ["a", "b", "c"], "b": ["a"], "c": ["a"]}}
+        graph = Graph(input_graph=json.dumps(json_graph))
+        min_deg = min_degree(graph)
+        self.assertEqual(1, min_deg)
+
+    def test_graph_max_degree(self):
+        json_graph = {"graph": {"a": ["a", "b", "c"], "b": ["a"], "c": ["a"]}}
+        graph = Graph(input_graph=json.dumps(json_graph))
+        max_deg = max_degree(graph)
+        self.assertEqual(4, max_deg)
+
+    def test_degree_sequence(self):
+        json_graph = {"graph": {"a": ["a", "b", "c"], "b": ["a"], "c": ["a"]}}
+        graph = Graph(input_graph=json.dumps(json_graph))
+        dseq = degree_sequence(graph)
+        self.assertEqual((4, 1, 1), dseq)
+
+    def test_is_degree_sequence(self):
+        self.assertEqual(False, is_degree_sequence([1, 2, 3]))
+        self.assertEqual(True, is_degree_sequence([3, 1, 1]))
+        self.assertEqual(True, is_degree_sequence([]))
+
+    def test_is_erdos_gallois(self):
+        self.assertEqual(True, is_erdos_gallai([]))
+        self.assertEqual(False, is_erdos_gallai([1]))
+        self.assertEqual(False, is_erdos_gallai([2, 2, 4]))
+        self.assertEqual(False, is_erdos_gallai([32, 8, 4, 2, 2]))
+        # a real graphic sequence
+        self.assertEqual(True, is_erdos_gallai([6, 6, 6, 6, 5, 5, 2, 2]))
+
     def test_density(self):
-        dense_graph = {"graph": {"a": ["d", "f"],
-                                 "b": ["c", "b"],
-                                 "c": ["b", "c", "d", "e"],
-                                 "d": ["a", "c"],
-                                 "e": ["c"],
-                                 "f": ["a"]
-                                 }}
-        graph = Graph(input_graph=json.dumps(dense_graph))
+        graph = Graph(input_graph=json.dumps(self.connected_graph))
         self.assertAlmostEqual(0.466666666667, density(graph))
 
-        complete_graph = {"graph": {
-            "a": ["b", "c"],
-            "b": ["a", "c"],
-            "c": ["a", "b"]
-        }}
-        graph = Graph(input_graph=json.dumps(complete_graph))
+        graph = Graph(input_graph=json.dumps(self.complete_graph))
         self.assertEqual(1.0, density(graph))
 
-        isolated_graph = {"graph": {
-            "a": [],
-            "b": [],
-            "c": []
-        }}
-        graph = Graph(input_graph=json.dumps(isolated_graph))
+        graph = Graph(input_graph=json.dumps(self.isolated_graph))
         self.assertEqual(0.0, density(graph))
+
+    def test_is_connected(self):
+        graph = Graph(input_graph=json.dumps(self.connected_graph))
+        self.assertTrue(is_connected(graph))
+
+    def test_diameter(self):
+        graph = Graph(input_graph=json.dumps(self.big_graph))
+        self.assertEqual(3, diameter(graph))
 
 
 if __name__ == '__main__':
