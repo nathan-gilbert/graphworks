@@ -1,4 +1,5 @@
 from typing import List
+
 from graphworks.graph import Graph
 
 
@@ -26,3 +27,13 @@ def breadth_first_search(graph: Graph, start: str) -> List[str]:
                 queue.append(i)
                 visited[i] = True
     return walk
+
+
+def depth_first_search(graph: Graph, start: str) -> List[str]:
+    visited, stack = [], [start]
+    while stack:
+        vertex = stack.pop()
+        if vertex not in visited:
+            visited.append(vertex)
+            stack.extend(filter(lambda x: x not in visited, graph[vertex]))
+    return visited
