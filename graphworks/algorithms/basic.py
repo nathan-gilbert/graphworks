@@ -223,3 +223,12 @@ def diameter(graph: Graph) -> int:
     # i.e. diameter corresponds to the length of this path
     dia = len(smallest_paths[-1]) - 1
     return dia
+
+
+def is_sparse(graph: Graph) -> bool:
+    """
+    Checks if |E| <= |V^2| / 2
+    :param graph:
+    :return:
+    """
+    return graph.size() <= (graph.order()**2 / 2)
