@@ -1,6 +1,7 @@
 import sys
 from typing import Any
 from typing import List
+from typing import Dict
 from typing import Set
 from typing import Tuple
 
@@ -86,6 +87,40 @@ def max_degree(graph: Graph) -> int:
         if maximum_degree > maximum:
             maximum = maximum_degree
     return maximum
+
+
+def is_regular(graph: Graph) -> bool:
+    return min_degree(graph) == max_degree(graph)
+
+
+def check_for_cycles(graph: Graph, v: str, visited: Dict[str, bool], rec_stack: List[bool]) -> bool:
+    visited[v] = True
+    rec_stack[graph.vertices().index(v)] = True
+
+    for neighbour in graph[v]:
+        if not visited[neighbour]:
+            if check_for_cycles(graph, neighbour, visited, rec_stack):
+                return True
+        elif rec_stack[neighbour]:
+            return True
+
+    rec_stack[graph.vertices().index(v)] = False
+    return False
+
+
+def is_simple(graph: Graph) -> bool:
+    """
+    A simple graph has no loops
+    :param graph:
+    :return:
+    """
+    visited = {k: False for k in graph}
+    rec_stack = [False] * graph.order()
+    for v in graph:
+        if not visited[v]:
+            if check_for_cycles(graph, v, visited, rec_stack):
+                return True
+    return False
 
 
 def degree_sequence(graph: Graph) -> Tuple[int]:

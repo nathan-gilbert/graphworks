@@ -4,6 +4,8 @@ import tempfile
 import unittest
 from os import path
 
+import numpy as np
+
 from graphworks.graph import Graph
 
 
@@ -63,6 +65,20 @@ B -> 0"""
         self.assertEqual(json_graph["label"], graph.get_label())
         self.assertEqual(False, graph.is_directed())
         self.assertEqual(json_graph["graph"], graph.get_graph())
+
+    def test_order_and_size(self):
+        json_graph = {"graph": {"A": ["B"], "B": []}}
+        graph = Graph(input_graph=json.dumps(json_graph))
+        self.assertEqual(2, graph.order())
+        self.assertEqual(1, graph.size())
+
+    def test_get_adjacency_matrix(self):
+        json_graph = {"graph": {"A": ["B"], "B": []}}
+        graph = Graph(input_graph=json.dumps(json_graph))
+        matrix = graph.get_adjacency_matrix()
+        answer = np.array([[0, 1], [0, 0]])
+        np.testing.assert_equal(matrix, answer)
+        self.assertEqual(answer.size, matrix.size)
 
 
 if __name__ == '__main__':

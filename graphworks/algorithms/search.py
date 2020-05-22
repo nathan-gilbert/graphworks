@@ -7,7 +7,7 @@ def breadth_first_search(graph: Graph, start: str) -> List[str]:
     """
 
     :param graph:
-    :param start:
+    :param start: the vertex to start the traversal from
     :return:
     """
     # Mark all the vertices as not visited
@@ -30,6 +30,12 @@ def breadth_first_search(graph: Graph, start: str) -> List[str]:
 
 
 def depth_first_search(graph: Graph, start: str) -> List[str]:
+    """
+
+    :param graph:
+    :param start: the vertex to start the traversal from
+    :return:
+    """
     visited, stack = [], [start]
     while stack:
         vertex = stack.pop()

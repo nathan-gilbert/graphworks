@@ -2,6 +2,8 @@ import json
 from typing import Dict
 from typing import List
 
+import numpy as np
+
 
 class Graph:
     """ The graph implementation as a simple adjacency map. """
@@ -67,6 +69,22 @@ class Graph:
 
         if vertex2 not in self.__graph:
             self.__graph[vertex2] = []
+
+    def order(self) -> int:
+        return len(self.vertices())
+
+    def size(self) -> int:
+        return len(self.edges())
+
+    def get_adjacency_matrix(self):
+        shape = (self.order(), self.order())
+        matrix = np.zeros(shape, dtype=int)
+        for v in self.vertices():
+            i = self.vertices().index(v)
+            for edge in self.__graph[v]:
+                j = self.vertices().index(edge)
+                matrix[i][j] = 1
+        return matrix
 
     def __repr__(self):
         return self.__label
