@@ -6,6 +6,7 @@ from typing import Set
 from typing import Tuple
 
 from graphworks.graph import Graph
+from numpy import invert
 
 
 def generate_edges(graph: Graph) -> List[Tuple[Any, Any]]:
@@ -232,3 +233,9 @@ def is_sparse(graph: Graph) -> bool:
     :return:
     """
     return graph.size() <= (graph.order()**2 / 2)
+
+
+def get_complement(graph: Graph) -> Graph:
+    adj = graph.get_adjacency_matrix()
+    complement = invert(adj)
+    return Graph(label=f"{graph.get_label()} complement", input_array=complement)

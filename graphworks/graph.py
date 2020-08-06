@@ -3,6 +3,7 @@ from typing import Dict
 from typing import List
 
 import numpy as np
+from numpy import ndarray
 
 
 class Graph:
@@ -11,7 +12,8 @@ class Graph:
     def __init__(self,
                  label: str = None,
                  input_file: str = None,
-                 input_graph: str = None):
+                 input_graph: str = None,
+                 input_array: ndarray = None):
         """
 
         :param label: a name for this graph
@@ -31,6 +33,11 @@ class Graph:
         elif input_file is None and input_graph is not None:
             json_data = json.loads(input_graph)
             self.__extract_fields_from_json(json_data)
+        elif input_array is not None:
+            self.__array_to_graph(input_array)
+
+        if not self.__validate():
+            raise ValueError("Edges don't match vertices")
 
     def vertices(self) -> List[str]:
         """ returns the vertices of a graph """
@@ -76,7 +83,7 @@ class Graph:
     def size(self) -> int:
         return len(self.edges())
 
-    def get_adjacency_matrix(self):
+    def get_adjacency_matrix(self) -> ndarray:
         shape = (self.order(), self.order())
         matrix = np.zeros(shape, dtype=int)
         for v in self.vertices():
@@ -148,3 +155,18 @@ class Graph:
                 if {neighbour, vertex} not in edges:
                     edges.append({vertex, neighbour})
         return edges
+
+    def __validate(self) -> bool:
+        """
+        Test to make sure that all edge endpoints are contained in the vertex
+        list.
+        :return: True if the vertex list matches all the edge endpoints
+        """
+        for vertex in self.__graph:
+            for neighbor in self.__graph[vertex]:
+                if neighbor not in self.__graph:
+                    return False
+        return True
+
+    def __array_to_graph(self):
+        pass
