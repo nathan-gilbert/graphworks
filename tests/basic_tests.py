@@ -11,6 +11,9 @@ from graphworks.algorithms.basic import generate_edges
 from graphworks.algorithms.basic import is_connected
 from graphworks.algorithms.basic import is_degree_sequence
 from graphworks.algorithms.basic import is_erdos_gallai
+from graphworks.algorithms.basic import is_regular
+from graphworks.algorithms.basic import is_simple
+from graphworks.algorithms.basic import is_sparse
 from graphworks.algorithms.basic import max_degree
 from graphworks.algorithms.basic import min_degree
 from graphworks.algorithms.basic import vertex_degree
@@ -41,6 +44,24 @@ class BasicTests(unittest.TestCase):
             "d": ["c"],
             "e": ["b", "c", "f"],
             "f": ["b", "e"]
+        }}
+        self.one_regular_graph = {"graph": {
+            "a": [],
+            "b": [],
+            "c": []
+        }}
+        self.lollipop_graph = {"graph": {
+            "z": ["a"],
+            "a": ["b"],
+            "b": ["c"],
+            "c": ["d"],
+            "d": ["b"]
+        }}
+        self.straight_line = {"graph": {
+            "a": ["b"],
+            "b": ["c"],
+            "c": ["d"],
+            "d": []
         }}
 
     def test_generate_edges(self):
@@ -148,6 +169,22 @@ class BasicTests(unittest.TestCase):
     def test_diameter(self):
         graph = Graph(input_graph=json.dumps(self.big_graph))
         self.assertEqual(3, diameter(graph))
+
+    def test_is_regular_graph(self):
+        graph = Graph(input_graph=json.dumps(self.big_graph))
+        self.assertFalse(is_regular(graph))
+        one_reg_graph = Graph(input_graph=json.dumps(self.one_regular_graph))
+        self.assertTrue(is_regular(one_reg_graph))
+
+    def test_is_simple(self):
+        graph = Graph(input_graph=json.dumps(self.straight_line))
+        self.assertTrue(is_simple(graph))
+        lolli = Graph(input_graph=json.dumps(self.lollipop_graph))
+        self.assertFalse(is_simple(lolli))
+
+    def test_is_sparse(self):
+        graph = Graph(input_graph=json.dumps(self.isolated_graph))
+        self.assertTrue(is_sparse(graph))
 
 
 if __name__ == '__main__':

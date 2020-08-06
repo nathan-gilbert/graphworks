@@ -1,7 +1,7 @@
 import sys
 from typing import Any
-from typing import List
 from typing import Dict
+from typing import List
 from typing import Set
 from typing import Tuple
 
@@ -98,10 +98,10 @@ def check_for_cycles(graph: Graph, v: str, visited: Dict[str, bool], rec_stack: 
     rec_stack[graph.vertices().index(v)] = True
 
     for neighbour in graph[v]:
-        if not visited[neighbour]:
+        if not visited.get(neighbour, False):
             if check_for_cycles(graph, neighbour, visited, rec_stack):
                 return True
-        elif rec_stack[neighbour]:
+        elif rec_stack[graph.vertices().index(neighbour)]:
             return True
 
     rec_stack[graph.vertices().index(v)] = False
@@ -119,8 +119,8 @@ def is_simple(graph: Graph) -> bool:
     for v in graph:
         if not visited[v]:
             if check_for_cycles(graph, v, visited, rec_stack):
-                return True
-    return False
+                return False
+    return True
 
 
 def degree_sequence(graph: Graph) -> Tuple[int]:
