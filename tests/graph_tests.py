@@ -80,6 +80,12 @@ B -> 0"""
         np.testing.assert_equal(matrix, answer)
         self.assertEqual(answer.size, matrix.size)
 
+    def test_set_from_adjacency_matrix(self):
+        json_graph = '{"A": ["B"], "B": ["A"]}'
+        array_graph = np.array([[0, 1], [1, 0]])
+        graph = Graph(input_array=array_graph)
+        self.assertEqual(json_graph, graph.get_graph_json())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,9 +1,10 @@
 import json
-from typing import Dict
 from typing import List
+from typing import DefaultDict
 
 import numpy as np
 from numpy import ndarray
+from collections import defaultdict
 
 
 class Graph:
@@ -22,7 +23,7 @@ class Graph:
         """
         self.__label = label if label is not None else None
         self.__is_directed = False
-        self.__graph = {}
+        self.__graph = defaultdict(list)
 
         # process either a file or string representing the graph
         if input_file is not None:
@@ -34,6 +35,8 @@ class Graph:
             json_data = json.loads(input_graph)
             self.__extract_fields_from_json(json_data)
         elif input_array is not None:
+            if not self.__validate_array(input_array):
+                raise ValueError("input array is malformed")
             self.__array_to_graph(input_array)
 
         if not self.__validate():
@@ -47,8 +50,11 @@ class Graph:
         """ returns the edges of a graph """
         return self.__generate_edges()
 
-    def get_graph(self) -> Dict[str, str]:
+    def get_graph(self) -> DefaultDict[str, List]:
         return self.__graph
+
+    def get_graph_json(self) -> str:
+        return json.dumps(self.__graph)
 
     def get_label(self) -> str:
         return self.__label
@@ -92,6 +98,14 @@ class Graph:
                 j = self.vertices().index(edge)
                 matrix[i][j] = 1
         return matrix
+
+    @staticmethod
+    def __validate_array(arr: ndarray) -> bool:
+        if len(arr.shape) != 2:
+            return False
+        if arr.shape[0] != arr.shape[1]:
+            return False
+        return True
 
     def __repr__(self):
         return self.__label
@@ -144,10 +158,9 @@ class Graph:
         self.__graph = json_data.get("graph", {})
 
     def __generate_edges(self) -> List[set]:
-        """ A static method generating the edges of the
-            graph "graph". Edges are represented as sets
-            with one (a loop back to the vertex) or two
-            vertices
+        """
+            Generating the edges of the graph "graph". Edges are represented as
+            sets with one (a loop back to the vertex) or two vertices
         """
         edges = []
         for vertex in self.__graph:
@@ -168,5 +181,11 @@ class Graph:
                     return False
         return True
 
-    def __array_to_graph(self):
-        pass
+    def __array_to_graph(self, arr: ndarray):
+        names = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        for r_idx in range(arr.shape[0]):
+            vertex = names[r_idx]
+            for idx, val in enumerate(arr[r_idx]):
+                if val > 0:
+                    edge = names[idx]
+                    self.__graph[vertex].append(edge)
