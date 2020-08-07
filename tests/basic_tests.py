@@ -17,6 +17,8 @@ from graphworks.algorithms.basic import is_sparse
 from graphworks.algorithms.basic import max_degree
 from graphworks.algorithms.basic import min_degree
 from graphworks.algorithms.basic import vertex_degree
+from graphworks.algorithms.basic import get_complement
+from graphworks.algorithms.basic import is_complete
 from graphworks.graph import Graph
 
 
@@ -185,6 +187,20 @@ class BasicTests(unittest.TestCase):
     def test_is_sparse(self):
         graph = Graph(input_graph=json.dumps(self.isolated_graph))
         self.assertTrue(is_sparse(graph))
+
+    def test_is_complete(self):
+        graph = Graph(input_graph=json.dumps(self.complete_graph))
+        self.assertTrue(is_complete(graph))
+        graph = Graph(input_graph=json.dumps(self.isolated_graph))
+        self.assertFalse(is_complete(graph))
+        json_graph = {"name": "", "graph": {"A": ["B"], "B": []}}
+        graph = Graph(input_graph=json.dumps(json_graph))
+        self.assertFalse(is_complete(graph))
+
+    def test_complement(self):
+        graph = Graph(input_graph=json.dumps(self.isolated_graph))
+        complement = get_complement(graph)
+        self.assertTrue(is_complete(complement))
 
 
 if __name__ == '__main__':

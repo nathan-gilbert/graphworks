@@ -239,3 +239,22 @@ def get_complement(graph: Graph) -> Graph:
     adj = graph.get_adjacency_matrix()
     complement = invert(adj)
     return Graph(label=f"{graph.get_label()} complement", input_array=complement)
+
+
+def is_complete(graph: Graph) -> bool:
+    """
+    Checks that each vertex has V(V-1) / 2 edges and that each vertex is
+    connected to V - 1 others
+    :param graph:
+    :return: true or false
+    """
+    V = len(graph.vertices())
+    max_edges = (V**2 - V) / 2
+    E = len(graph.edges())
+    if E != max_edges:
+        return False
+
+    for vertex in graph:
+        if len(graph[vertex]) != V - 1:
+            return False
+    return True
