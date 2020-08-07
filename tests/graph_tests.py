@@ -86,6 +86,16 @@ B -> 0"""
         graph = Graph(input_array=array_graph)
         self.assertEqual(json_graph, graph.get_graph_json())
 
+    def test_malformed_array(self):
+        array_graph = np.array([[0, 1, 0, 0, 0], [1, 0]])
+        self.assertRaises(ValueError, Graph, input_array=array_graph)
+        array_graph = np.array([[0, 1], [1, 0], [1, 0]])
+        self.assertRaises(ValueError, Graph, input_array=array_graph)
+
+    def test_malformed_json(self):
+        json_graph = {"graph": {"A": ["B", "C", "D"], "B": []}}
+        self.assertRaises(ValueError, Graph, input_graph=json.dumps(json_graph))
+
 
 if __name__ == '__main__':
     unittest.main()
