@@ -25,7 +25,8 @@ class Graph:
         self.__is_directed = False
         self.__graph = defaultdict(list)
 
-        # process either a file or string representing the graph
+        # process a file, string representing the graph or an ndarray
+        # representation
         if input_file is not None:
             with open(input_file, 'r') as in_file:
                 lines = ''.join(in_file.readlines())
@@ -62,7 +63,7 @@ class Graph:
     def is_directed(self) -> bool:
         return self.__is_directed
 
-    def add_vertex(self, vertex):
+    def add_vertex(self, vertex: str):
         """ If the vertex "vertex" is not in
             self.__graph, a key "vertex" with an empty
             list as a value is added to the dictionary.
@@ -71,8 +72,7 @@ class Graph:
         if vertex not in self.__graph:
             self.__graph[vertex] = []
 
-    def add_edge(self, edge):
-        """ assumes that edge is of type set, tuple or list """
+    def add_edge(self, edge: List):
         edge = set(edge)
         (vertex1, vertex2) = tuple(edge)
         if vertex1 in self.__graph:
@@ -182,6 +182,7 @@ class Graph:
         return True
 
     def __array_to_graph(self, arr: ndarray):
+        # TODO: this should be generated and potentially infinite
         names = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         for r_idx in range(arr.shape[0]):
             vertex = names[r_idx]

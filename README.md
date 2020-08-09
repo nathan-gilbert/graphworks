@@ -52,5 +52,11 @@ Using the library: TODO
 
 ## TODO
 
-1. Start with a simple map representation of a graph
-2. Implement the basic graph algorithms on this representation
+* Allow for directed graphs
+* Implement basic algorithms for directed graphs
+  * Hierholzer’s Algorithm
+  * <https://algs4.cs.princeton.edu/42digraph/>
+* Allow for weighted graphs
+  * Jarnik's algorithm
+  * Dijkstra's algorithm
+
