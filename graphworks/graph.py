@@ -155,6 +155,7 @@ class Graph:
     def __extract_fields_from_json(self, json_data: dict):
         self.__label = json_data.get("label", "")
         self.__is_directed = json_data.get("directed", False)
+        self.__is_weighted = json_data.get("weighted", False)
         self.__graph = json_data.get("graph", {})
 
     def __generate_edges(self) -> List[set]:

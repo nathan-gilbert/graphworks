@@ -1,6 +1,7 @@
 {
-  "label": "small graph",
+  "label": "directed graph",
   "directed": true,
+  "weighted": false,
   "graph": {
     "A": ["B", "C"],
     "B": ["C"],

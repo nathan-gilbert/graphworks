@@ -1,5 +1,6 @@
 {
-  "label": "Graph1",
+  "label": "small undirected graph",
   "directed": false,
-  "graph": { "A": ["B", "C"], "B": ["A"], "C": [] }
+  "weighted": false,
+  "graph": { "A": ["A"] }
 }
