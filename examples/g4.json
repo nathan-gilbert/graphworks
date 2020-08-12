@@ -5,6 +5,6 @@
   "graph": {
     "A": [{"label":  "A", "weight": 1}, {"label":  "B", "weight": 2}],
     "B": [{"label":  "A", "weight": 2}, {"label": "C", "weight": 3}],
-    "C": [{"label": "B", "weight":  "3"}]
+    "C": [{"label": "B", "weight":  3}]
   }
 }

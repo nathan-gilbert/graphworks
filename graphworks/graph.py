@@ -5,6 +5,18 @@ from typing import DefaultDict
 import numpy as np
 from numpy import ndarray
 from collections import defaultdict
+from dataclasses import dataclass
+
+
+@dataclass
+class Edge:
+    terminus: str
+    weight: float = None
+
+    def has_weight(self) -> bool:
+        if self.weight is None:
+            return False
+        return True
 
 
 class Graph:
