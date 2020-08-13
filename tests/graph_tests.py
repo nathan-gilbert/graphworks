@@ -81,10 +81,10 @@ B -> 0"""
         self.assertEqual(answer.size, matrix.size)
 
     def test_set_from_adjacency_matrix(self):
-        json_graph = '{"A": ["B"], "B": ["A"]}'
         array_graph = np.array([[0, 1], [1, 0]])
         graph = Graph(input_array=array_graph)
-        self.assertEqual(json_graph, graph.get_graph_json())
+        self.assertEqual(2, len(graph.vertices()))
+        self.assertEqual(1, len(graph.edges()))
 
     def test_malformed_array(self):
         array_graph = np.array([[0, 1, 0, 0, 0], [1, 0]])

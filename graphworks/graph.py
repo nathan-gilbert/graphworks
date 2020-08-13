@@ -1,6 +1,7 @@
 import json
 from typing import List
 from typing import DefaultDict
+import uuid
 
 import numpy as np
 from numpy import ndarray
@@ -17,6 +18,9 @@ class Edge:
         if self.weight is None:
             return False
         return True
+
+    def __repr__(self):
+        return self.terminus
 
 
 class Graph:
@@ -65,9 +69,6 @@ class Graph:
 
     def get_graph(self) -> DefaultDict[str, List]:
         return self.__graph
-
-    def get_graph_json(self) -> str:
-        return json.dumps(self.__graph)
 
     def get_label(self) -> str:
         return self.__label
@@ -195,8 +196,7 @@ class Graph:
         return True
 
     def __array_to_graph(self, arr: ndarray):
-        # TODO: this should be generated and potentially infinite
-        names = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        names = [str(uuid.uuid4()) for _ in range(arr.shape[0])]
         for r_idx in range(arr.shape[0]):
             vertex = names[r_idx]
             for idx, val in enumerate(arr[r_idx]):
