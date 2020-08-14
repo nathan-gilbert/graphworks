@@ -52,6 +52,7 @@ Using the library: TODO
 
 ## TODO
 
+* Make edges use the data class for all graph objects
 * Allow for directed graphs
 * Implement basic algorithms for directed graphs
   * Hierholzer’s Algorithm
