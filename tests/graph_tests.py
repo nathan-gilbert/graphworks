@@ -7,6 +7,7 @@ from os import path
 import numpy as np
 
 from graphworks.graph import Graph
+from graphworks.graph import Edge
 
 
 class GraphTests(unittest.TestCase):
@@ -40,7 +41,7 @@ B -> 0"""
         self.assertEqual(json_graph["label"], graph.get_label())
         self.assertEqual(False, graph.is_directed())
         self.assertEqual(json_graph["graph"], graph.get_graph())
-        self.assertEqual([{'B', 'A'}], graph.edges())
+        self.assertEqual([Edge('B', 'A')], graph.edges())
 
     def test_add_vertex(self):
         graph = Graph("my graph")
