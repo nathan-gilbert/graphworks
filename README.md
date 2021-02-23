@@ -54,6 +54,7 @@ Using the library: TODO
 
 - Make edges use the data class for all graph objects
 - Allow for directed graphs
+- <https://www.python-course.eu/graphs_python.php>
 - Implement basic algorithms for directed graphs
   - Hierholzer’s Algorithm
   - <https://algs4.cs.princeton.edu/42digraph/>
