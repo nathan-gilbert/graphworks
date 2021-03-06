@@ -174,7 +174,7 @@ def density(graph: Graph) -> float:
     :return:
     """
     V = len(graph.vertices())
-    E = len(graph.edges()) / 2
+    E = len(graph.edges())
     return 2.0 * (E / (V**2 - V))
 
 
@@ -255,8 +255,7 @@ def is_complete(graph: Graph) -> bool:
     if not graph.is_directed():
         max_edges //= 2
 
-    # Edges list is 2 way, so divide by 2 to get accurate count
-    E = len(graph.edges()) // 2
+    E = len(graph.edges())
     if E != max_edges:
         return False
 

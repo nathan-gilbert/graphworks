@@ -156,7 +156,7 @@ class BasicTests(unittest.TestCase):
 
     def test_density(self):
         graph = Graph(input_graph=json.dumps(self.connected_graph))
-        self.assertAlmostEqual(0.4, density(graph))
+        self.assertAlmostEqual(0.4666666666666667, density(graph))
 
         graph = Graph(input_graph=json.dumps(self.complete_graph))
         self.assertEqual(1.0, density(graph))
