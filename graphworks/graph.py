@@ -1,7 +1,6 @@
 import json
 from typing import List
 from typing import DefaultDict
-from typing import Tuple
 import uuid
 
 import numpy as np
