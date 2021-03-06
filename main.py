@@ -30,7 +30,7 @@ if __name__ == "__main__":
     print(graph.vertices())
 
     print("Add an edge:")
-    graph.add_edge({"A", "D"})
+    graph.add_edge("A", "D")
 
     print("Vertices of graph:")
     print(graph.vertices())
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     print("Edges of graph:")
     print(graph.edges())
 
-    graph.add_edge({"X", "Y"})
+    graph.add_edge("X", "Y")
     print("Vertices of graph:")
     print(graph.vertices())
     print("Edges of graph:")

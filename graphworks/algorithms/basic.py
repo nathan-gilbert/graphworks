@@ -173,9 +173,9 @@ def density(graph: Graph) -> float:
     :param graph:
     :return:
     """
-    vertices = len(graph.vertices())
-    edges = len(graph.edges())
-    return 2.0 * (edges / (vertices * (vertices - 1)))
+    V = len(graph.vertices())
+    E = len(graph.edges()) / 2
+    return 2.0 * (E / (V**2 - V))
 
 
 def is_connected(graph: Graph,
@@ -244,13 +244,19 @@ def get_complement(graph: Graph) -> Graph:
 def is_complete(graph: Graph) -> bool:
     """
     Checks that each vertex has V(V-1) / 2 edges and that each vertex is
-    connected to V - 1 others
+    connected to V - 1 others.
+
+    runtime: O(n^2)
     :param graph:
     :return: true or false
     """
     V = len(graph.vertices())
-    max_edges = (V**2 - V) / 2
-    E = len(graph.edges())
+    max_edges = (V**2 - V)
+    if not graph.is_directed():
+        max_edges //= 2
+
+    # Edges list is 2 way, so divide by 2 to get accurate count
+    E = len(graph.edges()) // 2
     if E != max_edges:
         return False
 

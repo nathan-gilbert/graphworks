@@ -52,9 +52,9 @@ B -> 0"""
         graph = Graph("my graph")
         graph.add_vertex("A")
         graph.add_vertex("B")
-        graph.add_edge(("A", "B"))
+        graph.add_edge("A", "B")
         self.assertCountEqual([{"A", "B"}], graph.edges())
-        graph.add_edge(("X", "Y"))
+        graph.add_edge("X", "Y")
         self.assertCountEqual([{"A", "B"}, {"X", "Y"}], graph.edges())
         self.assertCountEqual(["A", "B", "X", "Y"], graph.vertices())
 
@@ -88,7 +88,7 @@ B -> 0"""
         self.assertEqual(1, len(graph.edges()))
 
     def test_malformed_array(self):
-        array_graph = np.array([[0, 1, 0, 0, 0], [1, 0]])
+        array_graph = np.array([[0, 1, 0, 0, 0], [1, 0]], dtype=object)
         self.assertRaises(ValueError, Graph, input_array=array_graph)
         array_graph = np.array([[0, 1], [1, 0], [1, 0]])
         self.assertRaises(ValueError, Graph, input_array=array_graph)

@@ -1,6 +1,7 @@
 import json
 from typing import List
 from typing import DefaultDict
+from typing import Tuple
 import uuid
 
 import numpy as np
@@ -87,9 +88,13 @@ class Graph:
         if vertex not in self.__graph:
             self.__graph[vertex] = []
 
-    def add_edge(self, edge: List):
-        edge = set(edge)
-        (vertex1, vertex2) = tuple(edge)
+    def add_edge(self, vertex1, vertex2):
+        """
+        Set vertex1 & vertex2 to the same node for a loop
+        :param vertex1:
+        :param vertex2:
+        :return:
+        """
         if vertex1 in self.__graph:
             self.__graph[vertex1].append(vertex2)
         else:
