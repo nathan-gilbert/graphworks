@@ -187,6 +187,8 @@ class Graph:
             for neighbour in self.__graph[vertex]:
                 if not self.is_directed() and Edge(neighbour, vertex) not in edges:
                     edges.append(Edge(vertex, neighbour))
+                elif self.is_directed():
+                    edges.append(Edge(vertex, neighbour))
         return edges
 
     def __validate(self) -> bool:

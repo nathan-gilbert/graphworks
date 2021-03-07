@@ -38,6 +38,13 @@ class BasicTests(unittest.TestCase):
                       "b": ["a", "c"],
                       "c": ["a", "b"]}
         }
+        self.complete_digraph = {
+            "directed": True,
+            "graph": {
+                "a": ["b"],
+                "b": ["a"]
+            }
+        }
         self.isolated_graph = {"graph": {"a": [], "b": [], "c": []}}
         self.big_graph = {"graph": {
             "a": ["c"],
@@ -196,6 +203,10 @@ class BasicTests(unittest.TestCase):
         json_graph = {"name": "", "graph": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
         self.assertFalse(is_complete(graph))
+
+    def test_is_complete_digraph(self):
+        graph = Graph(input_graph=json.dumps(self.complete_digraph))
+        self.assertTrue(is_complete(graph))
 
     def test_complement(self):
         graph = Graph(input_graph=json.dumps(self.isolated_graph))
