@@ -204,9 +204,12 @@ class BasicTests(unittest.TestCase):
         graph = Graph(input_graph=json.dumps(json_graph))
         self.assertFalse(is_complete(graph))
 
-    def test_is_complete_digraph(self):
+    def test_complete_digraph(self):
         graph = Graph(input_graph=json.dumps(self.complete_digraph))
         self.assertTrue(is_complete(graph))
+        json_graph = {"name": "", "directed": True, "graph": {"A": ["B"], "B": []}}
+        graph = Graph(input_graph=json.dumps(json_graph))
+        self.assertFalse(is_complete(graph))
 
     def test_complement(self):
         graph = Graph(input_graph=json.dumps(self.isolated_graph))
