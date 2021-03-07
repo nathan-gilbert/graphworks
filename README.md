@@ -45,8 +45,8 @@ Run unit test coverage: `coverage run --source=graphworks/ -m unittest discover 
 
 Generate test coverage reports (either works):
 
-- `coverage report --omit="*/test*"`
-- `coverage html --omit="*/test*"`
+- `coverage report --omit="*/test*,*/venv/*"`
+- `coverage html --omit="*/test*,*/venv/*"`
 
 Using the library: TODO
 
