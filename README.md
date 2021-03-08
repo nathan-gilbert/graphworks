@@ -2,8 +2,8 @@
 
 ## A Python module for efficient graph theoretic programming
 
-This is a very old project I created for my undergrad capstone project.
-It's not in a working state at the moment but I'm bringing it back to life.
+**NOTE** This is a very old project I created for my undergrad capstone project.
+It's not in a working state at the moment, but I'm bringing it back to life.
 
 ## Usage
 
@@ -64,4 +64,5 @@ pip install -r requirements.txt
   - Dijkstra's algorithm
 - <https://towardsdatascience.com/4-types-of-tree-traversal-algorithms-d56328450846>
 - Create the documentation for usage
+- C++ binaries for speeding up graph computations
 

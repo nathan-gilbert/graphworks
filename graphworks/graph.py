@@ -12,7 +12,8 @@ from dataclasses import dataclass
 @dataclass
 class Edge:
     """
-    An undirected edge is a line. A directed edge is an arc or arrow.
+    Implementation of graph edge between 2 vertices. An undirected edge is a
+    line. A directed edge is an arc or arrow. Supports weighted (float) edges.
     """
     vertex1: str
     vertex2: str
@@ -26,7 +27,9 @@ class Edge:
 
 
 class Graph:
-    """ The graph implementation as a simple adjacency map. """
+    """
+    Implementation of un-directional and directional graphs.
+    """
 
     def __init__(self,
                  label: str = None,
@@ -34,10 +37,12 @@ class Graph:
                  input_graph: str = None,
                  input_array: ndarray = None):
         """
+        One of input_file, input_graph or input_array must be not None
 
         :param label: a name for this graph
         :param input_file: the absolute path to a json file containing a graph
         :param input_graph: a string containing json representing the graph
+        :param input_array: an ndarray representation of the graph to generate
         """
         self.__label = label if label is not None else None
         self.__is_directed = False
@@ -62,20 +67,23 @@ class Graph:
             raise ValueError("Edges don't match vertices")
 
     def vertices(self) -> List[str]:
-        """ returns the vertices of a graph """
+        """ :return: list of vertices' names in the graph """
         return list(self.__graph.keys())
 
     def edges(self) -> List[Edge]:
-        """ returns the edges of a graph """
+        """ :return: list of edges in the graph """
         return self.__generate_edges()
 
     def get_graph(self) -> DefaultDict[str, List]:
+        """ :return: dictionary representation of graph """
         return self.__graph
 
     def get_label(self) -> str:
+        """ :return: label of graph"""
         return self.__label
 
     def is_directed(self) -> bool:
+        """ :return: whether or not the graph is directed """
         return self.__is_directed
 
     def add_vertex(self, vertex: str):
@@ -83,6 +91,8 @@ class Graph:
             self.__graph, a key "vertex" with an empty
             list as a value is added to the dictionary.
             Otherwise nothing has to be done.
+
+            :parameter vertex: name of the vertex to add to graph
         """
         if vertex not in self.__graph:
             self.__graph[vertex] = []
@@ -92,7 +102,6 @@ class Graph:
         Set vertex1 & vertex2 to the same node for a loop
         :param vertex1:
         :param vertex2:
-        :return:
         """
         if vertex1 in self.__graph:
             self.__graph[vertex1].append(vertex2)
@@ -103,12 +112,15 @@ class Graph:
             self.__graph[vertex2] = []
 
     def order(self) -> int:
+        """:return: the order of the graph (e.g. the # of vertices)"""
         return len(self.vertices())
 
     def size(self) -> int:
+        """:return: the number of edges in the graph"""
         return len(self.edges())
 
     def get_adjacency_matrix(self) -> ndarray:
+        """:return: matrix representation of the graph"""
         shape = (self.order(), self.order())
         matrix = np.zeros(shape, dtype=int)
         for v in self.vertices():
@@ -120,6 +132,11 @@ class Graph:
 
     @staticmethod
     def __validate_array(arr: ndarray) -> bool:
+        """
+
+        :param arr: matrix of graph to validate
+        :return: whether or not the array is a valid graph
+        """
         if len(arr.shape) != 2:
             return False
         if arr.shape[0] != arr.shape[1]:
@@ -154,7 +171,6 @@ class Graph:
             """
             Iterator class for Graphs
             """
-
             def __init__(self, g: Graph):
                 self._graph = g
                 self._index = 0
@@ -172,6 +188,11 @@ class Graph:
         return self.__graph.get(node, [])
 
     def __extract_fields_from_json(self, json_data: dict):
+        """
+
+        :param json_data: raw json representation of graph
+        :return:
+        """
         self.__label = json_data.get("label", "")
         self.__is_directed = json_data.get("directed", False)
         self.__is_weighted = json_data.get("weighted", False)
@@ -181,6 +202,7 @@ class Graph:
         """
             Generating the edges of the graph "graph". Edges are represented as
             sets with one (a loop back to the vertex) or two vertices
+            :return: List of Edges in the graph
         """
         edges = []
         for vertex in self.__graph:
@@ -204,6 +226,12 @@ class Graph:
         return True
 
     def __array_to_graph(self, arr: ndarray):
+        """
+        Converts an ndarray representation of a graph to a dictionary
+        representation.
+        :param arr: matrix graph
+        :return:
+        """
         names = [str(uuid.uuid4()) for _ in range(arr.shape[0])]
         for r_idx in range(arr.shape[0]):
             vertex = names[r_idx]
