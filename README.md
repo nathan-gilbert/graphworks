@@ -53,16 +53,16 @@ pip install -r requirements.txt
 
 ## TODO
 
-- Make edges use the data class for all graph objects
-- Allow for directed graphs
+- Create the documentation for usage
+- Searching/Sorting
+  - Topological sort
+  - <https://towardsdatascience.com/4-types-of-tree-traversal-algorithms-d56328450846>
 - <https://www.python-course.eu/graphs_python.php>
-- Implement basic algorithms for directed graphs
+- Build out directed graphs algorithms
   - Hierholzer’s Algorithm
   - <https://algs4.cs.princeton.edu/42digraph/>
-- Allow for weighted graphs
+- Allow for weighted graph algorithms
   - Jarnik's algorithm
   - Dijkstra's algorithm
-- <https://towardsdatascience.com/4-types-of-tree-traversal-algorithms-d56328450846>
-- Create the documentation for usage
 - C++ binaries for speeding up graph computations
 
