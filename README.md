@@ -5,7 +5,13 @@
 This is a very old project I created for my undergrad capstone project.
 It's not in a working state at the moment but I'm bringing it back to life.
 
-## Requirements
+## Usage
+
+TODO
+
+## Development
+
+### Requirements
 
 - Python 3.7+
 - virtualenv
@@ -37,18 +43,13 @@ deactivate
 pip install -r requirements.txt
 ```
 
-## Usage
+### Diagnostics
 
-Run the unit tests: `python -m unittest discover tests '*_tests.py'`
-
-Run unit test coverage: `coverage run --source=graphworks/ -m unittest discover tests '*_tests.py'`
-
-Generate test coverage reports (either works):
-
-- `coverage report --omit="*/test*,*/venv/*"`
-- `coverage html --omit="*/test*,*/venv/*"`
-
-Using the library: TODO
+- Run the unit tests: `python -m unittest discover tests '*_tests.py'`
+- Run unit test coverage: `coverage run --source=graphworks/ -m unittest discover tests '*_tests.py'`
+- Generate test coverage reports (either works):
+  - `coverage report --omit="*/test*,*/venv/*"`
+  - `coverage html --omit="*/test*,*/venv/*"`
 
 ## TODO
 
@@ -62,4 +63,5 @@ Using the library: TODO
   - Jarnik's algorithm
   - Dijkstra's algorithm
 - <https://towardsdatascience.com/4-types-of-tree-traversal-algorithms-d56328450846>
+- Create the documentation for usage
 
