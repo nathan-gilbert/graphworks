@@ -9,7 +9,12 @@ from graphworks.graph import Graph
 from numpy import invert
 
 
-def generate_edges(graph: Graph) -> List[Tuple[Any, Any]]:
+def generate_edges(graph: Graph) -> List[Tuple[str, str]]:
+    """
+
+    :param graph: input graph instance
+    :return: List of string tuples representing the edges in the input graph
+    """
     edges = []
     for node in graph:
         for neighbour in graph[node]:
@@ -18,6 +23,11 @@ def generate_edges(graph: Graph) -> List[Tuple[Any, Any]]:
 
 
 def find_isolated_vertices(graph: Graph) -> List[str]:
+    """
+
+    :param graph:
+    :return:
+    """
     isolated = []
     for vertex in graph:
         if not graph[vertex]:
@@ -26,7 +36,15 @@ def find_isolated_vertices(graph: Graph) -> List[str]:
 
 
 def find_path(graph: Graph, start_vertex: str, end_vertex: str, path=None) -> List[str]:
-    """ find a path from start_vertex to end_vertex in graph """
+    """
+    find a path from start_vertex to end_vertex in graph
+
+    :param graph: input graph
+    :param start_vertex: where the path begins
+    :param end_vertex: where the path terminates
+    :param path: the current path
+    :return: list of vertices in the path
+    """
     if path is None:
         path = []
     path = path + [start_vertex]
@@ -43,7 +61,15 @@ def find_path(graph: Graph, start_vertex: str, end_vertex: str, path=None) -> Li
 
 
 def find_all_paths(graph: Graph, start_vertex: str, end_vertex: str, path=None) -> List[str]:
-    """ find all paths from start_vertex to end_vertex in graph """
+    """
+    find all paths from start_vertex to end_vertex in graph
+
+    :param graph: input graph
+    :param start_vertex: where the path begins
+    :param end_vertex: where the path terminates
+    :param path: the current path
+    :return: list of paths between start and end vertex
+    """
     if path is None:
         path = []
 
@@ -64,7 +90,12 @@ def find_all_paths(graph: Graph, start_vertex: str, end_vertex: str, path=None) 
 def vertex_degree(graph: Graph, vertex: str) -> int:
     """ The degree of a vertex is the number of edges connecting it,
     i.e. the number of adjacent vertices. Loops are counted double,
-    i.e. every occurrence of a vertex in the list of adjacent vertices. """
+    i.e. every occurrence of a vertex in the list of adjacent vertices.
+
+    :param graph:
+    :param vertex:
+    :return: the degree of the supplied vertex
+    """
     adj_vertices = graph[vertex]
     degree = len(adj_vertices) + adj_vertices.count(vertex)
     return degree
