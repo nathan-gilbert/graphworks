@@ -102,7 +102,11 @@ def vertex_degree(graph: Graph, vertex: str) -> int:
 
 
 def min_degree(graph: Graph) -> int:
-    """ the minimum degree of the vertices """
+    """
+
+    :param graph: graph instance to analyze
+    :return: the minimum degree of all vertices in graph
+    """
     minimum = sys.maxsize
     for vertex in graph:
         degree = vertex_degree(graph, vertex)
@@ -112,7 +116,11 @@ def min_degree(graph: Graph) -> int:
 
 
 def max_degree(graph: Graph) -> int:
-    """ the maximum degree of the vertices """
+    """
+
+    :param graph: graph instance to analyze
+    :return: the maximum degree of any vertex in graph
+    """
     maximum = 0
     for vertex in graph:
         maximum_degree = vertex_degree(graph, vertex)
@@ -122,10 +130,24 @@ def max_degree(graph: Graph) -> int:
 
 
 def is_regular(graph: Graph) -> bool:
+    """
+    A regular graph is a graph where each vertex has the same number of
+    neighbors; i.e. every vertex has the same degree.
+    :param graph:
+    :return: whether or not graph is regular
+    """
     return min_degree(graph) == max_degree(graph)
 
 
 def check_for_cycles(graph: Graph, v: str, visited: Dict[str, bool], rec_stack: List[bool]) -> bool:
+    """
+
+    :param graph:
+    :param v: vertex to start from
+    :param visited: list of visited vertices
+    :param rec_stack:
+    :return: whether or not the graph contains a cycle
+    """
     visited[v] = True
     rec_stack[graph.vertices().index(v)] = True
 
@@ -142,9 +164,9 @@ def check_for_cycles(graph: Graph, v: str, visited: Dict[str, bool], rec_stack: 
 
 def is_simple(graph: Graph) -> bool:
     """
-    A simple graph has no loops
+    A simple graph has no cycles
     :param graph:
-    :return:
+    :return: whether or not the graph is simple
     """
     visited = {k: False for k in graph}
     rec_stack = [False] * graph.order()
@@ -156,6 +178,11 @@ def is_simple(graph: Graph) -> bool:
 
 
 def degree_sequence(graph: Graph) -> Tuple[int]:
+    """
+
+    :param graph:
+    :return: Tuple of degrees of all vertices, sorted
+    """
     seq = []
     for vertex in graph:
         seq.append(vertex_degree(graph, vertex))
@@ -213,11 +240,10 @@ def is_connected(graph: Graph,
                  start_vertex: str = None,
                  vertices_encountered: Set[str] = None) -> bool:
     """
-
     :param graph:
     :param start_vertex:
     :param vertices_encountered:
-    :return:
+    :return: whether or not the graph is connected
     """
     if vertices_encountered is None:
         vertices_encountered = set()
@@ -238,9 +264,8 @@ def is_connected(graph: Graph,
 
 def diameter(graph: Graph) -> int:
     """
-
     :param graph:
-    :return:
+    :return: length of longest path in graph
     """
     vee = graph.vertices()
     pairs = [(vee[i], vee[j]) for i in range(len(vee) - 1) for j in range(i + 1, len(vee))]
@@ -267,6 +292,11 @@ def is_sparse(graph: Graph) -> bool:
 
 
 def get_complement(graph: Graph) -> Graph:
+    """
+    If graph is represented as a matrix, invert that matrix
+    :param graph:
+    :return: inversion of graph
+    """
     adj = graph.get_adjacency_matrix()
     complement = invert(adj)
     return Graph(label=f"{graph.get_label()} complement", input_array=complement)
