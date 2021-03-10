@@ -1,5 +1,7 @@
 # Graphworks
 
+[![Python package](https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package.yml/badge.svg)](https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package.yml)
+
 ## A Python module for efficient graph theoretic programming
 
 **NOTE** This is a very old project I created for my undergrad capstone project.
