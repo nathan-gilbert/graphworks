@@ -38,7 +38,6 @@ graph {
 	B [label=B]
 }
 """
-
         json_graph = {"label": "my graph", "graph": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(json_graph))
         save_to_dot(graph, self.test_dir)
