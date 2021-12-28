@@ -1,29 +1,13 @@
 import json
+import uuid
 from typing import List
 from typing import DefaultDict
-import uuid
-
 from collections import defaultdict
-from dataclasses import dataclass
+
 import numpy as np
-from numpy import ndarray
+from numpy.typing import NDArray
 
-
-@dataclass
-class Edge:
-    """
-    Implementation of graph edge between 2 vertices. An undirected edge is a
-    line. A directed edge is an arc or arrow. Supports weighted (float) edges.
-    """
-    vertex1: str
-    vertex2: str
-    directed: bool = False
-    weight: float = None
-
-    def has_weight(self) -> bool:
-        if self.weight is None:
-            return False
-        return True
+from graphworks.edge import Edge
 
 
 class Graph:
@@ -35,14 +19,14 @@ class Graph:
                  label: str = None,
                  input_file: str = None,
                  input_graph: str = None,
-                 input_array: ndarray = None):
+                 input_array: NDArray = None):
         """
         One of input_file, input_graph or input_array must be not None
 
         :param label: a name for this graph
         :param input_file: the absolute path to a json file containing a graph
         :param input_graph: a string containing json representing the graph
-        :param input_array: an ndarray representation of the graph to generate
+        :param input_array: an NDArray representation of the graph to generate
         """
         self.__label = label if label is not None else None
         self.__is_directed = False
@@ -124,7 +108,7 @@ class Graph:
         """:return: the number of edges in the graph"""
         return len(self.edges())
 
-    def get_adjacency_matrix(self) -> ndarray:
+    def get_adjacency_matrix(self) -> NDArray:
         """:return: matrix representation of the graph"""
         shape = (self.order(), self.order())
         matrix = np.zeros(shape, dtype=int)
@@ -136,7 +120,7 @@ class Graph:
         return matrix
 
     @staticmethod
-    def __validate_array(arr: ndarray) -> bool:
+    def __validate_array(arr: NDArray) -> bool:
         """
 
         :param arr: matrix of graph to validate
@@ -230,7 +214,7 @@ class Graph:
                     return False
         return True
 
-    def __array_to_graph(self, arr: ndarray):
+    def __array_to_graph(self, arr: NDArray):
         """
         Converts an ndarray representation of a graph to a dictionary
         representation.
