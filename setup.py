@@ -8,7 +8,7 @@ with open('LICENSE', 'r', encoding='utf-8') as f:
     LICENSE = f.read()
 
 setup(name="graphworks",
-      version="0.1.3",
+      version="0.1.5",
       description="Graph theoretic classes and helper functions.",
       long_description_content_type="text/markdown",
       long_description=README,
@@ -20,12 +20,15 @@ setup(name="graphworks",
       license=LICENSE,
       classifiers=[
         "Intended Audience :: Developers",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Operating System :: OS Independent"
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering :: Mathematics"
       ],
       include_package_data=True,
       package_data={'': ['data/*.json']},

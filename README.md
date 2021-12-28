@@ -46,10 +46,12 @@ pip install -r requirements.txt
 ```
 
 ### Building the package
+
 - Update the version number in `setup.py`
 - Run `python setup.py sdist bdist_wheel`
 - Run `twine check dist/*`
-- Run `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
+- Upload to test PyPi: `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
+- Upload to PyPi main: `twine upload --skip-existing dist/*`
 
 ### Diagnostics
 
@@ -73,4 +75,3 @@ pip install -r requirements.txt
   - Jarnik's algorithm
   - Dijkstra's algorithm
 - C++ binaries for speeding up graph computations
-
