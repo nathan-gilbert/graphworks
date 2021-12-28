@@ -8,12 +8,12 @@ with open('LICENSE', 'r', encoding='utf-8') as f:
     LICENSE = f.read()
 
 setup(name="graphworks",
-      version="0.1.1",
+      version="0.1.3",
       description="Graph theoretic classes and helper functions.",
       long_description_content_type="text/markdown",
       long_description=README,
       packages=find_packages(),
-      install_requires=['numpy', 'graphviz'],
+      install_requires=['numpy ==1.21.5', 'graphviz ==0.19.1'],
       author="Nathan Gilbert",
       author_email="me@nathangilbert.com",
       url="https://github.com/nathan-gilbert/graphworks",

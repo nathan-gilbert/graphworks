@@ -46,9 +46,10 @@ pip install -r requirements.txt
 ```
 
 ### Building the package
-
+- Update the version number in `setup.py`
 - Run `python setup.py sdist bdist_wheel`
 - Run `twine check dist/*`
+- Run `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
 
 ### Diagnostics
 
