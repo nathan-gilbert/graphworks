@@ -4,7 +4,6 @@ with open('README.md', 'r', encoding='utf-8') as f:
     README = f.read()
 
 with open('LICENSE', 'r', encoding='utf-8') as f:
-    # pylint: disable=redefined-builtin
     LICENSE = f.read()
 
 setup(name="graphworks",
