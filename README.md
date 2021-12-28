@@ -1,6 +1,6 @@
 # Graphworks
 
-[![Python package](https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package.yml/badge.svg)](https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package.yml)
+[![Python package](https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package-ci.yml/badge.svg)](https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package-ci.yml)
 
 ## A Python module for efficient graph theoretic programming
 
