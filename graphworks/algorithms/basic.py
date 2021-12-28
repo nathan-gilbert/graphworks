@@ -4,8 +4,8 @@ from typing import List
 from typing import Set
 from typing import Tuple
 
-from graphworks.graph import Graph
 from numpy import invert
+from graphworks.graph import Graph
 
 
 def generate_edges(graph: Graph) -> List[Tuple[str, str]]:

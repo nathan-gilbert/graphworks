@@ -19,7 +19,6 @@ def breadth_first_search(graph: Graph, start: str) -> List[str]:
     walk = []
     while queue:
         cur = queue.pop(0)
-        # print(cur, end=" ")
         walk.append(cur)
 
         for i in graph[cur]:
