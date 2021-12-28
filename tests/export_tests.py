@@ -4,8 +4,8 @@ import tempfile
 import unittest
 from os import path
 
-from graphworks.export.graphviz import save_to_dot
-from graphworks.export.json import save_to_json
+from graphworks.export.graphviz_utils import save_to_dot
+from graphworks.export.json_utils import save_to_json
 from graphworks.graph import Graph
 
 

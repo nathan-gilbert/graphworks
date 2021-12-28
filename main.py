@@ -2,8 +2,8 @@ import json
 
 from graphworks.algorithms.basic import find_isolated_vertices
 from graphworks.algorithms.basic import generate_edges
-from graphworks.export.graphviz import save_to_dot
-from graphworks.export.json import save_to_json
+from graphworks.export.graphviz_utils import save_to_dot
+from graphworks.export.json_utils import save_to_json
 from graphworks.graph import Graph
 
 if __name__ == "__main__":

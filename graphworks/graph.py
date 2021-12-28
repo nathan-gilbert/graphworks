@@ -3,10 +3,10 @@ from typing import List
 from typing import DefaultDict
 import uuid
 
-import numpy as np
-from numpy import ndarray
 from collections import defaultdict
 from dataclasses import dataclass
+import numpy as np
+from numpy import ndarray
 
 
 @dataclass
@@ -46,12 +46,13 @@ class Graph:
         """
         self.__label = label if label is not None else None
         self.__is_directed = False
+        self.__is_weighted = False
         self.__graph = defaultdict(list)
 
-        # process a file, string representing the graph or an ndarray
+        # process a file, string representing the graph or a ndarray
         # representation
         if input_file is not None:
-            with open(input_file, 'r') as in_file:
+            with open(input_file, 'r', encoding="utf8") as in_file:
                 lines = ''.join(in_file.readlines())
                 json_data = json.loads(lines)
                 self.__extract_fields_from_json(json_data)
@@ -83,8 +84,12 @@ class Graph:
         return self.__label
 
     def is_directed(self) -> bool:
-        """ :return: whether or not the graph is directed """
+        """ :return: whether the graph is directed """
         return self.__is_directed
+
+    def is_weighted(self) -> bool:
+        """ :return whether the graph has weights on edges """
+        return self.__is_weighted
 
     def add_vertex(self, vertex: str):
         """ If the vertex "vertex" is not in
@@ -135,7 +140,7 @@ class Graph:
         """
 
         :param arr: matrix of graph to validate
-        :return: whether or not the array is a valid graph
+        :return: whether it is true that  the array is a valid graph
         """
         if len(arr.shape) != 2:
             return False
@@ -171,8 +176,8 @@ class Graph:
             """
             Iterator class for Graphs
             """
-            def __init__(self, g: Graph):
-                self._graph = g
+            def __init__(self, graph: Graph):
+                self._graph = graph
                 self._index = 0
 
             def __next__(self):
