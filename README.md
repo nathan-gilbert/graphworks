@@ -45,6 +45,11 @@ deactivate
 pip install -r requirements.txt
 ```
 
+### Building the package
+
+- Run `python setup.py sdist bdist_wheel`
+- Run `twine check dist/*`
+
 ### Diagnostics
 
 - Run the unit tests: `python -m unittest discover tests '*_tests.py'`
