@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  # workflow_run doesn't appear to be able to combine with publishing on tags
   #workflow_run:
   #  workflows: [ "CI" ]
   #  types: [ completed ]
@@ -11,7 +12,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # only run this if the CI job succeeds and there is a tag set
+    # TODO: only run this if the CI job succeeds and there is a tag set
     #if: github.event.workflow_run.conclusion == 'success'
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     strategy:
