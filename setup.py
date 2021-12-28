@@ -7,7 +7,7 @@ with open('LICENSE', 'r', encoding='utf-8') as f:
     LICENSE = f.read()
 
 setup(name="graphworks",
-      version="0.1.9",
+      version="0.1.10",
       description="Graph theoretic classes and helper functions.",
       long_description_content_type="text/markdown",
       long_description=README,
