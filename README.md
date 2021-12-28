@@ -52,6 +52,8 @@ pip install -r requirements.txt
 - Run `twine check dist/*`
 - Upload to test PyPi: `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
 - Upload to PyPi main: `twine upload --skip-existing dist/*`
+- To autopublish, tag commit with `git tag -a vX.Y.Z -m 'release message`
+- Then `git push --tags`
 
 ### Diagnostics
 
