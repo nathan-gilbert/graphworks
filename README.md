@@ -65,7 +65,6 @@ pip install -r requirements.txt
 
 ## TODO
 
-- Create the documentation for usage
 - Searching/Sorting
   - Topological sort
   - <https://towardsdatascience.com/4-types-of-tree-traversal-algorithms-d56328450846>

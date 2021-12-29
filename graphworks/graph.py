@@ -12,7 +12,7 @@ from graphworks.edge import Edge
 
 class Graph:
     """
-    Implementation of un-directional and directional graphs.
+    Implementation of both non-directional and directional graphs.
     """
 
     def __init__(self,
@@ -31,7 +31,7 @@ class Graph:
         self.__label = label if label is not None else None
         self.__is_directed = False
         self.__is_weighted = False
-        self.__graph = defaultdict(list)
+        self.__graph = defaultdict(list[str])
 
         # process a file, string representing the graph or a ndarray
         # representation
@@ -59,13 +59,17 @@ class Graph:
         """ :return: list of edges in the graph """
         return self.__generate_edges()
 
-    def get_graph(self) -> DefaultDict[str, List]:
+    def get_graph(self) -> DefaultDict[str, List[str]]:
         """ :return: dictionary representation of graph """
         return self.__graph
 
     def get_label(self) -> str:
         """ :return: label of graph"""
         return self.__label
+
+    def set_directed(self, is_directed: bool):
+        """ setter for making a graph instance a (non)directional graph """
+        self.__is_directed = is_directed
 
     def is_directed(self) -> bool:
         """ :return: whether the graph is directed """
@@ -79,7 +83,7 @@ class Graph:
         """ If the vertex "vertex" is not in
             self.__graph, a key "vertex" with an empty
             list as a value is added to the dictionary.
-            Otherwise nothing has to be done.
+            Otherwise, nothing has to be done.
 
             :parameter vertex: name of the vertex to add to graph
         """
