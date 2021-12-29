@@ -31,7 +31,7 @@ class Graph:
         self.__label = label if label is not None else None
         self.__is_directed = False
         self.__is_weighted = False
-        self.__graph = defaultdict(list[str])
+        self.__graph: DefaultDict[str, list[str]] = defaultdict(list[str])
 
         # process a file, string representing the graph or a ndarray
         # representation
@@ -122,6 +122,14 @@ class Graph:
                 j = self.vertices().index(edge)
                 matrix[i][j] = 1
         return matrix
+
+    def get_neighbors(self, v: str) -> List[str]:
+        """
+        Get a list of a vertex's neighbors
+        :param v:
+        :return: List of vertices that have an edge with V
+        """
+        return self.__graph[v]
 
     @staticmethod
     def __validate_array(arr: NDArray) -> bool:

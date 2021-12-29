@@ -97,6 +97,13 @@ B -> 0"""
         json_graph = {"graph": {"A": ["B", "C", "D"], "B": []}}
         self.assertRaises(ValueError, Graph, input_graph=json.dumps(json_graph))
 
+    def test_get_neighbors(self):
+        json_graph = {"label": "my graph", "graph": {"A": ["B"], "B": []}}
+        graph = Graph(input_graph=json.dumps(json_graph))
+
+        self.assertEqual(graph.get_neighbors("A"), ["B"])
+        self.assertEqual(graph.get_neighbors("B"), [])
+
 
 if __name__ == '__main__':
     unittest.main()
