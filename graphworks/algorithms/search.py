@@ -53,12 +53,14 @@ def arrival_departure_dfs(graph: Graph,
     """
     Method for DFS with arrival and departure times for each vertex
 
+    O(V+E) -- E could be as big as V^2
+
     :param graph:
     :param v:
     :param discovered:
     :param arrival:
     :param departure:
-    :param time:
+    :param time: should be initialized to -1
     :return:
     """
     time += 1

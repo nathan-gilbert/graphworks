@@ -31,7 +31,7 @@ class Graph:
         self.__label = label if label is not None else None
         self.__is_directed = False
         self.__is_weighted = False
-        self.__graph: DefaultDict[str, list[str]] = defaultdict(list[str])
+        self.__graph: DefaultDict[str, List[str]] = defaultdict(list)
 
         # process a file, string representing the graph or a ndarray
         # representation
