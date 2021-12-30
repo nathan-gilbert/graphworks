@@ -65,9 +65,6 @@ pip install -r requirements.txt
 
 ## TODO
 
-- Searching/Sorting
-  - Topological sort
-  - <https://towardsdatascience.com/4-types-of-tree-traversal-algorithms-d56328450846>
 - <https://www.python-course.eu/graphs_python.php>
 - Build out directed graphs algorithms
   - Hierholzer’s Algorithm

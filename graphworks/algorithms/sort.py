@@ -1,9 +1,13 @@
-
 from typing import List, Dict
 from graphworks.graph import Graph
 
 
 def topological(graph: Graph) -> List[str]:
+    """
+    O(V+E)
+    :param graph:
+    :return: List of vertices sorted topologically
+    """
     def mark_visited(g: Graph, v: str, v_map: Dict[str, bool], t_sort_results: List[str]):
         v_map[v] = True
         for n in g.get_neighbors(v):
