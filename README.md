@@ -4,9 +4,6 @@
 
 ## A Python module for efficient graph theoretic programming
 
-**NOTE** This is a very old project I created for my undergrad capstone project.
-It's not in a working state at the moment, but I'm bringing it back to life.
-
 ## Usage
 
 See the [wiki](https://github.com/nathan-gilbert/graphworks/wiki)
