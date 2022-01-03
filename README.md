@@ -9,7 +9,20 @@ It's not in a working state at the moment, but I'm bringing it back to life.
 
 ## Usage
 
-TODO
+See the [wiki](https://github.com/nathan-gilbert/graphworks/wiki)
+
+### TLDR
+
+First, `pip install graphworks`
+
+```python
+
+from graphworks.graph import Graph
+
+json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
+graph = Graph("my graph", input_graph=json.dumps(json_graph))
+print(graph)
+```
 
 ## Development
 
