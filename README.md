@@ -75,6 +75,7 @@ pip install -r requirements.txt
 
 ## TODO
 
+- Create Vertex class
 - <https://www.python-course.eu/graphs_python.php>
 - Build out directed graphs algorithms
   - Hierholzer’s Algorithm
