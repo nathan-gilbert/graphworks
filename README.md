@@ -13,7 +13,7 @@ See the [wiki](https://github.com/nathan-gilbert/graphworks/wiki)
 First, `pip install graphworks`
 
 ```python
-
+import json
 from graphworks.graph import Graph
 
 json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
