@@ -78,7 +78,6 @@ pip install -r requirements.txt
 - Create Vertex class
 - <https://www.python-course.eu/graphs_python.php>
 - Build out directed graphs algorithms
-  - Hierholzer’s Algorithm
   - <https://algs4.cs.princeton.edu/42digraph/>
 - Allow for weighted graph algorithms
   - Jarnik's algorithm
