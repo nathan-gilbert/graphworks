@@ -2,6 +2,7 @@ import json
 import uuid
 from typing import List
 from typing import DefaultDict
+import random
 from collections import defaultdict
 
 import numpy as np
@@ -123,6 +124,12 @@ class Graph:
                 matrix[i][j] = 1
         return matrix
 
+    def vertex_to_matrix_index(self, v: str) -> int:
+        return self.vertices().index(v)
+
+    def matrix_index_to_vertex(self, index: int) -> str:
+        return self.vertices()[index]
+
     def get_neighbors(self, v: str) -> List[str]:
         """
         Get a list of a vertex's neighbors
@@ -130,6 +137,9 @@ class Graph:
         :return: List of vertices that have an edge with V
         """
         return self.__graph[v]
+
+    def get_random_vertex(self) -> str:
+        return random.choice(self.vertices())
 
     @staticmethod
     def __validate_array(arr: NDArray) -> bool:

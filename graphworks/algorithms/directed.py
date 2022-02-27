@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 from graphworks.graph import Graph
 from graphworks.algorithms.search import arrival_departure_dfs
 
@@ -38,3 +40,34 @@ def is_dag(graph: Graph) -> bool:
 
     # No back edges
     return True
+
+
+def build_neighbor_matrix(graph: Graph) -> Dict[str, List[str]]:
+    adjacency_matrix = {}
+    for v in graph.vertices():
+        adjacency_matrix[v] = graph.get_neighbors(v)
+
+    return adjacency_matrix
+
+
+def find_circuit(graph: Graph) -> List[str]:
+    """
+    Using Hierholzer’s algorithm to find an eulerian circuit
+    :param graph:
+    :return: A list of vertices in the eulerian circuit of this graph
+    """
+    if len(graph.vertices()) == 0:
+        return []
+
+    circuit = []
+    adjacency_matrix = build_neighbor_matrix(graph)
+    current_path: List[str] = [graph.vertices()[0]]
+    while len(current_path) > 0:
+        current_vertex = current_path[-1]
+        if len(adjacency_matrix[current_vertex]) > 0:
+            next_vertex = adjacency_matrix[current_vertex].pop()
+            current_path.append(next_vertex)
+        else:
+            circuit.append(current_path.pop())
+
+    return circuit
