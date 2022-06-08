@@ -57,8 +57,8 @@ pip install -r requirements.txt
 
 ### Building the package
 
-- Update the version number in `setup.py`
-- Run `python setup.py sdist bdist_wheel`
+- Update the version number in `graphworks.__init__.py`
+- Run `python -m build`
 - Run `twine check dist/*`
 - Upload to test PyPi: `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`
 - Upload to PyPi main: `twine upload --skip-existing dist/*`
