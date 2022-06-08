@@ -1,5 +1,6 @@
 astroid==2.11.3
 bleach==4.1.0
+build==0.8.0
 certifi==2021.10.8
 charset-normalizer==2.0.10
 colorama==0.4.4
@@ -16,6 +17,7 @@ lazy-object-proxy==1.7.1
 mccabe==0.6.1
 numpy==1.22.0
 packaging==21.3
+pep517==0.12.0
 pkginfo==1.8.2
 platformdirs==2.4.1
 pycodestyle==2.8.0
