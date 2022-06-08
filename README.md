@@ -14,7 +14,7 @@ First, `pip install graphworks`
 
 ```python
 import json
-from graphworks.graph import Graph
+from src.graphworks.graph import Graph
 
 json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
 graph = Graph("my graph", input_graph=json.dumps(json_graph))

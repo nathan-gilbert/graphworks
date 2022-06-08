@@ -1,8 +1,8 @@
 import json
 import unittest
 
-from graphworks.algorithms.sort import topological
-from graphworks.graph import Graph
+from src.graphworks.algorithms.sort import topological
+from src.graphworks.graph import Graph
 
 
 class SortTests(unittest.TestCase):

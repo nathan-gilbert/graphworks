@@ -1,7 +1,7 @@
 import json
 from os import path
 
-from graphworks.graph import Graph
+from src.graphworks.graph import Graph
 
 
 def save_to_json(graph: Graph, out_dir):

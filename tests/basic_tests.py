@@ -1,25 +1,25 @@
 import json
 import unittest
 
-from graphworks.algorithms.basic import degree_sequence
-from graphworks.algorithms.basic import density
-from graphworks.algorithms.basic import diameter
-from graphworks.algorithms.basic import find_all_paths
-from graphworks.algorithms.basic import find_isolated_vertices
-from graphworks.algorithms.basic import find_path
-from graphworks.algorithms.basic import generate_edges
-from graphworks.algorithms.basic import is_connected
-from graphworks.algorithms.basic import is_degree_sequence
-from graphworks.algorithms.basic import is_erdos_gallai
-from graphworks.algorithms.basic import is_regular
-from graphworks.algorithms.basic import is_simple
-from graphworks.algorithms.basic import is_sparse
-from graphworks.algorithms.basic import max_degree
-from graphworks.algorithms.basic import min_degree
-from graphworks.algorithms.basic import vertex_degree
-from graphworks.algorithms.basic import get_complement
-from graphworks.algorithms.basic import is_complete
-from graphworks.graph import Graph
+from src.graphworks.algorithms.basic import degree_sequence
+from src.graphworks.algorithms.basic import density
+from src.graphworks.algorithms.basic import diameter
+from src.graphworks.algorithms.basic import find_all_paths
+from src.graphworks.algorithms.basic import find_isolated_vertices
+from src.graphworks.algorithms.basic import find_path
+from src.graphworks.algorithms.basic import generate_edges
+from src.graphworks.algorithms.basic import is_connected
+from src.graphworks.algorithms.basic import is_degree_sequence
+from src.graphworks.algorithms.basic import is_erdos_gallai
+from src.graphworks.algorithms.basic import is_regular
+from src.graphworks.algorithms.basic import is_simple
+from src.graphworks.algorithms.basic import is_sparse
+from src.graphworks.algorithms.basic import max_degree
+from src.graphworks.algorithms.basic import min_degree
+from src.graphworks.algorithms.basic import vertex_degree
+from src.graphworks.algorithms.basic import get_complement
+from src.graphworks.algorithms.basic import is_complete
+from src.graphworks.graph import Graph
 
 
 class BasicTests(unittest.TestCase):

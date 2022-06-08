@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from graphworks.graph import Graph
+from src.graphworks.graph import Graph
 
 
 class GraphIteratorTests(unittest.TestCase):

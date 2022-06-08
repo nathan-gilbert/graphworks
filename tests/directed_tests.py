@@ -1,7 +1,7 @@
 import json
 import unittest
-from graphworks.algorithms.directed import is_dag, find_circuit
-from graphworks.graph import Graph
+from src.graphworks.algorithms.directed import is_dag, find_circuit
+from src.graphworks.graph import Graph
 
 
 class DirectedTests(unittest.TestCase):

@@ -5,7 +5,7 @@ from typing import Set
 from typing import Tuple
 
 from numpy import invert
-from graphworks.graph import Graph
+from src.graphworks.graph import Graph
 
 
 def generate_edges(graph: Graph) -> List[Tuple[str, str]]:

@@ -1,7 +1,7 @@
 from typing import List, Dict
 
-from graphworks.graph import Graph
-from graphworks.algorithms.search import arrival_departure_dfs
+from src.graphworks.graph import Graph
+from src.graphworks.algorithms.search import arrival_departure_dfs
 
 
 def is_dag(graph: Graph) -> bool:

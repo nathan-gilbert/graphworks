@@ -1,6 +1,6 @@
 import unittest
 
-from graphworks.graph import Edge
+from src.graphworks.graph import Edge
 
 
 class EdgeTests(unittest.TestCase):

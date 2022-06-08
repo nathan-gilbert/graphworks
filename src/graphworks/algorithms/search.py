@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from graphworks.graph import Graph
+from src.graphworks.graph import Graph
 
 
 def breadth_first_search(graph: Graph, start: str) -> List[str]:

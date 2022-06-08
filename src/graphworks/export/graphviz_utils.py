@@ -2,7 +2,7 @@ from os import path
 
 from graphviz import Graph as GraphViz
 
-from graphworks.graph import Graph
+from src.graphworks.graph import Graph
 
 
 def save_to_dot(graph: Graph, out_dir: str):

@@ -1,5 +1,5 @@
 from typing import List, Dict
-from graphworks.graph import Graph
+from src.graphworks.graph import Graph
 
 
 def topological(graph: Graph) -> List[str]:

@@ -1,10 +1,10 @@
 import json
 import unittest
 
-from graphworks.algorithms.search import breadth_first_search
-from graphworks.algorithms.search import depth_first_search
-from graphworks.algorithms.search import arrival_departure_dfs
-from graphworks.graph import Graph
+from src.graphworks.algorithms.search import breadth_first_search
+from src.graphworks.algorithms.search import depth_first_search
+from src.graphworks.algorithms.search import arrival_departure_dfs
+from src.graphworks.graph import Graph
 
 
 class SearchTests(unittest.TestCase):

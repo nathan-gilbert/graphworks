@@ -8,7 +8,7 @@ from collections import defaultdict
 import numpy as np
 from numpy.typing import NDArray
 
-from graphworks.edge import Edge
+from src.graphworks.edge import Edge
 
 
 class Graph:
