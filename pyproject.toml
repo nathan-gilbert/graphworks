@@ -7,7 +7,9 @@ name = "graphworks"
 description = "Graph theoretic classes and helper functions."
 readme = "README.md"
 requires-python = ">=3.13"
+keywords = [ "algorithms", "data-structures", "graph", "graph-theory", "mathematics", "network",]
 classifiers = [
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
@@ -17,10 +19,11 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "Programming Language :: Python :: 3.15",
     "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
 ]
-dependencies = [ "graphviz", "numpy",]
+dependencies = [ "numpy",]
 dynamic = [ "version",]
 
 [project.license]
@@ -30,44 +33,82 @@ text = "MIT"
 name = "Nathan Gilbert"
 email = "nathan.gilbert@gmail.com"
 
+[[project.maintainers]]
+name = "Nathan Gilbert"
+email = "nathan.gilbert@gmail.com"
+
 [project.urls]
 Homepage = "https://github.com/nathan-gilbert/graphworks"
+Repository = "https://github.com/nathan-gilbert/graphworks"
 "Bug Tracker" = "https://github.com/nathan-gilbert/graphworks/issues"
+Changelog = "https://github.com/nathan-gilbert/graphworks/blob/main/CHANGELOG.md"
+Documentation = "https://graphworks.readthedocs.io"
+
+[project.optional-dependencies]
+viz = [ "graphviz",]
+docs = [ "myst-parser", "sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme",]
+dev = [ "black", "import-linter", "pytest", "pytest-cov", "ruff", "ty", "xenon",]
+all = [ "graphworks[dev,docs,viz]",]
 
 [tool.hatch.version]
 path = "src/graphworks/__init__.py"
 
+[tool.hatch.build.targets.sdist]
+include = [ "src/", "tests/", "docs/", "README.md", "CHANGELOG.md", "LICENSE", "pyproject.toml",]
+
 [tool.hatch.build.targets.wheel]
 packages = [ "src/graphworks",]
 
-[tool.uv]
-dev-dependencies = [ "pytest", "pytest-cov", "black", "ruff", "ty", "import-linter", "radon",]
-
 [tool.black]
 line-length = 88
-target-version = [ "py313", "py314", "py315",]
+target-version = [ "py313", "py314",]
 
 [tool.ruff]
 line-length = 88
 target-version = "py313"
 
 [tool.ruff.lint]
-select = [ "E", "W", "F", "I", "UP", "B", "C4", "SIM",]
-ignore = []
+select = [ "E", "W", "F", "I", "UP", "B", "C4", "SIM", "TCH", "ANN", "D",]
+ignore = [ "D203", "D213",]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
 
 [tool.ruff.lint.isort]
 known-first-party = [ "graphworks",]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [ "ANN", "D",]
+
 [tool.ty]
 python-version = "3.13"
 
+[tool.ty.rules]
+strict = true
+
 [tool.pytest.ini_options]
 testpaths = [ "tests",]
-addopts = "--tb=short -v"
+addopts = [
+    "--tb=short",
+    "--strict-markers",
+    "-v",
+    "--cov=graphworks",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+]
+markers = [
+    "unit: fast, isolated unit tests",
+    "integration: tests that exercise multiple components together",
+    "slow: tests that take more than a second",
+]
 
 [tool.coverage.run]
 source = [ "src/graphworks",]
-omit = [ "tests/*",]
+omit = [ "tests/*", "docs/*",]
+branch = true
 
 [tool.coverage.report]
 show_missing = true
+skip_covered = false
+fail_under = 80
+exclude_lines = [ "pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError", "@(abc\\.)?abstractmethod",]
