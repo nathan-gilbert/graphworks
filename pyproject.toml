@@ -103,6 +103,7 @@ index-strategy = "first-index"
 
 [tool.pytest]
 testpaths = [ "tests",]
+pythonpath = [ "src",]
 addopts = [
     "--color=yes",
     "--tb=auto",
