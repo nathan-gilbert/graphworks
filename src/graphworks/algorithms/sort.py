@@ -1,4 +1,3 @@
-
 from src.graphworks.graph import Graph
 
 
@@ -8,7 +7,10 @@ def topological(graph: Graph) -> list[str]:
     :param graph:
     :return: List of vertices sorted topologically
     """
-    def mark_visited(g: Graph, v: str, v_map: dict[str, bool], t_sort_results: list[str]):
+
+    def mark_visited(
+        g: Graph, v: str, v_map: dict[str, bool], t_sort_results: list[str]
+    ):
         v_map[v] = True
         for n in g.get_neighbors(v):
             if not v_map[n]:

@@ -1,4 +1,3 @@
-
 from src.graphworks.graph import Graph
 
 
@@ -43,12 +42,14 @@ def depth_first_search(graph: Graph, start: str) -> list[str]:
     return visited
 
 
-def arrival_departure_dfs(graph: Graph,
-                          v: str,
-                          discovered: dict[str, bool],
-                          arrival: dict[str, int],
-                          departure: dict[str, int],
-                          time: int) -> int:
+def arrival_departure_dfs(
+    graph: Graph,
+    v: str,
+    discovered: dict[str, bool],
+    arrival: dict[str, int],
+    departure: dict[str, int],
+    time: int,
+) -> int:
     """
     Method for DFS with arrival and departure times for each vertex
 

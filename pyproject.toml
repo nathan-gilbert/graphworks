@@ -86,7 +86,7 @@ convention = "pep257"
 profile = "black"
 line_length = 88
 multi_line_output = 3
-known-first-party = [ "graphworks",]
+known_first_party = [ "graphworks",]
 
 [tool.ty]
 python-version = "3.13"
