@@ -1,9 +1,11 @@
 import json
 import unittest
 
-from src.graphworks.algorithms.search import breadth_first_search
-from src.graphworks.algorithms.search import depth_first_search
-from src.graphworks.algorithms.search import arrival_departure_dfs
+from src.graphworks.algorithms.search import (
+    arrival_departure_dfs,
+    breadth_first_search,
+    depth_first_search,
+)
 from src.graphworks.graph import Graph
 
 
@@ -42,11 +44,11 @@ class SearchTests(unittest.TestCase):
         graph = Graph(input_graph=json.dumps(disjoint_graph))
 
         # list to store the arrival time of vertex
-        arrival = {v: 0 for v in graph.vertices()}
+        arrival = dict.fromkeys(graph.vertices(), 0)
         # list to store the departure time of vertex
-        departure = {v: 0 for v in graph.vertices()}
+        departure = dict.fromkeys(graph.vertices(), 0)
         # mark all the vertices as not discovered
-        discovered = {v: False for v in graph.vertices()}
+        discovered = dict.fromkeys(graph.vertices(), False)
         time = -1
 
         for v in graph.vertices():

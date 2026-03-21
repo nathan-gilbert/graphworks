@@ -48,7 +48,7 @@ Documentation = "https://graphworks.readthedocs.io"
 matrix = [ "numpy",]
 viz = [ "graphviz",]
 docs = [ "myst-parser", "sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme",]
-dev = [ "black", "import-linter", "pytest", "pytest-cov", "ruff", "ty", "xenon",]
+dev = [ "black", "import-linter", "isort", "pytest", "pytest-cov", "ruff", "ty", "xenon",]
 all = [ "graphworks[dev,docs,viz]",]
 
 [tool.hatch.version]
@@ -65,7 +65,7 @@ packages = [ "src/graphworks",]
 
 [tool.black]
 line-length = 88
-target-version = [ "py313", "py314",]
+target-version = [ "py314"]
 
 [tool.ruff]
 line-length = 88
@@ -78,7 +78,10 @@ ignore = [ "D203", "D213",]
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
 
-[tool.ruff.lint.isort]
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
 known-first-party = [ "graphworks",]
 
 [tool.ruff.lint.per-file-ignores]
@@ -90,13 +93,23 @@ python-version = "3.13"
 [tool.ty.rules]
 strict = true
 
-[tool.pytest.ini_options]
-testpaths = [ "tests",]
+[tool.uv]
+required-version = ">=0.10.12"
+python-preference = "managed"
+resolution = "highest"
+prerelease = "disallow"
+index-strategy = "first-index"
+
+[tool.pytest]
+testpaths = ["tests"]
 addopts = [
-    "--tb=short",
+    "--color=yes",
+    "--tb=auto",
+    "--maxfail=10",
+    "--durations=10",
+    "-ra",
     "--strict-markers",
-    "-v",
-    "--cov=graphworks",
+    "--cov=src/graphworks",
     "--cov-report=term-missing",
     "--cov-report=html:htmlcov",
 ]
@@ -107,12 +120,17 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = [ "src/graphworks",]
-omit = [ "tests/*", "docs/*",]
+source = ["src/graphworks"]
+omit = ["tests/*", "docs/*"]
 branch = true
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
-fail_under = 80
-exclude_lines = [ "pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError", "@(abc\\.)?abstractmethod",]
+fail_under = 90
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@(abc\\.)?abstractmethod",
+]

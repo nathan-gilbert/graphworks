@@ -1,7 +1,6 @@
-from typing import List, Dict
 
-from src.graphworks.graph import Graph
 from src.graphworks.algorithms.search import arrival_departure_dfs
+from src.graphworks.graph import Graph
 
 
 def is_dag(graph: Graph) -> bool:
@@ -13,12 +12,12 @@ def is_dag(graph: Graph) -> bool:
     if not graph.is_directed():
         return False
 
-    departure = {v: 0 for v in graph.vertices()}
-    discovered = {v: False for v in graph.vertices()}
+    departure = dict.fromkeys(graph.vertices(), 0)
+    discovered = dict.fromkeys(graph.vertices(), False)
     time = -1
 
     # not needed in this case
-    arrival = {v: 0 for v in graph.vertices()}
+    arrival = dict.fromkeys(graph.vertices(), 0)
 
     # visit all connected components of the graph, build departure dict
     for n in graph.vertices():
@@ -42,7 +41,7 @@ def is_dag(graph: Graph) -> bool:
     return True
 
 
-def build_neighbor_matrix(graph: Graph) -> Dict[str, List[str]]:
+def build_neighbor_matrix(graph: Graph) -> dict[str, list[str]]:
     adjacency_matrix = {}
     for v in graph.vertices():
         adjacency_matrix[v] = graph.get_neighbors(v)
@@ -50,7 +49,7 @@ def build_neighbor_matrix(graph: Graph) -> Dict[str, List[str]]:
     return adjacency_matrix
 
 
-def find_circuit(graph: Graph) -> List[str]:
+def find_circuit(graph: Graph) -> list[str]:
     """
     Using Hierholzer’s algorithm to find an eulerian circuit
     :param graph:
@@ -61,7 +60,7 @@ def find_circuit(graph: Graph) -> List[str]:
 
     circuit = []
     adjacency_matrix = build_neighbor_matrix(graph)
-    current_path: List[str] = [graph.vertices()[0]]
+    current_path: list[str] = [graph.vertices()[0]]
     while len(current_path) > 0:
         current_vertex = current_path[-1]
         if len(adjacency_matrix[current_vertex]) > 0:

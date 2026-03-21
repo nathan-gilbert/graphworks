@@ -1,9 +1,8 @@
-from typing import List, Dict
 
 from src.graphworks.graph import Graph
 
 
-def breadth_first_search(graph: Graph, start: str) -> List[str]:
+def breadth_first_search(graph: Graph, start: str) -> list[str]:
     """
 
     :param graph:
@@ -11,7 +10,7 @@ def breadth_first_search(graph: Graph, start: str) -> List[str]:
     :return:
     """
     # Mark all the vertices as not visited
-    visited = {k: False for k in graph.vertices()}
+    visited = dict.fromkeys(graph.vertices(), False)
     # Mark the start vertices as visited and enqueue it
     visited[start] = True
 
@@ -28,7 +27,7 @@ def breadth_first_search(graph: Graph, start: str) -> List[str]:
     return walk
 
 
-def depth_first_search(graph: Graph, start: str) -> List[str]:
+def depth_first_search(graph: Graph, start: str) -> list[str]:
     """
 
     :param graph:
@@ -46,9 +45,9 @@ def depth_first_search(graph: Graph, start: str) -> List[str]:
 
 def arrival_departure_dfs(graph: Graph,
                           v: str,
-                          discovered: Dict[str, bool],
-                          arrival: Dict[str, int],
-                          departure: Dict[str, int],
+                          discovered: dict[str, bool],
+                          arrival: dict[str, int],
+                          departure: dict[str, int],
                           time: int) -> int:
     """
     Method for DFS with arrival and departure times for each vertex

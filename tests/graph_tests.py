@@ -6,8 +6,7 @@ from os import path
 
 import numpy as np
 
-from src.graphworks.graph import Graph
-from src.graphworks.graph import Edge
+from src.graphworks.graph import Edge, Graph
 
 
 class GraphTests(unittest.TestCase):
