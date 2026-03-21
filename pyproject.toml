@@ -1,12 +1,12 @@
 [build-system]
-requires = [ "hatchling",]
+requires = [ "hatch-vcs", "hatchling",]
 build-backend = "hatchling.build"
 
 [project]
 name = "graphworks"
-description = "Graph theoretic classes and helper functions."
+description = "Graph theoretic classes and algorithm helper functions."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = "<=3.15,>=3.13"
 keywords = [ "algorithms", "data-structures", "graph", "graph-theory", "mathematics", "network",]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -23,7 +23,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-dependencies = [ "numpy",]
+dependencies = []
 dynamic = [ "version",]
 
 [project.license]
@@ -45,13 +45,17 @@ Changelog = "https://github.com/nathan-gilbert/graphworks/blob/main/CHANGELOG.md
 Documentation = "https://graphworks.readthedocs.io"
 
 [project.optional-dependencies]
+matrix = [ "numpy",]
 viz = [ "graphviz",]
 docs = [ "myst-parser", "sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme",]
 dev = [ "black", "import-linter", "pytest", "pytest-cov", "ruff", "ty", "xenon",]
 all = [ "graphworks[dev,docs,viz]",]
 
 [tool.hatch.version]
-path = "src/graphworks/__init__.py"
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/graphworks/_version.py"
 
 [tool.hatch.build.targets.sdist]
 include = [ "src/", "tests/", "docs/", "README.md", "CHANGELOG.md", "LICENSE", "pyproject.toml",]
