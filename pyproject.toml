@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
@@ -65,7 +66,7 @@ packages = [ "src/graphworks",]
 
 [tool.black]
 line-length = 88
-target-version = [ "py314"]
+target-version = [ "py314",]
 
 [tool.ruff]
 line-length = 88
@@ -78,14 +79,14 @@ ignore = [ "D203", "D213",]
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [ "ANN", "D",]
+
 [tool.isort]
 profile = "black"
 line_length = 88
 multi_line_output = 3
 known-first-party = [ "graphworks",]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = [ "ANN", "D",]
 
 [tool.ty]
 python-version = "3.13"
@@ -101,7 +102,7 @@ prerelease = "disallow"
 index-strategy = "first-index"
 
 [tool.pytest]
-testpaths = ["tests"]
+testpaths = [ "tests",]
 addopts = [
     "--color=yes",
     "--tb=auto",
@@ -120,17 +121,12 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src/graphworks"]
-omit = ["tests/*", "docs/*"]
+source = [ "src/graphworks",]
+omit = [ "tests/*", "docs/*",]
 branch = true
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
 fail_under = 90
-exclude_lines = [
-    "pragma: no cover",
-    "if TYPE_CHECKING:",
-    "raise NotImplementedError",
-    "@(abc\\.)?abstractmethod",
-]
+exclude_lines = [ "pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError", "@(abc\\.)?abstractmethod",]
