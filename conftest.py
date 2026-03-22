@@ -1,8 +1,4 @@
-"""
-tests.conftest
-~~~~~~~~~~~~~~
-
-Shared pytest fixtures for the graphworks test suite.
+"""Shared pytest fixtures for the graphworks test suite.
 
 All fixtures used across multiple test modules live here so pytest discovers
 them automatically without explicit imports.
@@ -23,8 +19,6 @@ Both approaches ensure that ``from graphworks.x import Y`` and the
 library's internal ``from graphworks.x import Y`` resolve to the **same**
 module object, which is required for dataclass ``__eq__`` to work correctly
 across the test/library boundary.
-
-:author: Nathan Gilbert
 """
 
 from __future__ import annotations
@@ -32,8 +26,11 @@ from __future__ import annotations
 import json
 import shutil
 import tempfile
-from collections.abc import Generator
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 import pytest
 
@@ -282,7 +279,7 @@ def disjoint_directed_json() -> dict:
 
 
 @pytest.fixture()
-def simple_edge_graph(simple_edge_json) -> Graph:
+def simple_edge_graph(simple_edge_json: dict) -> Graph:
     """Two-vertex undirected :class:`Graph` with one edge (A → B).
 
     :return: Constructed Graph instance.
@@ -292,7 +289,7 @@ def simple_edge_graph(simple_edge_json) -> Graph:
 
 
 @pytest.fixture()
-def triangle_graph(triangle_json) -> Graph:
+def triangle_graph(triangle_json: dict) -> Graph:
     """Complete undirected :class:`Graph` on three vertices (K₃).
 
     :return: Constructed Graph instance.
@@ -302,7 +299,7 @@ def triangle_graph(triangle_json) -> Graph:
 
 
 @pytest.fixture()
-def isolated_graph(isolated_json) -> Graph:
+def isolated_graph(isolated_json: dict) -> Graph:
     """Three-vertex :class:`Graph` with no edges.
 
     :return: Constructed Graph instance.
@@ -312,7 +309,7 @@ def isolated_graph(isolated_json) -> Graph:
 
 
 @pytest.fixture()
-def connected_graph(connected_json) -> Graph:
+def connected_graph(connected_json: dict) -> Graph:
     """Six-vertex connected undirected :class:`Graph`.
 
     :return: Constructed Graph instance.
@@ -322,7 +319,7 @@ def connected_graph(connected_json) -> Graph:
 
 
 @pytest.fixture()
-def big_graph(big_graph_json) -> Graph:
+def big_graph(big_graph_json: dict) -> Graph:
     """Six-vertex connected undirected :class:`Graph` for diameter tests.
 
     :return: Constructed Graph instance.
@@ -332,7 +329,7 @@ def big_graph(big_graph_json) -> Graph:
 
 
 @pytest.fixture()
-def directed_dag(directed_dag_json) -> Graph:
+def directed_dag(directed_dag_json: dict) -> Graph:
     """Directed acyclic :class:`Graph`.
 
     :return: Constructed Graph instance.
@@ -342,7 +339,7 @@ def directed_dag(directed_dag_json) -> Graph:
 
 
 @pytest.fixture()
-def directed_cycle_graph(directed_cycle_json) -> Graph:
+def directed_cycle_graph(directed_cycle_json: dict) -> Graph:
     """Directed :class:`Graph` containing a cycle.
 
     :return: Constructed Graph instance.
@@ -352,7 +349,7 @@ def directed_cycle_graph(directed_cycle_json) -> Graph:
 
 
 @pytest.fixture()
-def circuit_graph(circuit_json) -> Graph:
+def circuit_graph(circuit_json: dict) -> Graph:
     """Directed :class:`Graph` with an Eulerian circuit A → B → C → A.
 
     :return: Constructed Graph instance.
@@ -362,7 +359,7 @@ def circuit_graph(circuit_json) -> Graph:
 
 
 @pytest.fixture()
-def search_graph(search_graph_json) -> Graph:
+def search_graph(search_graph_json: dict) -> Graph:
     """Four-vertex :class:`Graph` for BFS / DFS tests.
 
     :return: Constructed Graph instance.
@@ -372,7 +369,7 @@ def search_graph(search_graph_json) -> Graph:
 
 
 @pytest.fixture()
-def disjoint_directed_graph(disjoint_directed_json) -> Graph:
+def disjoint_directed_graph(disjoint_directed_json: dict) -> Graph:
     """Directed :class:`Graph` with two disjoint components.
 
     :return: Constructed Graph instance.
