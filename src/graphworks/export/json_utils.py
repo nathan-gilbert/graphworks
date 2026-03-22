@@ -1,7 +1,7 @@
 import json
 from os import path
 
-from src.graphworks.graph import Graph
+from graphworks.graph import Graph
 
 
 def save_to_json(graph: Graph, out_dir):
@@ -17,7 +17,5 @@ def save_to_json(graph: Graph, out_dir):
         "graph": graph.get_graph(),
     }
 
-    with open(
-        path.join(out_dir, f"{graph.get_label()}.json"), "w", encoding="utf8"
-    ) as out:
+    with open(path.join(out_dir, f"{graph.get_label()}.json"), "w", encoding="utf8") as out:
         out.write(json.dumps(g_dict))

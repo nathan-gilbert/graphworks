@@ -16,6 +16,7 @@ from pathlib import Path
 
 import pytest
 
+from graphworks.export.graphviz_utils import save_to_dot
 from graphworks.export.json_utils import save_to_json
 from graphworks.graph import Graph
 
@@ -29,9 +30,7 @@ class TestSaveToJson:
         out = tmp_dir / f"{simple_edge_graph.get_label()}.json"
         assert out.exists()
 
-    def test_output_content_is_valid_json(
-        self, simple_edge_graph, tmp_dir: Path
-    ) -> None:
+    def test_output_content_is_valid_json(self, simple_edge_graph, tmp_dir: Path) -> None:
         """The written file is valid JSON."""
         save_to_json(simple_edge_graph, str(tmp_dir))
         out = tmp_dir / f"{simple_edge_graph.get_label()}.json"
@@ -45,9 +44,7 @@ class TestSaveToJson:
         data = json.loads(out.read_text(encoding="utf-8"))
         assert data["label"] == "my graph"
 
-    def test_output_contains_directed_flag(
-        self, simple_edge_graph, tmp_dir: Path
-    ) -> None:
+    def test_output_contains_directed_flag(self, simple_edge_graph, tmp_dir: Path) -> None:
         """Serialised JSON includes the directed flag."""
         save_to_json(simple_edge_graph, str(tmp_dir))
         out = tmp_dir / f"{simple_edge_graph.get_label()}.json"
@@ -55,14 +52,9 @@ class TestSaveToJson:
         assert "directed" in data
         assert data["directed"] is False
 
-    def test_output_matches_expected_string(
-        self, simple_edge_graph, tmp_dir: Path
-    ) -> None:
+    def test_output_matches_expected_string(self, simple_edge_graph, tmp_dir: Path) -> None:
         """Serialised output exactly matches expected JSON string."""
-        expected = (
-            '{"label": "my graph", "directed": false,'
-            ' "graph": {"A": ["B"], "B": []}}'
-        )
+        expected = '{"label": "my graph", "directed": false,' ' "graph": {"A": ["B"], "B": []}}'
         save_to_json(simple_edge_graph, str(tmp_dir))
         out = tmp_dir / f"{simple_edge_graph.get_label()}.json"
         assert out.read_text(encoding="utf-8") == expected
@@ -87,18 +79,14 @@ class TestSaveToDot:
 
     def test_dot_file_is_created(self, simple_edge_graph, tmp_dir: Path) -> None:
         """save_to_dot creates a .gv file in the output directory."""
-        from src.graphworks.export.graphviz_utils import save_to_dot
 
         save_to_dot(simple_edge_graph, str(tmp_dir))
         # graphviz appends .gv to the path we pass
         out = tmp_dir / f"{simple_edge_graph.get_label()}.gv"
         assert out.exists()
 
-    def test_dot_content_matches_expected(
-        self, simple_edge_graph, tmp_dir: Path
-    ) -> None:
+    def test_dot_content_matches_expected(self, simple_edge_graph, tmp_dir: Path) -> None:
         """The .gv file contains the expected Graphviz dot language content."""
-        from src.graphworks.export.graphviz_utils import save_to_dot
 
         expected = "// my graph\ngraph {\n\tA [label=A]\n\tA -- B\n\tB [label=B]\n}\n"
         save_to_dot(simple_edge_graph, str(tmp_dir))
@@ -107,7 +95,6 @@ class TestSaveToDot:
 
     def test_directed_graph_skipped_by_save_to_dot(self, tmp_dir: Path) -> None:
         """save_to_dot silently skips directed graphs (undirected only)."""
-        from src.graphworks.export.graphviz_utils import save_to_dot
 
         data = {"directed": True, "label": "d", "graph": {"A": ["B"], "B": []}}
         graph = Graph(input_graph=json.dumps(data))

@@ -1,4 +1,4 @@
-from src.graphworks.graph import Graph
+from graphworks.graph import Graph
 
 
 def breadth_first_search(graph: Graph, start: str) -> list[str]:

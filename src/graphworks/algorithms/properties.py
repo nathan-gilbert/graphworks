@@ -1,8 +1,4 @@
-"""
-graphworks.algorithms.properties
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Graph property queries and structural metrics.
+"""Graph property queries and structural metrics.
 
 This module provides predicate functions (``is_*``) and quantitative metrics
 (``density``, ``diameter``, ``degree_sequence``, etc.) that inspect a
@@ -10,14 +6,17 @@ This module provides predicate functions (``is_*``) and quantitative metrics
 
 All functions are pure: they take a graph (and optional parameters) and
 return a value.  None of the functions here require numpy.
-
-:author: Nathan Gilbert
 """
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from graphworks.algorithms.paths import find_all_paths  # avoid circular
 from graphworks.graph import Graph
-from graphworks.types import AdjacencyMatrix
+
+if TYPE_CHECKING:
+    from graphworks.types import AdjacencyMatrix
 
 # ---------------------------------------------------------------------------
 # Degree helpers
@@ -190,9 +189,10 @@ def is_connected(
 
     if len(vertices_encountered) != len(verts):
         for vertex in graph[start_vertex]:
-            if vertex not in vertices_encountered:
-                if is_connected(graph, vertex, vertices_encountered):
-                    return True
+            if vertex not in vertices_encountered and is_connected(
+                graph, vertex, vertices_encountered
+            ):
+                return True
     else:
         return True
     return False
@@ -272,28 +272,21 @@ def density(graph: Graph) -> float:
 def diameter(graph: Graph) -> int:
     """Return the diameter of the graph.
 
-    The diameter is the length of the longest shortest path between any pair
-    of vertices.
+    The diameter is the length of the longest shortest path between any pair of vertices.
 
     :param graph: The graph to inspect.
     :type graph: Graph
     :return: Diameter (number of edges on the longest shortest path).
     :rtype: int
     """
-    from graphworks.algorithms.paths import find_all_paths  # avoid circular
-
     verts = graph.vertices()
-    pairs = [
-        (verts[i], verts[j])
-        for i in range(len(verts) - 1)
-        for j in range(i + 1, len(verts))
-    ]
+    pairs = [(verts[i], verts[j]) for i in range(len(verts) - 1) for j in range(i + 1, len(verts))]
 
     shortest_paths: list[list[str]] = []
     for start, end in pairs:
-        all_paths = find_all_paths(graph, start, end)
+        all_paths: list[list[str]] = find_all_paths(graph, start, end)
         if all_paths:
-            shortest_paths.append(sorted(all_paths, key=len)[0])
+            shortest_paths.append(min(all_paths, key=lambda path: len(path)))
 
     if not shortest_paths:
         return 0

@@ -1,15 +1,9 @@
-"""
-graphworks.graph
-~~~~~~~~~~~~~~~~
+"""Core graph data structure for the graphworks library.
 
-Core graph data structure for the graphworks library.
-
-Provides :class:`Graph`, which stores graphs internally as an adjacency list
-(``dict[str, list[str]]``) and exposes a numpy-free adjacency matrix
-interface via :data:`~graphworks.types.AdjacencyMatrix`.  Optional numpy
-interop is available through :mod:`graphworks.numpy_compat`.
-
-:author: Nathan Gilbert
+Provides :class:`Graph`, which stores graphs internally as an adjacency list (``dict[str,
+list[str]]``) and exposes a numpy-free adjacency matrix interface via
+:data:`~graphworks.types.AdjacencyMatrix`.  Optional numpy interop is available through
+:mod:`graphworks.numpy_compat`.
 """
 
 from __future__ import annotations
@@ -18,17 +12,21 @@ import json
 import random
 import uuid
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 from graphworks.edge import Edge
-from graphworks.types import AdjacencyMatrix
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from graphworks.types import AdjacencyMatrix
 
 
 class Graph:
     """Implementation of both undirected and directed graphs.
 
-    Graphs are stored internally as an adjacency-list dictionary
-    (``dict[str, list[str]]``).  The matrix representation is derived
-    on demand and uses only stdlib types — no numpy required.
+    Graphs are stored internally as an adjacency-list dictionary (``dict[str, list[str]]``).
+    The matrix representation is derived on demand and uses only stdlib types — no numpy required.
 
     A :class:`Graph` can be constructed from:
 
@@ -41,13 +39,13 @@ class Graph:
 
     Example::
 
-        import json
-        from graphworks.graph import Graph
-
-        data = {"label": "demo", "graph": {"A": ["B"], "B": []}}
-        g = Graph(input_graph=json.dumps(data))
-        print(g.vertices())   # ['A', 'B']
-        print(g.edges())      # [Edge(vertex1='A', vertex2='B', ...)]
+        >>> import json
+        >>> from graphworks.graph import Graph
+        ...
+        >>> data = {"label": "demo", "graph": {"A": ["B"], "B": []}}
+        >>> g = Graph(input_graph=json.dumps(data))
+        >>> print(g.vertices())   # ['A', 'B']
+        >>> print(g.edges())      # [Edge(vertex1='A', vertex2='B', ...)]
     """
 
     def __init__(
@@ -57,10 +55,10 @@ class Graph:
         input_graph: str | None = None,
         input_matrix: AdjacencyMatrix | None = None,
     ) -> None:
-        """Initialise a :class:`Graph`.
+        """Initialize a :class:`Graph`.
 
-        Exactly one of *input_file*, *input_graph*, or *input_matrix* should
-        be provided.  If none is given an empty graph is created.
+        Exactly one of *input_file*, *input_graph*, or *input_matrix* should be provided.  If
+        none is given an empty graph is created.
 
         :param label: Human-readable name for this graph.
         :type label: str | None
@@ -68,11 +66,11 @@ class Graph:
         :type input_file: str | None
         :param input_graph: JSON string describing the graph.
         :type input_graph: str | None
-        :param input_matrix: Square adjacency matrix (``list[list[int]]``).
-            Non-zero values are treated as edges.
+        :param input_matrix: Square adjacency matrix (``list[list[int]]``). Non-zero values are
+            treated as edges.
         :type input_matrix: AdjacencyMatrix | None
-        :raises ValueError: If *input_matrix* is not square, or if edge
-            endpoints in a JSON graph reference vertices that do not exist.
+        :raises ValueError: If *input_matrix* is not square, or if edge endpoints in a JSON graph
+            reference vertices that do not exist.
         """
         self.__label: str = label if label is not None else ""
         self.__is_directed: bool = False
@@ -89,15 +87,14 @@ class Graph:
         elif input_matrix is not None:
             if not self.__validate_matrix(input_matrix):
                 raise ValueError(
-                    "input_matrix is malformed: must be a non-empty square "
-                    "list[list[int]]."
+                    "input_matrix is malformed: must be a non-empty square list[list[int]]."
                 )
             self.__matrix_to_graph(input_matrix)
 
         if not self.__validate():
             raise ValueError(
-                "Graph is invalid: edge endpoints reference vertices that do "
-                "not exist in the vertex set."
+                "Graph is invalid: edge endpoints reference vertices that do not exist in the "
+                "vertex set."
             )
 
     # ------------------------------------------------------------------
@@ -115,8 +112,8 @@ class Graph:
     def edges(self) -> list[Edge]:
         """Return all edges in the graph.
 
-        For undirected graphs each edge is returned once (the canonical
-        direction is *vertex1 → vertex2* in insertion order).
+        For undirected graphs each edge is returned once (the canonical direction is *vertex1 →
+        vertex2* in insertion order).
 
         :return: List of :class:`~graphworks.edge.Edge` objects.
         :rtype: list[Edge]
@@ -126,8 +123,7 @@ class Graph:
     def get_graph(self) -> defaultdict[str, list[str]]:
         """Return the raw adjacency-list dictionary.
 
-        :return: The underlying ``defaultdict`` mapping vertex names to their
-            neighbour lists.
+        :return: The underlying ``defaultdict`` mapping vertex names to their neighbor lists.
         :rtype: DefaultDict[str, list[str]]
         """
         return self.__graph
@@ -143,10 +139,9 @@ class Graph:
     def set_directed(self, is_directed: bool) -> None:
         """Set whether this graph is directed.
 
-        :param is_directed: ``True`` for a directed graph, ``False`` for
-            undirected.
+        :param is_directed: ``True`` for a directed graph, ``False`` for undirected.
         :type is_directed: bool
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         self.__is_directed = is_directed
@@ -172,7 +167,7 @@ class Graph:
 
         :param vertex: Name of the vertex to add.
         :type vertex: str
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         if vertex not in self.__graph:
@@ -187,7 +182,7 @@ class Graph:
         :type vertex1: str
         :param vertex2: Destination vertex name.
         :type vertex2: str
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         if vertex1 in self.__graph:
@@ -296,8 +291,8 @@ class Graph:
     def __str__(self) -> str:
         """Return a human-readable adjacency-list view of the graph.
 
-        :return: Multi-line string with ``vertex -> neighbours`` per line,
-            preceded by the graph label.
+        :return: Multi-line string with ``vertex -> neighbours`` per line, preceded by the graph
+            label.
         :rtype: str
         """
         lines: list[str] = []
@@ -307,7 +302,7 @@ class Graph:
             lines.append(f"{key} -> {rhs}")
         return f"{self.__label}\n" + "\n".join(lines)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         """Iterate over vertex names in insertion order.
 
         :return: An iterator yielding vertex name strings.
@@ -316,12 +311,11 @@ class Graph:
         return iter(self.vertices())
 
     def __getitem__(self, node: str) -> list[str]:
-        """Return the neighbour list for *node*.
+        """Return the neighbor list for *node*.
 
         :param node: Vertex name.
         :type node: str
-        :return: List of neighbour vertex names, or an empty list if *node*
-            is not in the graph.
+        :return: List of neighbor vertex names, or an empty list if *node* is not in the graph.
         :rtype: list[str]
         """
         return self.__graph.get(node, [])
@@ -335,7 +329,7 @@ class Graph:
 
         :param json_data: Parsed JSON representation of the graph.
         :type json_data: dict
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         self.__label = json_data.get("label", "")
@@ -393,17 +387,15 @@ class Graph:
 
         Vertex names are generated as UUID strings to guarantee uniqueness.
 
-        :param matrix: Square adjacency matrix where non-zero values denote
-            edges.
+        :param matrix: Square adjacency matrix where non-zero values denote edges.
         :type matrix: AdjacencyMatrix
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         n = len(matrix)
         names = [str(uuid.uuid4()) for _ in range(n)]
         for r_idx in range(n):
             vertex = names[r_idx]
-            self.__graph[vertex]  # ensure key exists via defaultdict
             for c_idx, val in enumerate(matrix[r_idx]):
                 if val > 0:
                     self.__graph[vertex].append(names[c_idx])

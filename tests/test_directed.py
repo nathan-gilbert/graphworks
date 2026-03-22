@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import json
 
-from src.graphworks.algorithms.directed import find_circuit, is_dag
-from src.graphworks.graph import Graph
+from graphworks.algorithms.directed import find_circuit, is_dag
+from graphworks.graph import Graph
 
 
 class TestIsDag:

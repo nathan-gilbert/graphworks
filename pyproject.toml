@@ -65,16 +65,16 @@ include = [ "src/", "tests/", "docs/", "README.md", "CHANGELOG.md", "LICENSE", "
 packages = [ "src/graphworks",]
 
 [tool.black]
-line-length = 88
+line-length = 100
 target-version = [ "py314",]
 
 [tool.ruff]
-line-length = 88
-target-version = "py313"
+line-length = 100
+target-version = "py314"
 
 [tool.ruff.lint]
 select = [ "E", "W", "F", "I", "UP", "B", "C4", "SIM", "TCH", "ANN", "D",]
-ignore = [ "D203", "D213",]
+ignore = [ "D203", "D401", "D213",]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
@@ -84,15 +84,14 @@ convention = "pep257"
 
 [tool.isort]
 profile = "black"
-line_length = 88
+line_length = 100
 multi_line_output = 3
 known_first_party = [ "graphworks",]
 
-[tool.ty]
-python-version = "3.13"
-
-[tool.ty.rules]
-strict = true
+[tool.ty.environment]
+python-platform = "darwin"
+python-version = "3.14"
+root = [ "./src",]
 
 [tool.uv]
 required-version = ">=0.10.12"

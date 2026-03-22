@@ -87,8 +87,8 @@ Version is managed automatically via git tags using `hatchling-vcs`.
 
 - Create Vertex class
 - Build out directed graphs algorithms
-  - <https://algs4.cs.princeton.edu/42digraph/>
+   - <https://algs4.cs.princeton.edu/42digraph/>
 - Allow for weighted graph algorithms
-  - Jarnik's algorithm
-  - Dijkstra's algorithm
+   - Jarnik's algorithm
+   - Dijkstra's algorithm
 - C++ binaries for speeding up graph computations

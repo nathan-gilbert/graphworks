@@ -13,7 +13,7 @@ and string representations.
    than ``==`` between ``Edge`` instances produced by the library and ``Edge``
    instances constructed in test code.  This avoids a subtle identity issue
    that arises when the library's internal ``from graphworks.edge import Edge``
-   and the test's ``from src.graphworks.edge import Edge`` resolve to two
+   and the test's ``from graphworks.edge import Edge`` resolve to two
    different class objects — a situation that only occurs in non-installed
    (non-editable) development environments.  In a properly configured project
    (``uv sync`` / ``pip install -e .``) both paths collapse to the same

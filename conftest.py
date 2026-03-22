@@ -19,7 +19,7 @@ environments that do not use an editable install::
 
     pythonpath = ["src"]
 
-Both approaches ensure that ``from src.graphworks.x import Y`` and the
+Both approaches ensure that ``from graphworks.x import Y`` and the
 library's internal ``from graphworks.x import Y`` resolve to the **same**
 module object, which is required for dataclass ``__eq__`` to work correctly
 across the test/library boundary.
