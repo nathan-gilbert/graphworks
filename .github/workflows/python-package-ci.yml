@@ -15,7 +15,7 @@ jobs:
         with:
           version: ">=0.10.12"
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: uv sync --extra all
       - name: Ruff check
         run: uv run ruff check src/ tests/
       - name: Black check
