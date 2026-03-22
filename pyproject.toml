@@ -45,6 +45,9 @@ Repository = "https://github.com/nathan-gilbert/graphworks"
 Changelog = "https://github.com/nathan-gilbert/graphworks/blob/main/CHANGELOG.md"
 Documentation = "https://graphworks.readthedocs.io"
 
+[project.scripts]
+demo = "examples.demo:main"
+
 [project.optional-dependencies]
 matrix = [ "numpy",]
 viz = [ "graphviz",]
@@ -55,11 +58,15 @@ all = [ "graphworks[dev,docs,matrix,viz]",]
 [tool.hatch.version]
 source = "vcs"
 
+[tool.hatch.build]
+dev-mode-dirs = [ "src", ".",]
+
 [tool.hatch.build.hooks.vcs]
 version-file = "src/graphworks/_version.py"
 
 [tool.hatch.build.targets.sdist]
 include = [ "src/", "tests/", "docs/", "README.md", "CHANGELOG.md", "LICENSE", "pyproject.toml",]
+exclude = [ "examples/",]
 
 [tool.hatch.build.targets.wheel]
 packages = [ "src/graphworks",]
