@@ -335,7 +335,11 @@ class Graph:
         self.__label = json_data.get("label", "")
         self.__is_directed = json_data.get("directed", False)
         self.__is_weighted = json_data.get("weighted", False)
-        self.__graph = json_data.get("graph", {})
+        raw_graph = json_data.get("graph", {})
+        self.__graph: defaultdict[str, list[str]] = defaultdict(
+            list,
+            raw_graph,
+        )
 
     def __generate_edges(self) -> list[Edge]:
         """Build and return the edge list from the adjacency list.

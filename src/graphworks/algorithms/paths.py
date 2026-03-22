@@ -1,8 +1,4 @@
-"""
-graphworks.algorithms.paths
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Path-finding and edge-generation utilities.
+"""Path-finding and edge-generation utilities.
 
 This module provides functions for discovering paths between vertices,
 generating edge lists, and finding structurally isolated vertices.  All
@@ -14,8 +10,11 @@ external dependencies.
 
 from __future__ import annotations
 
-from graphworks.edge import Edge
-from graphworks.graph import Graph
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from graphworks.edge import Edge
+    from graphworks.graph import Graph
 
 
 def generate_edges(graph: Graph) -> list[Edge]:

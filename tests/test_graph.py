@@ -1,8 +1,4 @@
-"""
-tests.test_graph
-~~~~~~~~~~~~~~~~
-
-Unit and integration tests for :class:`graphworks.graph.Graph`.
+"""Unit and integration tests for :class:`graphworks.graph.Graph`.
 
 Covers construction (JSON string, JSON file, adjacency matrix), vertex/edge
 manipulation, the stdlib adjacency-matrix interface, validation, iteration,
@@ -25,7 +21,10 @@ and string representations.
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import pytest
 
@@ -489,7 +488,7 @@ class TestGraphIteration:
         """
         data = {"graph": {"A": ["B", "C", "D"], "B": [], "C": [], "D": []}}
         graph = Graph(input_graph=json.dumps(data))
-        assert sorted(list(graph)) == ["A", "B", "C", "D"]
+        assert sorted(graph) == ["A", "B", "C", "D"]
 
     def test_iter_count(self) -> None:
         """Number of iterations equals the number of vertices.

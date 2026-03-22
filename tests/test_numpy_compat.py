@@ -20,9 +20,7 @@ import json
 
 import pytest
 
-numpy = pytest.importorskip(
-    "numpy", reason="numpy not installed — skipping matrix tests"
-)
+numpy = pytest.importorskip("numpy", reason="numpy not installed — skipping matrix tests")
 np = numpy
 
 from graphworks.graph import Graph  # noqa: E402

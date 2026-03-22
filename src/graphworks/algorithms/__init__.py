@@ -1,8 +1,4 @@
-"""
-graphworks.algorithms
-~~~~~~~~~~~~~~~~~~~~~
-
-Graph algorithm implementations.
+"""Graph algorithm implementations.
 
 Submodules
 ----------

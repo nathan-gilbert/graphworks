@@ -1,12 +1,20 @@
-from graphworks.graph import Graph
+"""This module implements DFS with arrival and departure times."""
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from graphworks.graph import Graph
 
 
 def breadth_first_search(graph: Graph, start: str) -> list[str]:
-    """
+    """Breadth-first search with arrival and departure times.
 
     :param graph:
+    :type graph: Graph
     :param start: the vertex to start the traversal from
-    :return:
+    :type start: str
+    :return: The list of vertex paths
+    :rtype: list[str]
     """
     # Mark all the vertices as not visited
     visited = dict.fromkeys(graph.vertices(), False)
@@ -27,11 +35,14 @@ def breadth_first_search(graph: Graph, start: str) -> list[str]:
 
 
 def depth_first_search(graph: Graph, start: str) -> list[str]:
-    """
+    """Depth-first search with arrival and departure times.
 
     :param graph:
+    :type graph: Graph
     :param start: the vertex to start the traversal from
-    :return:
+    :type start: str
+    :return: The list of vertex paths
+    :rtype: list[str]
     """
     visited, stack = [], [start]
     while stack:
@@ -50,18 +61,24 @@ def arrival_departure_dfs(
     departure: dict[str, int],
     time: int,
 ) -> int:
-    """
-    Method for DFS with arrival and departure times for each vertex
+    """Method for DFS with arrival and departure times for each vertex.
 
     O(V+E) -- E could be as big as V^2
 
-    :param graph:
-    :param v:
-    :param discovered:
-    :param arrival:
-    :param departure:
-    :param time: should be initialized to -1
-    :return:
+    :param graph: The graph
+    :type graph: Graph
+    :param v: The vertex to traverse from
+    :type v: str
+    :param discovered: The discovered vertex
+    :type discovered: dict[str, bool]
+    :param arrival: The arrival vertex
+    :type arrival: dict[str, int]
+    :param departure: The departure vertex
+    :type departure: dict[str, int]
+    :param time: initialized to -1
+    :type time: int
+    :return: The departure time
+    :rtype: int
     """
     time += 1
 

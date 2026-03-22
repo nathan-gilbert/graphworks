@@ -1,12 +1,20 @@
+"""Directed graph utilities."""
+
+from typing import TYPE_CHECKING
+
 from graphworks.algorithms.search import arrival_departure_dfs
-from graphworks.graph import Graph
+
+if TYPE_CHECKING:
+    from graphworks.graph import Graph
 
 
 def is_dag(graph: Graph) -> bool:
-    """
+    """Returns true if graph is a directed acyclic graph.
 
     :param graph:
+    :type graph: Graph
     :return: True/False if graph is a directed, acyclic graph
+    :rtype: bool
     """
     if not graph.is_directed():
         return False
@@ -41,6 +49,13 @@ def is_dag(graph: Graph) -> bool:
 
 
 def build_neighbor_matrix(graph: Graph) -> dict[str, list[str]]:
+    """Builds adjacency matrix for directed acyclic graph.
+
+    :param graph: The graph
+    :type graph: Graph
+    :return: adjacency matrix
+    :rtype: dict[str, list[str]]
+    """
     adjacency_matrix = {}
     for v in graph.vertices():
         adjacency_matrix[v] = graph.get_neighbors(v)
@@ -49,10 +64,12 @@ def build_neighbor_matrix(graph: Graph) -> dict[str, list[str]]:
 
 
 def find_circuit(graph: Graph) -> list[str]:
-    """
-    Using Hierholzer’s algorithm to find an eulerian circuit
+    """Using Hierholzer’s algorithm to find an eulerian circuit.
+
     :param graph:
+    :type graph: Graph
     :return: A list of vertices in the eulerian circuit of this graph
+    :rtype: list[str]
     """
     if len(graph.vertices()) == 0:
         return []

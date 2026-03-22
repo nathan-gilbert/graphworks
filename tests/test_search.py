@@ -27,7 +27,7 @@ class TestBreadthFirstSearch:
     def test_bfs_from_c(self, search_graph) -> None:
         """BFS from 'c' visits all reachable vertices in level order.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         walk = breadth_first_search(search_graph, "c")
@@ -36,7 +36,7 @@ class TestBreadthFirstSearch:
     def test_bfs_visits_all_vertices(self, search_graph) -> None:
         """BFS visits every vertex in the connected graph.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         walk = breadth_first_search(search_graph, "a")
@@ -45,7 +45,7 @@ class TestBreadthFirstSearch:
     def test_bfs_single_vertex(self) -> None:
         """BFS on a single-vertex graph returns just that vertex.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         g = Graph(input_graph=json.dumps({"graph": {"x": []}}))
@@ -54,7 +54,7 @@ class TestBreadthFirstSearch:
     def test_bfs_start_vertex_is_first(self, search_graph) -> None:
         """BFS walk always begins with the given start vertex.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         walk = breadth_first_search(search_graph, "b")
@@ -63,7 +63,7 @@ class TestBreadthFirstSearch:
     def test_bfs_no_duplicates(self, search_graph) -> None:
         """BFS never visits a vertex more than once.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         walk = breadth_first_search(search_graph, "a")
@@ -76,7 +76,7 @@ class TestDepthFirstSearch:
     def test_dfs_from_c(self, search_graph) -> None:
         """DFS from 'c' visits vertices in depth-first order.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         walk = depth_first_search(search_graph, "c")
@@ -85,7 +85,7 @@ class TestDepthFirstSearch:
     def test_dfs_visits_all_vertices(self, search_graph) -> None:
         """DFS visits every vertex in the connected graph.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         walk = depth_first_search(search_graph, "a")
@@ -94,7 +94,7 @@ class TestDepthFirstSearch:
     def test_dfs_start_vertex_is_first(self, search_graph) -> None:
         """DFS walk always begins with the given start vertex.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         walk = depth_first_search(search_graph, "a")
@@ -103,7 +103,7 @@ class TestDepthFirstSearch:
     def test_dfs_no_duplicates(self, search_graph) -> None:
         """DFS never visits a vertex more than once.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         walk = depth_first_search(search_graph, "a")
@@ -121,7 +121,7 @@ class TestDepthFirstSearch:
         Graph topology: ``a → [b, c]``, ``c → [b]`` — vertex *b* is reachable
         from both *a* (directly) and *c* (indirectly via *a*'s push of *c*).
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         data = {"graph": {"a": ["b", "c"], "b": [], "c": ["b"]}}
@@ -151,19 +151,17 @@ class TestArrivalDepartureDFS:
         time = -1
         for v in graph.vertices():
             if not discovered[v]:
-                time = arrival_departure_dfs(
-                    graph, v, discovered, arrival, departure, time
-                )
+                time = arrival_departure_dfs(graph, v, discovered, arrival, departure, time)
         return arrival, departure, discovered
 
     def test_arrival_departure_times(self, disjoint_directed_graph) -> None:
         """Arrival and departure times are correctly assigned for both components.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arrival, departure, _ = self._run_full_traversal(disjoint_directed_graph)
-        result = list(zip(arrival.values(), departure.values()))
+        result = list(zip(arrival.values(), departure.values(), strict=False))
         expected = [
             (0, 11),
             (1, 2),
@@ -179,7 +177,7 @@ class TestArrivalDepartureDFS:
     def test_all_vertices_discovered(self, disjoint_directed_graph) -> None:
         """Every vertex is discovered after a full traversal.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         _, _, discovered = self._run_full_traversal(disjoint_directed_graph)
@@ -188,7 +186,7 @@ class TestArrivalDepartureDFS:
     def test_departure_always_after_arrival(self, disjoint_directed_graph) -> None:
         """Departure time is strictly greater than arrival time for every vertex.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arrival, departure, _ = self._run_full_traversal(disjoint_directed_graph)
@@ -200,7 +198,7 @@ class TestArrivalDepartureDFS:
     def test_times_are_unique(self, disjoint_directed_graph) -> None:
         """No two events (arrival or departure) share the same timestamp.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arrival, departure, _ = self._run_full_traversal(disjoint_directed_graph)

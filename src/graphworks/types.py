@@ -1,13 +1,7 @@
-"""
-graphworks.types
-~~~~~~~~~~~~~~~~
-
-Shared type aliases used throughout the graphworks library.
+"""Shared type aliases used throughout the graphworks library.
 
 These are intentionally stdlib-only. numpy interop lives in
 :mod:`graphworks.numpy_compat` and is gated behind the ``[matrix]`` extra.
-
-:author: Nathan Gilbert
 """
 
 from __future__ import annotations

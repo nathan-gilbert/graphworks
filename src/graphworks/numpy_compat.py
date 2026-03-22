@@ -1,8 +1,4 @@
-"""
-graphworks.numpy_compat
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Optional numpy interop for graphworks.
+"""Optional numpy interop for graphworks.
 
 This module is **only available** when the ``[matrix]`` extra is installed::
 
@@ -15,33 +11,36 @@ arrays can pass them directly to :class:`~graphworks.graph.Graph`.
 Import pattern — always guard with :data:`TYPE_CHECKING` or a try/except so that
 code using graphworks does not *require* numpy::
 
-    try:
-        from graphworks.numpy_compat import ndarray_to_matrix, matrix_to_ndarray
-    except ImportError:
-        pass  # numpy not installed; matrix I/O unavailable
+    >>> try:
+    ...    from graphworks.numpy_compat import ndarray_to_matrix, matrix_to_ndarray
+    >>> except ImportError:
+    ...    pass  # numpy not installed; matrix I/O unavailable
 
 :author: Nathan Gilbert
 """
 
 from __future__ import annotations
 
-from graphworks.types import AdjacencyMatrix
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    from graphworks.types import AdjacencyMatrix
 
 try:
     import numpy as np
-    from numpy.typing import NDArray
 except ImportError as exc:  # pragma: no cover
     raise ImportError(
-        "numpy is required for numpy interop. "
-        "Install it with: pip install graphworks[matrix]"
+        "numpy is required for numpy interop. " "Install it with: pip install graphworks[matrix]"
     ) from exc
 
 
 def ndarray_to_matrix(arr: NDArray) -> AdjacencyMatrix:
-    """Convert a numpy ndarray adjacency representation to an :data:`~graphworks.types.AdjacencyMatrix`.
+    """Convert numpy ndarray adjacency representation to :data:`~graphworks.types.AdjacencyMatrix`.
 
-    Only integer-valued arrays are supported. Values greater than zero are
-    treated as edges (coerced to ``1``); zero values mean no edge.
+    Only integer-valued arrays are supported. Values greater than zero are treated as edges (
+    coerced to ``1``); zero values mean no edge.
 
     :param arr: A square 2-D numpy array representing an adjacency matrix.
     :type arr: numpy.typing.NDArray

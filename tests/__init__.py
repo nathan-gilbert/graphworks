@@ -1,8 +1,4 @@
-"""
-tests
-~~~~~
-
-Graphworks test suite.
+"""Graphworks test suite.
 
 Run with::
 

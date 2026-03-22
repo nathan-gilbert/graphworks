@@ -1,15 +1,22 @@
+"""JSON utilities."""
+
 import json
 from os import path
+from typing import TYPE_CHECKING
 
-from graphworks.graph import Graph
+if TYPE_CHECKING:
+    from graphworks.graph import Graph
 
 
-def save_to_json(graph: Graph, out_dir):
-    """
+def save_to_json(graph: Graph, out_dir: str) -> None:
+    """Save to json file.
 
     :param graph: the graph to write to json
+    :type graph: Graph
     :param out_dir: the absolute path to the dir to write the file
-    :return:
+    :type out_dir: str
+    :return: Nothing
+    :rtype: None
     """
     g_dict = {
         "label": graph.get_label(),
