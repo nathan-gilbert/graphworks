@@ -1,5 +1,7 @@
 """Directed graph utilities."""
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from graphworks.algorithms.search import arrival_departure_dfs

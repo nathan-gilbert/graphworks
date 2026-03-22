@@ -1,5 +1,7 @@
 """Implementation of graph edge between 2 vertices."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 
