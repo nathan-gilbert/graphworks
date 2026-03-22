@@ -400,6 +400,8 @@ class Graph:
         names = [str(uuid.uuid4()) for _ in range(n)]
         for r_idx in range(n):
             vertex = names[r_idx]
+            # Ensure the vertex exists even when its entire row is zeros.
+            self.__graph.setdefault(vertex, [])
             for c_idx, val in enumerate(matrix[r_idx]):
                 if val > 0:
                     self.__graph[vertex].append(names[c_idx])
