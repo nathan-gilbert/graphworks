@@ -1,17 +1,25 @@
-from typing import List, Dict
+"""This module implements DFS with arrival and departure times."""
 
-from src.graphworks.graph import Graph
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from graphworks.graph import Graph
 
 
-def breadth_first_search(graph: Graph, start: str) -> List[str]:
-    """
+def breadth_first_search(graph: Graph, start: str) -> list[str]:
+    """Breadth-first search with arrival and departure times.
 
     :param graph:
+    :type graph: Graph
     :param start: the vertex to start the traversal from
-    :return:
+    :type start: str
+    :return: The list of vertex paths
+    :rtype: list[str]
     """
     # Mark all the vertices as not visited
-    visited = {k: False for k in graph.vertices()}
+    visited = dict.fromkeys(graph.vertices(), False)
     # Mark the start vertices as visited and enqueue it
     visited[start] = True
 
@@ -28,12 +36,15 @@ def breadth_first_search(graph: Graph, start: str) -> List[str]:
     return walk
 
 
-def depth_first_search(graph: Graph, start: str) -> List[str]:
-    """
+def depth_first_search(graph: Graph, start: str) -> list[str]:
+    """Depth-first search with arrival and departure times.
 
     :param graph:
+    :type graph: Graph
     :param start: the vertex to start the traversal from
-    :return:
+    :type start: str
+    :return: The list of vertex paths
+    :rtype: list[str]
     """
     visited, stack = [], [start]
     while stack:
@@ -44,24 +55,32 @@ def depth_first_search(graph: Graph, start: str) -> List[str]:
     return visited
 
 
-def arrival_departure_dfs(graph: Graph,
-                          v: str,
-                          discovered: Dict[str, bool],
-                          arrival: Dict[str, int],
-                          departure: Dict[str, int],
-                          time: int) -> int:
-    """
-    Method for DFS with arrival and departure times for each vertex
+def arrival_departure_dfs(
+    graph: Graph,
+    v: str,
+    discovered: dict[str, bool],
+    arrival: dict[str, int],
+    departure: dict[str, int],
+    time: int,
+) -> int:
+    """Method for DFS with arrival and departure times for each vertex.
 
     O(V+E) -- E could be as big as V^2
 
-    :param graph:
-    :param v:
-    :param discovered:
-    :param arrival:
-    :param departure:
-    :param time: should be initialized to -1
-    :return:
+    :param graph: The graph
+    :type graph: Graph
+    :param v: The vertex to traverse from
+    :type v: str
+    :param discovered: The discovered vertex
+    :type discovered: dict[str, bool]
+    :param arrival: The arrival vertex
+    :type arrival: dict[str, int]
+    :param departure: The departure vertex
+    :type departure: dict[str, int]
+    :param time: initialized to -1
+    :type time: int
+    :return: The departure time
+    :rtype: int
     """
     time += 1
 

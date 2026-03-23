@@ -1,3 +1,142 @@
 [build-system]
-requires = ["setuptools>=42"]
-build-backend = "setuptools.build_meta"
+requires = [ "hatch-vcs", "hatchling",]
+build-backend = "hatchling.build"
+
+[project]
+name = "graphworks"
+description = "Graph theoretic classes and algorithm helper functions."
+readme = "README.md"
+requires-python = "<=3.15,>=3.13"
+keywords = [ "algorithms", "data-structures", "graph", "graph-theory", "mathematics", "network",]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = []
+dynamic = [ "version",]
+
+[project.license]
+text = "MIT"
+
+[[project.authors]]
+name = "Nathan Gilbert"
+email = "nathan.gilbert@gmail.com"
+
+[[project.maintainers]]
+name = "Nathan Gilbert"
+email = "nathan.gilbert@gmail.com"
+
+[project.urls]
+Homepage = "https://github.com/nathan-gilbert/graphworks"
+Repository = "https://github.com/nathan-gilbert/graphworks"
+"Bug Tracker" = "https://github.com/nathan-gilbert/graphworks/issues"
+Changelog = "https://github.com/nathan-gilbert/graphworks/blob/main/CHANGELOG.md"
+Documentation = "https://graphworks.readthedocs.io"
+
+[project.scripts]
+demo = "examples.demo:main"
+
+[project.optional-dependencies]
+matrix = [ "numpy",]
+viz = [ "graphviz", "rich",]
+docs = [ "myst-parser", "sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme",]
+all = [ "graphworks[docs,matrix,viz]",]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build]
+dev-mode-dirs = [ "src", ".",]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/graphworks/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = [ "src/", "tests/", "docs/", "README.md", "CHANGELOG.md", "LICENSE", "pyproject.toml",]
+exclude = [ "examples/",]
+
+[tool.hatch.build.targets.wheel]
+packages = [ "src/graphworks",]
+
+[tool.black]
+line-length = 100
+target-version = [ "py314",]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = [ "E", "W", "F", "I", "UP", "B", "C4", "SIM", "TCH", "ANN", "D",]
+ignore = [ "D203", "D401", "D213",]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [ "ANN", "D",]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+known_first_party = [ "graphworks",]
+skip = [ "src/graphworks/_version.py",]
+
+[tool.ty.environment]
+python-platform = "darwin"
+python-version = "3.14"
+root = [ "./src",]
+
+[tool.uv]
+required-version = ">=0.10.12"
+python-preference = "managed"
+resolution = "highest"
+prerelease = "disallow"
+index-strategy = "first-index"
+
+[tool.pytest]
+testpaths = [ "tests",]
+pythonpath = [ "src",]
+addopts = [
+    "--color=yes",
+    "--tb=auto",
+    "--maxfail=10",
+    "--durations=10",
+    "-ra",
+    "--strict-markers",
+    "--cov=src/graphworks",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+]
+markers = [
+    "unit: fast, isolated unit tests",
+    "integration: tests that exercise multiple components together",
+    "slow: tests that take more than a second",
+]
+
+[tool.coverage.run]
+source = [ "src/graphworks",]
+omit = [ "tests/*", "docs/*", "examples/*",]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 90
+exclude_lines = [ "pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError", "@(abc\\.)?abstractmethod",]
+
+[dependency-groups]
+dev = [ "black", "import-linter", "isort", "pytest", "pytest-cov", "ruff", "ty", "xenon",]
