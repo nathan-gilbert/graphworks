@@ -88,7 +88,7 @@ Version is managed automatically via git tags using `hatchling-vcs`.
 
 ![TODO List](./todos.png)
 
-Tier 1 — Data model (do first, everything depends on it) The biggest gap right now is that vertices
+Tier 1: Data model (do first, everything depends on it) The biggest gap right now is that vertices
 are bare strings and edges are lightweight dataclasses that the Graph class barely uses internally.
 The adjacency list stores `defaultdict[str, list[str]]` — just names pointing to names. This means
 vertex attributes, edge weights, and edge labels all live outside the canonical representation. Your
@@ -98,27 +98,27 @@ label, and an attribute dict) and a richer Edge (already a dataclass, but needs 
 unit of storage rather than reconstructed on every .edges() call) would give you a foundation where
 all the metadata survives every operation.
 
-Tier 2 — Graph refactor Once Vertex and Edge exist as first-class objects, the internal
+Tier 2: Graph refactor Once Vertex and Edge exist as first-class objects, the internal
 `defaultdict[str, list[str]]` can become something like `dict[str, Vertex]` for vertex lookup and an
 edge storage structure that preserves weights and attributes. The critical constraint from your
 philosophy: conversions to adjacency matrix and back must be lossless — this is exactly the
 get_complement bug you just hit. A vertex-name-to-index mapping maintained alongside the matrix
 would solve it.
 
-Tier 3 — Lossless conversions With named vertices and attributed edges, you can build clean
+Tier 3: Lossless conversions With named vertices and attributed edges, you can build clean
 `to_adjacency_matrix()` / `from_adjacency_matrix()` round-trips that carry a name mapping,
 `to_edge_list()` / `from_edge_list()`, and fix get_complement to work through the matrix without
 losing names.
 
-Tier 4 — Algorithms With weighted edges actually in the data model, Dijkstra and Prim become
+Tier 4: Algorithms With weighted edges actually in the data model, Dijkstra and Prim become
 natural. Strongly connected components, better shortest-path implementations, and the directed graph
 algorithms from your TODO list can all build on the refactored core.
 
-Tier 5 — Export/CLI The Rich rendering and CLI app build on top of everything above. The export
+Tier 5: Export/CLI The Rich rendering and CLI app build on top of everything above. The export
 layer (JSON, DOT, Rich) becomes a clean translation from your canonical format rather than ad-hoc
 string building.
 
-Tier 6 — Cross-cutting quality Thread safety (immutable graph views, or threading.Lock around
+Tier 6: Cross-cutting quality Thread safety (immutable graph views, or threading.Lock around
 mutations), input validation, and benchmarks can happen in parallel with other tiers. Where would
 you like to start? The Vertex class and Edge redesign are the natural first move — they're
 self-contained, testable, and unblock everything downstream.
