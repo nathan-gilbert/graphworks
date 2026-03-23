@@ -230,30 +230,12 @@ source = { editable = "." }
 
 [package.optional-dependencies]
 all = [
-    { name = "black" },
     { name = "graphviz" },
-    { name = "import-linter" },
-    { name = "isort" },
     { name = "myst-parser" },
     { name = "numpy" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
     { name = "sphinx" },
     { name = "sphinx-autodoc-typehints" },
     { name = "sphinx-rtd-theme" },
-    { name = "ty" },
-    { name = "xenon" },
-]
-dev = [
-    { name = "black" },
-    { name = "import-linter" },
-    { name = "isort" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
-    { name = "ty" },
-    { name = "xenon" },
 ]
 docs = [
     { name = "myst-parser" },
@@ -268,38 +250,46 @@ viz = [
     { name = "graphviz" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "black" },
+    { name = "import-linter" },
+    { name = "isort" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+    { name = "ty" },
+    { name = "xenon" },
+]
+
 [package.metadata]
 requires-dist = [
-    { name = "black", marker = "extra == 'all'" },
-    { name = "black", marker = "extra == 'dev'" },
     { name = "graphviz", marker = "extra == 'all'" },
     { name = "graphviz", marker = "extra == 'viz'" },
-    { name = "import-linter", marker = "extra == 'all'" },
-    { name = "import-linter", marker = "extra == 'dev'" },
-    { name = "isort", marker = "extra == 'all'" },
-    { name = "isort", marker = "extra == 'dev'" },
     { name = "myst-parser", marker = "extra == 'all'" },
     { name = "myst-parser", marker = "extra == 'docs'" },
     { name = "numpy", marker = "extra == 'all'" },
     { name = "numpy", marker = "extra == 'matrix'" },
-    { name = "pytest", marker = "extra == 'all'" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-cov", marker = "extra == 'all'" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "ruff", marker = "extra == 'all'" },
-    { name = "ruff", marker = "extra == 'dev'" },
     { name = "sphinx", marker = "extra == 'all'" },
     { name = "sphinx", marker = "extra == 'docs'" },
     { name = "sphinx-autodoc-typehints", marker = "extra == 'all'" },
     { name = "sphinx-autodoc-typehints", marker = "extra == 'docs'" },
     { name = "sphinx-rtd-theme", marker = "extra == 'all'" },
     { name = "sphinx-rtd-theme", marker = "extra == 'docs'" },
-    { name = "ty", marker = "extra == 'all'" },
-    { name = "ty", marker = "extra == 'dev'" },
-    { name = "xenon", marker = "extra == 'all'" },
-    { name = "xenon", marker = "extra == 'dev'" },
 ]
-provides-extras = ["all", "dev", "docs", "matrix", "viz"]
+provides-extras = ["all", "docs", "matrix", "viz"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "black" },
+    { name = "import-linter" },
+    { name = "isort" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+    { name = "ty" },
+    { name = "xenon" },
+]
 
 [[package]]
 name = "grimp"

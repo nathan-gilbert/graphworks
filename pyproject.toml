@@ -52,8 +52,7 @@ demo = "examples.demo:main"
 matrix = [ "numpy",]
 viz = [ "graphviz",]
 docs = [ "myst-parser", "sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme",]
-dev = [ "black", "import-linter", "isort", "pytest", "pytest-cov", "ruff", "ty", "xenon",]
-all = [ "graphworks[dev,docs,matrix,viz]",]
+all = [ "graphworks[docs,matrix,viz]",]
 
 [tool.hatch.version]
 source = "vcs"
@@ -138,3 +137,6 @@ show_missing = true
 skip_covered = false
 fail_under = 90
 exclude_lines = [ "pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError", "@(abc\\.)?abstractmethod",]
+
+[dependency-groups]
+dev = [ "black", "import-linter", "isort", "pytest", "pytest-cov", "ruff", "ty", "xenon",]
