@@ -36,7 +36,6 @@ from graphworks.algorithms import (
     find_all_paths,
     find_isolated_vertices,
     find_path,
-    get_complement,
     is_complete,
     is_connected,
     is_dag,
@@ -109,29 +108,6 @@ def _graph_panel(graph: Graph, title: str, border_style: str = "blue") -> None:
             label = f"[green]{v}[/green] [dim](no edges)[/dim]"
         tree.add(label)
     console.print(Panel(tree, border_style=border_style))
-
-
-def _edge_table(graph: Graph) -> None:
-    """Display edges in a compact Rich table.
-
-    :param graph: The graph whose edges to display.
-    :type graph: Graph
-    :return: Nothing.
-    :rtype: None
-    """
-    edges = graph.edges()
-    if not edges:
-        console.print("  [dim](no edges)[/dim]")
-        return
-    arrow = "→" if graph.is_directed() else "—"
-    table = Table(show_header=True, header_style="bold", title="Edges")
-    table.add_column("#", justify="right", style="dim")
-    table.add_column("From", style="green")
-    table.add_column("", justify="center")
-    table.add_column("To", style="cyan")
-    for i, e in enumerate(edges, 1):
-        table.add_row(str(i), e.vertex1, arrow, e.vertex2)
-    console.print(table)
 
 
 # ---------------------------------------------------------------------------
@@ -293,6 +269,11 @@ def demo_paths(graph: Graph) -> None:
 def demo_complement(graph: Graph) -> None:
     """Show the complement graph.
 
+    The library's :func:`get_complement` returns a matrix-based graph with
+    UUID vertex names (the original names are lost in the matrix round-trip).
+    For display purposes we compute the missing edges directly so we can
+    show them with the original, human-readable vertex names.
+
     :param graph: An undirected graph.
     :type graph: Graph
     :return: Nothing.
@@ -300,12 +281,33 @@ def demo_complement(graph: Graph) -> None:
     """
     _section("6 · Complement graph")
 
-    comp = get_complement(graph)
-    _kv("original", f"{graph.order()} vertices, {graph.size()} edges")
-    _kv("complement", f"{comp.order()} vertices, {comp.size()} edges")
+    verts = sorted(graph.vertices())
+    original_edges: set[tuple[str, str]] = set()
+    for v in verts:
+        for n in graph.get_neighbors(v):
+            edge = (min(v, n), max(v, n))
+            original_edges.add(edge)
 
+    complement_edges: list[tuple[str, str]] = []
+    for i, v1 in enumerate(verts):
+        for v2 in verts[i + 1 :]:
+            if (min(v1, v2), max(v1, v2)) not in original_edges:
+                complement_edges.append((v1, v2))
+
+    _kv("original edges", len(original_edges))
+    _kv("complement edges", len(complement_edges))
     console.print()
-    _edge_table(comp)
+
+    table = Table(
+        show_header=True, header_style="bold", title="Complement Edges (missing from original)"
+    )
+    table.add_column("#", justify="right", style="dim")
+    table.add_column("From", style="green")
+    table.add_column("", justify="center")
+    table.add_column("To", style="cyan")
+    for i, (v1, v2) in enumerate(complement_edges, 1):
+        table.add_row(str(i), v1, "—", v2)
+    console.print(table)
 
 
 def demo_directed() -> None:
