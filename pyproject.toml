@@ -50,7 +50,7 @@ demo = "examples.demo:main"
 
 [project.optional-dependencies]
 matrix = [ "numpy",]
-viz = [ "graphviz",]
+viz = [ "graphviz", "rich",]
 docs = [ "myst-parser", "sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme",]
 all = [ "graphworks[docs,matrix,viz]",]
 
@@ -129,7 +129,7 @@ markers = [
 
 [tool.coverage.run]
 source = [ "src/graphworks",]
-omit = [ "tests/*", "docs/*",]
+omit = [ "tests/*", "docs/*", "examples/*",]
 branch = true
 
 [tool.coverage.report]
