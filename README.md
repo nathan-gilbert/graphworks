@@ -27,6 +27,7 @@ Optional extras:
 ```sh
 pip install graphworks[matrix]   # numpy adjacency matrix support
 pip install graphworks[viz]      # graphviz export
+pip install graphworks[docs]     # generate documentation
 ```
 
 ## Development
