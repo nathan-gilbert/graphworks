@@ -17,12 +17,6 @@ Immutability
 reassigned.  The *attrs* mapping is exposed as a read-only :class:`~types.MappingProxyType` so
 callers cannot mutate it in place either. To "update" an edge, create a new instance — idiomatic
 for frozen dataclasses and compatible with use as ``dict`` keys and ``set`` members.
-
-Backward compatibility
-----------------------
-The previous API exposed ``vertex1`` and ``vertex2`` field names.  These are retained as
-**read-only property aliases** for ``source`` and ``target`` respectively.  New code should
-prefer ``source`` / ``target``.
 """
 
 from __future__ import annotations
@@ -65,10 +59,6 @@ class Edge:
         default_factory=lambda: MappingProxyType({}),
     )
 
-    # ------------------------------------------------------------------
-    # Alternate constructor
-    # ------------------------------------------------------------------
-
     @classmethod
     def create(  # noqa: PLR0913
         cls,
@@ -108,34 +98,6 @@ class Edge:
             label=label,
             attrs=_freeze_attrs(attrs),
         )
-
-    # ------------------------------------------------------------------
-    # Backward-compatible aliases
-    # ------------------------------------------------------------------
-
-    @property
-    def vertex1(self) -> str:
-        """Alias for :attr:`source` (backward compatibility).
-
-        .. deprecated::
-            Use :attr:`source` instead.
-
-        :return: Source vertex name.
-        :rtype: str
-        """
-        return self.source
-
-    @property
-    def vertex2(self) -> str:
-        """Alias for :attr:`target` (backward compatibility).
-
-        .. deprecated::
-            Use :attr:`target` instead.
-
-        :return: Target vertex name.
-        :rtype: str
-        """
-        return self.target
 
     # ------------------------------------------------------------------
     # Predicates

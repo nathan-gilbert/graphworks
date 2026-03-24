@@ -1,24 +1,7 @@
 """Shared pytest fixtures for the graphworks test suite.
 
-All fixtures used across multiple test modules live here so pytest discovers
-them automatically without explicit imports.
-
-This test suite is written to run against the **installed** package.  In the
-typical development workflow::
-
-    uv sync          # installs graphworks in editable mode
-    uv run pytest    # runs the suite against the editable install
-
-Alternatively, add the following to ``[tool.pytest.ini_options]`` in
-``pyproject.toml`` so that pytest adds ``src/`` to ``sys.path`` for
-environments that do not use an editable install::
-
-    pythonpath = ["src"]
-
-Both approaches ensure that ``from graphworks.x import Y`` and the
-library's internal ``from graphworks.x import Y`` resolve to the **same**
-module object, which is required for dataclass ``__eq__`` to work correctly
-across the test/library boundary.
+All fixtures used across multiple test modules live here so pytest discovers them automatically
+without explicit imports.
 """
 
 from __future__ import annotations
@@ -43,38 +26,26 @@ from graphworks.graph import Graph
 
 @pytest.fixture
 def tmp_dir() -> Generator[Path]:
-    """Yield a fresh temporary directory and clean it up afterwards.
-
-    :return: Path to a temporary directory.
-    :rtype: Path
-    """
+    """Yield a fresh temporary directory and clean it up afterwards."""
     d = tempfile.mkdtemp()
     yield Path(d)
     shutil.rmtree(d)
 
 
 # ---------------------------------------------------------------------------
-# Raw JSON graph definitions (dicts) shared across test modules
+# Raw JSON graph definitions
 # ---------------------------------------------------------------------------
 
 
 @pytest.fixture
 def simple_edge_json() -> dict:
-    """Minimal two-vertex undirected graph with one edge (A → B).
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Minimal two-vertex undirected graph with one edge (A → B)."""
     return {"label": "my graph", "graph": {"A": ["B"], "B": []}}
 
 
 @pytest.fixture
 def triangle_json() -> dict:
-    """Complete undirected graph on three vertices (K₃).
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Complete undirected graph on three vertices (K₃)."""
     return {
         "graph": {
             "a": ["b", "c"],
@@ -86,21 +57,13 @@ def triangle_json() -> dict:
 
 @pytest.fixture
 def isolated_json() -> dict:
-    """Three-vertex graph with no edges (all isolated vertices).
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Three-vertex graph with no edges."""
     return {"graph": {"a": [], "b": [], "c": []}}
 
 
 @pytest.fixture
 def connected_json() -> dict:
-    """Six-vertex connected undirected graph that includes self-loops.
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Six-vertex connected undirected graph with self-loops."""
     return {
         "graph": {
             "a": ["d", "f"],
@@ -115,11 +78,7 @@ def connected_json() -> dict:
 
 @pytest.fixture
 def big_graph_json() -> dict:
-    """Six-vertex connected undirected graph used for diameter tests.
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Six-vertex connected undirected graph used for diameter tests."""
     return {
         "graph": {
             "a": ["c"],
@@ -134,16 +93,7 @@ def big_graph_json() -> dict:
 
 @pytest.fixture
 def lollipop_json() -> dict:
-    """Lollipop-shaped graph that contains a cycle (d→b) but *no* self-loops.
-
-    ``is_simple`` in this library only checks for self-loops (a vertex listed
-    in its own neighbour list), so this graph **is** considered simple despite
-    the cycle.  Use :func:`self_loop_json` when you need a graph that is
-    definitively not simple.
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Lollipop-shaped graph with a cycle but no self-loops."""
     return {
         "graph": {
             "z": ["a"],
@@ -157,36 +107,19 @@ def lollipop_json() -> dict:
 
 @pytest.fixture
 def self_loop_json() -> dict:
-    """Two-vertex graph where vertex *a* has a self-loop — **not** simple.
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
-    return {
-        "graph": {
-            "a": ["a", "b"],
-            "b": ["a"],
-        }
-    }
+    """Two-vertex graph where vertex *a* has a self-loop."""
+    return {"graph": {"a": ["a", "b"], "b": ["a"]}}
 
 
 @pytest.fixture
 def straight_line_json() -> dict:
-    """Linear path graph a-b-c-d: simple, no self-loops, no cycles.
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Linear path graph a-b-c-d."""
     return {"graph": {"a": ["b"], "b": ["c"], "c": ["d"], "d": []}}
 
 
 @pytest.fixture
 def directed_dag_json() -> dict:
-    """Directed acyclic graph for topological sort and DAG tests.
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Directed acyclic graph for topological sort and DAG tests."""
     return {
         "directed": True,
         "graph": {
@@ -202,13 +135,7 @@ def directed_dag_json() -> dict:
 
 @pytest.fixture
 def directed_cycle_json() -> dict:
-    """Directed graph containing a cycle — **not** a DAG.
-
-    The cycle is A → B → D → A (back-edge D→A).
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Directed graph containing a cycle (A → B → D → A)."""
     return {
         "directed": True,
         "graph": {
@@ -223,11 +150,7 @@ def directed_cycle_json() -> dict:
 
 @pytest.fixture
 def circuit_json() -> dict:
-    """Directed graph with a single Eulerian circuit A → B → C → A.
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Directed graph with a single Eulerian circuit A → B → C → A."""
     return {
         "directed": True,
         "graph": {"A": ["B"], "B": ["C"], "C": ["A"]},
@@ -236,11 +159,7 @@ def circuit_json() -> dict:
 
 @pytest.fixture
 def search_graph_json() -> dict:
-    """Four-vertex graph used for BFS / DFS traversal tests.
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Four-vertex graph used for BFS / DFS traversal tests."""
     return {
         "graph": {
             "a": ["b", "c"],
@@ -253,11 +172,7 @@ def search_graph_json() -> dict:
 
 @pytest.fixture
 def disjoint_directed_json() -> dict:
-    """Directed graph with two disjoint components for arrival/departure DFS.
-
-    :return: Graph definition dictionary.
-    :rtype: dict
-    """
+    """Directed graph with two disjoint components."""
     return {
         "directed": True,
         "graph": {
@@ -280,99 +195,59 @@ def disjoint_directed_json() -> dict:
 
 @pytest.fixture
 def simple_edge_graph(simple_edge_json: dict) -> Graph:
-    """Two-vertex undirected :class:`Graph` with one edge (A → B).
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Two-vertex undirected Graph with one edge (A → B)."""
     return Graph(input_graph=json.dumps(simple_edge_json))
 
 
 @pytest.fixture
 def triangle_graph(triangle_json: dict) -> Graph:
-    """Complete undirected :class:`Graph` on three vertices (K₃).
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Complete undirected Graph on three vertices (K₃)."""
     return Graph(input_graph=json.dumps(triangle_json))
 
 
 @pytest.fixture
 def isolated_graph(isolated_json: dict) -> Graph:
-    """Three-vertex :class:`Graph` with no edges.
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Three-vertex Graph with no edges."""
     return Graph(input_graph=json.dumps(isolated_json))
 
 
 @pytest.fixture
 def connected_graph(connected_json: dict) -> Graph:
-    """Six-vertex connected undirected :class:`Graph`.
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Six-vertex connected undirected Graph."""
     return Graph(input_graph=json.dumps(connected_json))
 
 
 @pytest.fixture
 def big_graph(big_graph_json: dict) -> Graph:
-    """Six-vertex connected undirected :class:`Graph` for diameter tests.
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Six-vertex connected undirected Graph for diameter tests."""
     return Graph(input_graph=json.dumps(big_graph_json))
 
 
 @pytest.fixture
 def directed_dag(directed_dag_json: dict) -> Graph:
-    """Directed acyclic :class:`Graph`.
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Directed acyclic Graph."""
     return Graph(input_graph=json.dumps(directed_dag_json))
 
 
 @pytest.fixture
 def directed_cycle_graph(directed_cycle_json: dict) -> Graph:
-    """Directed :class:`Graph` containing a cycle.
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Directed Graph containing a cycle."""
     return Graph(input_graph=json.dumps(directed_cycle_json))
 
 
 @pytest.fixture
 def circuit_graph(circuit_json: dict) -> Graph:
-    """Directed :class:`Graph` with an Eulerian circuit A → B → C → A.
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Directed Graph with an Eulerian circuit."""
     return Graph(input_graph=json.dumps(circuit_json))
 
 
 @pytest.fixture
 def search_graph(search_graph_json: dict) -> Graph:
-    """Four-vertex :class:`Graph` for BFS / DFS tests.
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Four-vertex Graph for BFS / DFS tests."""
     return Graph(input_graph=json.dumps(search_graph_json))
 
 
 @pytest.fixture
 def disjoint_directed_graph(disjoint_directed_json: dict) -> Graph:
-    """Directed :class:`Graph` with two disjoint components.
-
-    :return: Constructed Graph instance.
-    :rtype: Graph
-    """
+    """Directed Graph with two disjoint components."""
     return Graph(input_graph=json.dumps(disjoint_directed_json))

@@ -1,11 +1,8 @@
 """Path-finding and edge-generation utilities.
 
-This module provides functions for discovering paths between vertices,
-generating edge lists, and finding structurally isolated vertices.  All
-functions operate on the adjacency-list representation and require no
-external dependencies.
-
-:author: Nathan Gilbert
+Provides functions for discovering paths between vertices, generating edge lists, and finding
+structurally isolated vertices.  All functions operate on the adjacency-list representation and
+require no external dependencies.
 """
 
 from __future__ import annotations
@@ -18,9 +15,9 @@ if TYPE_CHECKING:
 
 
 def generate_edges(graph: Graph) -> list[Edge]:
-    """Return all edges in *graph* as a list of :class:`~graphworks.edge.Edge` objects.
+    """Return all edges in *graph*.
 
-    This is a convenience wrapper around :meth:`~graphworks.graph.Graph.edges`.
+    Convenience wrapper around :meth:`~graphworks.graph.Graph.edges`.
 
     :param graph: The graph to enumerate edges from.
     :type graph: Graph
@@ -49,8 +46,8 @@ def find_path(
 ) -> list[str]:
     """Find a single path between *start* and *end* using depth-first search.
 
-    Returns the first path found, not necessarily the shortest.  Returns an
-    empty list if no path exists or if *start* is not in the graph.
+    Returns the first path found, not necessarily the shortest.  Returns an empty list if no path
+    exists or if *start* is not in the graph.
 
     :param graph: The graph to search.
     :type graph: Graph
@@ -58,11 +55,9 @@ def find_path(
     :type start: str
     :param end: Destination vertex name.
     :type end: str
-    :param path: Accumulated path used by recursive calls.  Callers should
-        leave this as ``None``.
+    :param path: Accumulated path used by recursive calls.  Callers should leave this as ``None``.
     :type path: list[str] | None
-    :return: Ordered list of vertex names from *start* to *end*, or ``[]``
-        if no path exists.
+    :return: Ordered list of vertex names from *start* to *end*, or ``[]`` if no path exists.
     :rtype: list[str]
     """
     if path is None:
@@ -92,8 +87,8 @@ def find_all_paths(
 ) -> list[list[str]]:
     """Return all simple paths between *start* and *end*.
 
-    A simple path visits each vertex at most once.  Returns an empty list
-    if no path exists or if *start* is not in the graph.
+    A simple path visits each vertex at most once.  Returns an empty list if no path exists or if
+    *start* is not in the graph.
 
     :param graph: The graph to search.
     :type graph: Graph
@@ -101,11 +96,9 @@ def find_all_paths(
     :type start: str
     :param end: Destination vertex name.
     :type end: str
-    :param path: Accumulated path used by recursive calls.  Callers should
-        leave this as ``None``.
+    :param path: Accumulated path used by recursive calls.  Callers should leave this as ``None``.
     :type path: list[str] | None
-    :return: List of all simple paths, each path being an ordered list of
-        vertex names.
+    :return: List of all simple paths, each an ordered list of vertex names.
     :rtype: list[list[str]]
     """
     if path is None:

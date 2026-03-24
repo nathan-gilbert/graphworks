@@ -1,4 +1,9 @@
-"""Directed graph utilities."""
+"""Directed graph utilities.
+
+Provides DAG detection and Eulerian circuit finding via Hierholzer's algorithm.  All functions
+are pure — they take a :class:`~graphworks.graph.Graph` and return results without modifying the
+input.
+"""
 
 from __future__ import annotations
 
@@ -11,72 +16,68 @@ if TYPE_CHECKING:
 
 
 def is_dag(graph: Graph) -> bool:
-    """Returns true if graph is a directed acyclic graph.
+    """Return ``True`` if *graph* is a directed acyclic graph.
 
-    :param graph:
+    Uses arrival/departure DFS to detect back-edges.
+
+    :param graph: The graph to test.
     :type graph: Graph
-    :return: True/False if graph is a directed, acyclic graph
+    :return: ``True`` if the graph is both directed and acyclic.
     :rtype: bool
     """
-    if not graph.is_directed():
+    if not graph.directed:
         return False
 
     departure = dict.fromkeys(graph.vertices(), 0)
     discovered = dict.fromkeys(graph.vertices(), False)
+    arrival = dict.fromkeys(graph.vertices(), 0)
     time = -1
 
-    # not needed in this case
-    arrival = dict.fromkeys(graph.vertices(), 0)
-
-    # visit all connected components of the graph, build departure dict
     for n in graph.vertices():
         if not discovered[n]:
-            time = arrival_departure_dfs(graph, n, discovered, arrival, departure, time)
+            time = arrival_departure_dfs(
+                graph,
+                n,
+                discovered,
+                arrival,
+                departure,
+                time,
+            )
 
-    # check if the given directed graph is DAG or not
     for n in graph.vertices():
-
-        # check if (u, v) forms a back-edge.
-        for v in graph.get_neighbors(n):
-            # If the departure time of vertex `v` is greater than equal
-            # to the departure time of `u`, they form a back edge.
-
-            # `departure[u]` will be equal to `departure[v]` only if
-            # `u = v`, i.e., a vertex with an edge to itself
+        for v in graph.neighbors(n):
             if departure[n] <= departure[v]:
                 return False
 
-    # No back edges
     return True
 
 
 def build_neighbor_matrix(graph: Graph) -> dict[str, list[str]]:
-    """Builds adjacency matrix for directed acyclic graph.
+    """Build a mutable adjacency dict for *graph*.
 
-    :param graph: The graph
+    Returns a fresh ``dict[str, list[str]]`` that can be mutated without affecting the original
+    graph — used internally by :func:`find_circuit`.
+
+    :param graph: The graph.
     :type graph: Graph
-    :return: adjacency matrix
+    :return: Mutable adjacency mapping.
     :rtype: dict[str, list[str]]
     """
-    adjacency_matrix = {}
-    for v in graph.vertices():
-        adjacency_matrix[v] = graph.get_neighbors(v)
-
-    return adjacency_matrix
+    return {v: list(graph.neighbors(v)) for v in graph.vertices()}
 
 
 def find_circuit(graph: Graph) -> list[str]:
-    """Using Hierholzer’s algorithm to find an eulerian circuit.
+    """Find an Eulerian circuit using Hierholzer's algorithm.
 
-    :param graph:
+    :param graph: The graph to search for an Eulerian circuit.
     :type graph: Graph
-    :return: A list of vertices in the eulerian circuit of this graph
+    :return: List of vertex names forming the circuit, or ``[]`` if the graph has no vertices.
     :rtype: list[str]
     """
     if len(graph.vertices()) == 0:
         return []
 
-    circuit = []
+    circuit: list[str] = []
     adjacency_matrix = build_neighbor_matrix(graph)
     current_path: list[str] = [graph.vertices()[0]]
     while len(current_path) > 0:

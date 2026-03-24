@@ -14,7 +14,7 @@ annotations attached to it.
 Immutability
 ------------
 :class:`Vertex` is a **frozen** dataclass with ``__slots__``.  Once created, its fields cannot be
-reassigned. The *attrs* mapping is exposed as a read-only :class:`~types.MappingProxyType` so
+reassigned.  The *attrs* mapping is exposed as a read-only :class:`~types.MappingProxyType` so
 callers cannot mutate it in place either. To "update" a vertex, create a new instance — idiomatic
 for frozen dataclasses and compatible with use as ``dict`` keys and ``set`` members.
 """
@@ -25,7 +25,19 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any
 
-from graphworks.utilities import _freeze_attrs
+
+def _freeze_attrs(raw: dict[str, Any] | None) -> MappingProxyType[str, Any]:
+    """Return a read-only *copy* of *raw*, defaulting to an empty mapping.
+
+    The input dict is copied so that later mutations to the caller's original dict do not
+    propagate into the frozen vertex.
+
+    :param raw: Mutable attribute dictionary (or ``None``).
+    :type raw: dict[str, Any] | None
+    :return: Immutable mapping proxy.
+    :rtype: MappingProxyType[str, Any]
+    """
+    return MappingProxyType(dict(raw) if raw is not None else {})
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,10 +63,6 @@ class Vertex:
         default_factory=lambda: MappingProxyType({}),
     )
 
-    # ------------------------------------------------------------------
-    # Alternate constructor
-    # ------------------------------------------------------------------
-
     @classmethod
     def create(
         cls,
@@ -72,8 +80,7 @@ class Vertex:
         :type name: str
         :param label: Human-readable display name.
         :type label: str | None
-        :param attrs: Mutable attribute dict (will be defensively copied
-            and frozen).
+        :param attrs: Mutable attribute dict (will be defensively copied and frozen).
         :type attrs: dict[str, Any] | None
         :return: A new :class:`Vertex` instance.
         :rtype: Vertex
@@ -83,10 +90,6 @@ class Vertex:
             label=label,
             attrs=_freeze_attrs(attrs),
         )
-
-    # ------------------------------------------------------------------
-    # Derived properties
-    # ------------------------------------------------------------------
 
     @property
     def display_name(self) -> str:

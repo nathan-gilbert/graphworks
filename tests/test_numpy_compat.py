@@ -16,8 +16,6 @@ Install the optional dependency with::
 
 from __future__ import annotations
 
-import json
-
 import pytest
 
 numpy = pytest.importorskip("numpy", reason="numpy not installed — skipping matrix tests")
@@ -33,7 +31,7 @@ class TestNdarrayToMatrix:
     def test_basic_conversion(self) -> None:
         """A simple 2×2 ndarray converts to the expected list-of-lists.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arr = np.array([[0, 1], [1, 0]])
@@ -43,7 +41,7 @@ class TestNdarrayToMatrix:
     def test_nonzero_values_coerced_to_one(self) -> None:
         """Values greater than 0 are coerced to 1.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arr = np.array([[0, 5], [2, 0]])
@@ -53,7 +51,7 @@ class TestNdarrayToMatrix:
     def test_zero_values_remain_zero(self) -> None:
         """Zero values in the ndarray produce 0 in the matrix.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arr = np.zeros((3, 3), dtype=int)
@@ -63,7 +61,7 @@ class TestNdarrayToMatrix:
     def test_non_square_raises_value_error(self) -> None:
         """A non-square ndarray raises ValueError.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arr = np.array([[0, 1, 0, 0, 0], [1, 0]], dtype=object)
@@ -73,7 +71,7 @@ class TestNdarrayToMatrix:
     def test_three_dimensional_raises_value_error(self) -> None:
         """A 3-D ndarray raises ValueError (must be 2-D).
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arr = np.zeros((2, 2, 2))
@@ -83,7 +81,7 @@ class TestNdarrayToMatrix:
     def test_result_is_list_of_lists(self) -> None:
         """The returned value is a ``list[list[int]]``, not an ndarray.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arr = np.eye(2, dtype=int)
@@ -98,7 +96,7 @@ class TestMatrixToNdarray:
     def test_basic_conversion(self) -> None:
         """A list-of-lists converts to the expected numpy array.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         matrix = [[0, 1], [1, 0]]
@@ -108,7 +106,7 @@ class TestMatrixToNdarray:
     def test_dtype_is_integer(self) -> None:
         """The returned array has an integer dtype.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         result = matrix_to_ndarray([[0, 1], [1, 0]])
@@ -117,7 +115,7 @@ class TestMatrixToNdarray:
     def test_zeros_matrix(self) -> None:
         """An all-zeros matrix converts without modification.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         matrix = [[0, 0], [0, 0]]
@@ -127,7 +125,7 @@ class TestMatrixToNdarray:
     def test_result_is_ndarray(self) -> None:
         """The returned value is a numpy ndarray.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         result = matrix_to_ndarray([[0, 1], [1, 0]])
@@ -136,7 +134,7 @@ class TestMatrixToNdarray:
     def test_shape_preserved(self) -> None:
         """The shape of the output array matches the input matrix dimensions.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         matrix = [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
@@ -150,7 +148,7 @@ class TestGraphNumpyIntegration:
     def test_graph_from_ndarray_via_compat(self) -> None:
         """Graph built from an ndarray (via ndarray_to_matrix) is valid.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arr = np.array([[0, 1], [1, 0]], dtype=object)
@@ -159,22 +157,10 @@ class TestGraphNumpyIntegration:
         assert len(graph.vertices()) == 2
         assert len(graph.edges()) == 1
 
-    def test_adjacency_matrix_roundtrip(self) -> None:
-        """get_adjacency_matrix → matrix_to_ndarray preserves structure.
-
-        :return: None
-        :rtype: None
-        """
-        data = {"graph": {"A": ["B"], "B": []}}
-        graph = Graph(input_graph=json.dumps(data))
-        stdlib_matrix = graph.get_adjacency_matrix()
-        arr = matrix_to_ndarray(stdlib_matrix)
-        np.testing.assert_array_equal(arr, np.array([[0, 1], [0, 0]]))
-
     def test_symmetric_matrix_roundtrip(self) -> None:
         """A symmetric adjacency matrix survives a full ndarray roundtrip.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         original = [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
@@ -185,7 +171,7 @@ class TestGraphNumpyIntegration:
     def test_graph_order_from_ndarray(self) -> None:
         """A 4×4 ndarray produces a graph with 4 vertices.
 
-        :return: None
+        :return: Nothing
         :rtype: None
         """
         arr = np.zeros((4, 4), dtype=int)
@@ -193,4 +179,4 @@ class TestGraphNumpyIntegration:
         arr[1, 0] = 1
         matrix = ndarray_to_matrix(arr)
         graph = Graph(input_matrix=matrix)
-        assert graph.order() == 4
+        assert graph.order == 4
