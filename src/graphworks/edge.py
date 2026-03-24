@@ -31,16 +31,7 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any
 
-
-def _freeze_attrs(raw: dict[str, Any] | None) -> MappingProxyType[str, Any]:
-    """Return a read-only view of *raw*, defaulting to an empty mapping.
-
-    :param raw: Mutable attribute dictionary (or ``None``).
-    :type raw: dict[str, Any] | None
-    :return: Immutable mapping proxy.
-    :rtype: MappingProxyType[str, Any]
-    """
-    return MappingProxyType(dict(raw) if raw is not None else {})
+from .utilities import _freeze_attrs
 
 
 @dataclass(frozen=True, slots=True)
