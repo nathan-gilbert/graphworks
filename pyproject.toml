@@ -79,14 +79,56 @@ line-length = 100
 target-version = "py314"
 
 [tool.ruff.lint]
-select = [ "E", "W", "F", "I", "UP", "B", "C4", "SIM", "TCH", "ANN", "D",]
-ignore = [ "D203", "D401", "D213",]
+select = [
+    "E",
+    "W",
+    "TCH",
+    "F",
+    "B",
+    "ANN",
+    "C4",
+    "SIM",
+    "N",
+    "DTZ",
+    "ERA",
+    "PT",
+    "PTH",
+    "TRY",
+    "RET",
+    "T20",
+    "PL",
+    "G",
+    "D",
+]
+ignore = [
+    "ANN002",
+    "ANN003",
+    "ANN204",
+    "ANN401",
+    "TRY003",
+    "N818",
+    "TRY300",
+    "TRY301",
+    "TRY400",
+    "D401",
+    "D415",
+    "D104",
+    "D103",
+    "D400",
+    "D101",
+    "D404",
+    "D107",
+    "D203",
+    "D213",
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = [ "ANN", "D",]
+"tests/**/*.py" = [ "S101", "T201", "ARG", "ANN", "B023", "B011", "SIM117", "DTZ", "PL", "D",]
+"conftest.py" = [ "ANN", "D",]
+"examples/**" = [ "ANN", "T20", "PL", "D",]
 
 [tool.isort]
 profile = "black"

@@ -64,7 +64,7 @@ class TestFindIsolatedVertices:
 class TestFindPath:
     """Tests for find_path."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def path_graph(self) -> Graph:
         """Graph used for path-finding tests.
 
@@ -109,7 +109,7 @@ class TestFindPath:
 class TestFindAllPaths:
     """Tests for find_all_paths."""
 
-    @pytest.fixture()
+    @pytest.fixture
     def multi_path_graph(self) -> Graph:
         """Graph with multiple paths between vertices.
 
