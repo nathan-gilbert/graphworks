@@ -17,8 +17,8 @@ pip install graphworks
 import json
 from graphworks.graph import Graph
 
-json_graph = {"label": "my graph", "edges": {"A": ["B"], "B": []}}
-graph = Graph("my graph", input_graph=json.dumps(json_graph))
+json_graph = {"label": "my graph", "graph": {"A": ["B"], "B": []}}
+graph = Graph(input_graph=json.dumps(json_graph))
 print(graph)
 ```
 
@@ -73,7 +73,7 @@ uv run ty check
 uv run xenon --max-average=A --max-modules=B --max-absolute=B src/
 
 # Run all pre-commit hooks
-pre-commit run --all-files
+prek run --all-files
 ```
 
 ### Publishing
@@ -84,41 +84,47 @@ Version is managed automatically via git tags using `hatchling-vcs`.
 - Push the tag: `git push --tags`
 - The GitHub Actions workflow will build and publish to PyPI automatically.
 
-## TODO
+## Roadmap
 
-![TODO List](./todos.png)
+### Tier 1: Data model
 
-Tier 1: Data model (do first, everything depends on it) The biggest gap right now is that vertices
-are bare strings and edges are lightweight dataclasses that the Graph class barely uses internally.
-The adjacency list stores `defaultdict[str, list[str]]` — just names pointing to names. This means
-vertex attributes, edge weights, and edge labels all live outside the canonical representation. Your
-g4.json weighted format already hints at the tension: it uses dicts-as-neighbors instead of
-strings, but the Graph class doesn't actually parse them. A Vertex class (with a name, optional
-label, and an attribute dict) and a richer Edge (already a dataclass, but needs to be the actual
-unit of storage rather than reconstructed on every .edges() call) would give you a foundation where
-all the metadata survives every operation.
+- [x] `Vertex` class with name, optional label, and immutable attribute mapping
+- [x] `Edge` dataclass with source, target, directed flag, optional weight, label, and attributes
+- [x] Both classes are frozen (immutable) with identity-based equality and hashing
 
-Tier 2: Graph refactor Once Vertex and Edge exist as first-class objects, the internal
-`defaultdict[str, list[str]]` can become something like `dict[str, Vertex]` for vertex lookup and an
-edge storage structure that preserves weights and attributes. The critical constraint from your
-philosophy: conversions to adjacency matrix and back must be lossless — this is exactly the
-get_complement bug you just hit. A vertex-name-to-index mapping maintained alongside the matrix
-would solve it.
+### Tier 2: Graph refactor
 
-Tier 3: Lossless conversions With named vertices and attributed edges, you can build clean
-`to_adjacency_matrix()` / `from_adjacency_matrix()` round-trips that carry a name mapping,
-`to_edge_list()` / `from_edge_list()`, and fix get_complement to work through the matrix without
-losing names.
+- [x] Internal storage uses `dict[str, Vertex]` for vertex lookup
+- [x] Adjacency structure uses `dict[str, dict[str, Edge]]` for O(1) edge access
+- [x] Edge weights, labels, and attributes survive all operations
+- [x] `add_edge` supports `weight` and `label` keyword arguments
+- [x] `edge()` lookup method for direct O(1) edge retrieval
 
-Tier 4: Algorithms With weighted edges actually in the data model, Dijkstra and Prim become
-natural. Strongly connected components, better shortest-path implementations, and the directed graph
-algorithms from your TODO list can all build on the refactored core.
+### Tier 3: Lossless conversions
 
-Tier 5: Export/CLI The Rich rendering and CLI app build on top of everything above. The export
-layer (JSON, DOT, Rich) becomes a clean translation from your canonical format rather than ad-hoc
-string building.
+- [ ] `to_adjacency_matrix()` / `from_adjacency_matrix()` round-trips that preserve vertex names
+      via an index mapping
+- [ ] Fix `get_complement` to preserve original vertex names instead of generating UUIDs
+- [ ] `to_edge_list()` / `from_edge_list()` conversions
+- [ ] Parse weighted JSON format (e.g. `g4.json` dict-as-neighbor style)
 
-Tier 6: Cross-cutting quality Thread safety (immutable graph views, or threading.Lock around
-mutations), input validation, and benchmarks can happen in parallel with other tiers. Where would
-you like to start? The Vertex class and Edge redesign are the natural first move — they're
-self-contained, testable, and unblock everything downstream.
+### Tier 4: Algorithms
+
+- [ ] Dijkstra's shortest path (weighted)
+- [ ] Prim's / Kruskal's minimum spanning tree
+- [ ] Strongly connected components (Tarjan or Kosaraju)
+- [ ] Improved shortest-path implementations leveraging weighted edges
+
+### Tier 5: Export and CLI
+
+- [x] JSON export (`save_to_json`)
+- [x] Graphviz DOT export (`save_to_dot`)
+- [x] Rich-based demo script (`uv run demo`)
+- [ ] CLI application for common graph operations
+- [ ] Rich rendering integration for interactive graph display
+
+### Tier 6: Cross-cutting quality
+
+- [ ] Thread safety (immutable graph views or locking around mutations)
+- [ ] Input validation hardening
+- [ ] Performance benchmarks
