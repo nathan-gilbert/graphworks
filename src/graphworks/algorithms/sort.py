@@ -1,4 +1,4 @@
-"""Sorting algorithms."""
+"""Sorting algorithms for directed graphs."""
 
 from __future__ import annotations
 
@@ -9,42 +9,46 @@ if TYPE_CHECKING:
 
 
 def topological(graph: Graph) -> list[str]:
-    """Topological sort.
+    """Return a topological ordering of the vertices in *graph*.
 
-    O(V+E)
+    Uses a recursive DFS-based approach.  Complexity: O(V + E).
 
-    :param graph:
+    :param graph: A directed acyclic graph.
     :type graph: Graph
-    :return: List of vertices sorted topologically
+    :return: List of vertices sorted topologically.
     :rtype: list[str]
     """
 
-    def mark_visited(g: Graph, v: str, v_map: dict[str, bool], t_sort_results: list[str]) -> None:
-        """Mark visited vertex as visited.
+    def _mark_visited(
+        g: Graph,
+        v: str,
+        v_map: dict[str, bool],
+        result: list[str],
+    ) -> None:
+        """Recursively mark *v* and its descendants as visited.
 
-        :param g: The graphc
+        :param g: The graph.
         :type g: Graph
-        :param v: Vertex
+        :param v: Current vertex.
         :type v: str
-        :param v_map: Mapping from vertex to vertex index
+        :param v_map: Mutable visited-flag map.
         :type v_map: dict[str, bool]
-        :param t_sort_results: List of vertices sorted topologically
-        :type t_sort_results: list[str]
-        :return: Nothing
+        :param result: Accumulator for the reverse topological order.
+        :type result: list[str]
+        :return: Nothing.
         :rtype: None
         """
         v_map[v] = True
-        for n in g.get_neighbors(v):
+        for n in g.neighbors(v):
             if not v_map[n]:
-                mark_visited(g, n, v_map, t_sort_results)
-        t_sort_results.append(v)
+                _mark_visited(g, n, v_map, result)
+        result.append(v)
 
     visited = dict.fromkeys(graph.vertices(), False)
     result: list[str] = []
 
     for v in graph.vertices():
         if not visited[v]:
-            mark_visited(graph, v, visited, result)
+            _mark_visited(graph, v, visited, result)
 
-    # Contains topo sort results in reverse order
     return result[::-1]

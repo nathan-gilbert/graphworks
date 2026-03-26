@@ -1,9 +1,13 @@
-"""JSON utilities."""
+"""JSON export for graphworks graphs.
+
+Provides :func:`save_to_json` for serializing a :class:`~graphworks.graph.Graph` to a JSON file
+on disk.
+"""
 
 from __future__ import annotations
 
 import json
-from os import path
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,20 +15,32 @@ if TYPE_CHECKING:
 
 
 def save_to_json(graph: Graph, out_dir: str) -> None:
-    """Save to json file.
+    """Serialize *graph* to a JSON file in *out_dir*.
 
-    :param graph: the graph to write to json
+    The output file is named ``{graph.label}.json`` and uses the same schema accepted by
+    :class:`~graphworks.graph.Graph`'s ``input_file`` constructor parameter::
+
+        {
+            "label": "...",
+            "directed": false,
+            "graph": { "A": ["B"], "B": ["A"] }
+        }
+
+    :param graph: The graph to serialize.
     :type graph: Graph
-    :param out_dir: the absolute path to the dir to write the file
+    :param out_dir: Directory path where the JSON file will be written.
     :type out_dir: str
-    :return: Nothing
+    :return: Nothing.
     :rtype: None
     """
-    g_dict = {
-        "label": graph.get_label(),
-        "directed": graph.is_directed(),
-        "graph": graph.get_graph(),
+    adjacency: dict[str, list[str]] = {v: graph.neighbors(v) for v in graph.vertices()}
+
+    payload = {
+        "label": graph.label,
+        "directed": graph.directed,
+        "weighted": graph.weighted,
+        "graph": adjacency,
     }
 
-    with open(path.join(out_dir, f"{graph.get_label()}.json"), "w", encoding="utf8") as out:
-        out.write(json.dumps(g_dict))
+    out_path = Path(out_dir) / f"{graph.label}.json"
+    out_path.write_text(json.dumps(payload), encoding="utf-8")

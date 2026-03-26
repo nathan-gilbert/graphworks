@@ -26,18 +26,20 @@ repos:
         args: [ --fix, --exit-non-zero-on-fix ]
   # No official hook yet
   - repo: https://github.com/NSPBot911/ty-pre-commit
-    rev: v0.0.24
+    rev: v0.0.25
     hooks:
       - id: ty-check
         language: system
+        pass_filenames: false
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.10.12
+    rev: 0.11.1
     hooks:
       - id: uv-lock
   - repo: https://github.com/psf/black
     rev: 26.3.1
     hooks:
       - id: black
+        language: system
   - repo: https://github.com/pycqa/isort
     rev: 8.0.1
     hooks:

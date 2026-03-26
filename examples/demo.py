@@ -13,8 +13,8 @@ Requires the ``[viz]`` optional extra::
 
     uv sync --extra viz
 
-This script is **not** shipped with the library.  It lives in the ``examples/``
-directory and is excluded from both the sdist and wheel builds.
+This script is **not** shipped with the library.  It lives in the ``examples/`` directory and is
+excluded from both the sdist and wheel builds.
 """
 
 from __future__ import annotations
@@ -45,6 +45,7 @@ from graphworks.algorithms import (
     vertex_degree,
 )
 from graphworks.graph import Graph
+from graphworks.vertex import Vertex
 
 console = Console()
 
@@ -96,10 +97,10 @@ def _graph_panel(graph: Graph, title: str, border_style: str = "blue") -> None:
     :return: Nothing.
     :rtype: None
     """
-    arrow = "→" if graph.is_directed() else "—"
+    arrow = "→" if graph.directed else "—"
     tree = Tree(f"[bold]{title}[/bold]")
     for v in sorted(graph.vertices()):
-        neighbours = graph.get_neighbors(v)
+        neighbours = graph.neighbors(v)
         if neighbours:
             label = f"[green]{v}[/green] {arrow} " + ", ".join(
                 f"[cyan]{n}[/cyan]" for n in neighbours
@@ -135,26 +136,42 @@ def demo_construction() -> Graph:
         },
     }
     graph = Graph(input_graph=json.dumps(json_def))
-    _kv("label", graph.get_label())
-    _kv("vertices", graph.order())
-    _kv("edges", graph.size())
-    _kv("directed", graph.is_directed())
+    _kv("label", graph.label)
+    _kv("vertices", graph.order)
+    _kv("edges", graph.size)
+    _kv("directed", graph.directed)
 
     console.print()
     _graph_panel(graph, "social network")
 
-    # Other construction methods
+    # Matrix construction
     console.print()
     matrix = [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
     matrix_graph = Graph(input_matrix=matrix)
-    _kv("from matrix", f"{matrix_graph.order()} vertices, {matrix_graph.size()} edges")
+    _kv("from matrix", f"{matrix_graph.order} vertices, {matrix_graph.size} edges")
 
+    # Programmatic construction with Vertex objects
     manual = Graph("manual")
-    for v in ("X", "Y", "Z"):
-        manual.add_vertex(v)
+    manual.add_vertex(Vertex.create("X", label="Entry"))
+    manual.add_vertex(Vertex.create("Y", label="Middle"))
+    manual.add_vertex(Vertex.create("Z", label="Exit"))
     manual.add_edge("X", "Y")
     manual.add_edge("Y", "Z")
-    _kv("programmatic", f"{manual.order()} vertices, {manual.size()} edges")
+    _kv("programmatic", f"{manual.order} vertices, {manual.size} edges")
+
+    # Show that Vertex metadata survives
+    for name in manual.vertices():
+        v = manual.vertex(name)
+        if v is not None:
+            _kv(f"  {name}", f"display_name={v.display_name!r}")
+
+    # Weighted edge construction
+    weighted = Graph("routes", weighted=True)
+    weighted.add_edge("Denver", "SLC", weight=525.0, label="I-70/I-15")
+    weighted.add_edge("SLC", "Boise", weight=340.0, label="I-84")
+    e = weighted.edge("Denver", "SLC")
+    if e is not None:
+        _kv("weighted edge", f"{e} (weight={e.weight}, label={e.label!r})")
 
     return graph
 
@@ -209,7 +226,7 @@ def demo_degrees(graph: Graph) -> None:
     table.add_column("Neighbours")
     for v in sorted(graph.vertices()):
         deg = vertex_degree(graph, v)
-        nbrs = ", ".join(graph.get_neighbors(v)) or "(none)"
+        nbrs = ", ".join(graph.neighbors(v)) or "(none)"
         table.add_row(v, str(deg), nbrs)
     console.print(table)
 
@@ -284,7 +301,7 @@ def demo_complement(graph: Graph) -> None:
     verts = sorted(graph.vertices())
     original_edges: set[tuple[str, str]] = set()
     for v in verts:
-        for n in graph.get_neighbors(v):
+        for n in graph.neighbors(v):
             edge = (min(v, n), max(v, n))
             original_edges.add(edge)
 
@@ -367,7 +384,7 @@ def demo_adjacency_matrix(graph: Graph) -> None:
     """
     _section("8 · Adjacency matrix")
 
-    matrix = graph.get_adjacency_matrix()
+    matrix = graph.adjacency_matrix()
     verts = sorted(graph.vertices())
 
     table = Table(show_header=True, header_style="bold")
@@ -383,6 +400,42 @@ def demo_adjacency_matrix(graph: Graph) -> None:
                 cells.append("[dim]·[/dim]")
         table.add_row(v, *cells)
     console.print(table)
+
+
+def demo_edge_inspection(graph: Graph) -> None:
+    """Show the first-class Edge objects stored in the graph.
+
+    :param graph: A graph whose edges to inspect.
+    :type graph: Graph
+    :return: Nothing.
+    :rtype: None
+    """
+    _section("9 · Edge objects")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("#", justify="right", style="dim")
+    table.add_column("Edge", style="cyan")
+    table.add_column("Directed")
+    table.add_column("Weight")
+    table.add_column("Self-loop")
+    for i, e in enumerate(graph.edges(), 1):
+        table.add_row(
+            str(i),
+            str(e),
+            "✓" if e.directed else "✗",
+            str(e.weight) if e.has_weight() else "—",
+            "✓" if e.is_self_loop() else "✗",
+        )
+    console.print(table)
+
+    # Direct edge lookup
+    console.print()
+    src, tgt = graph.vertices()[0], graph.vertices()[1]
+    e = graph.edge(src, tgt)
+    if e is not None:
+        _kv("edge lookup", f"graph.edge({src!r}, {tgt!r}) = {e!r}")
+    else:
+        _kv("edge lookup", f"No edge between {src!r} and {tgt!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -412,6 +465,7 @@ def main() -> None:
     demo_complement(graph)
     demo_directed()
     demo_adjacency_matrix(graph)
+    demo_edge_inspection(graph)
 
     console.print()
     console.rule("[bold green]Done![/bold green]")

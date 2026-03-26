@@ -1,22 +1,23 @@
 """Graph property queries and structural metrics.
 
-This module provides predicate functions (``is_*``) and quantitative metrics
-(``density``, ``diameter``, ``degree_sequence``, etc.) that inspect a
-:class:`~graphworks.graph.Graph` without modifying it.
+Provides predicate functions (``is_*``) and quantitative metrics (``density``, ``diameter``,
+``degree_sequence``, etc.) that inspect a :class:`~graphworks.graph.Graph` without modifying it.
 
-All functions are pure: they take a graph (and optional parameters) and
-return a value.  None of the functions here require numpy.
+All functions are pure: they take a graph (and optional parameters) and return a value.  None of
+the functions here require numpy.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
-from graphworks.algorithms.paths import find_all_paths  # avoid circular
+from graphworks.algorithms.paths import find_all_paths
 from graphworks.graph import Graph
 
 if TYPE_CHECKING:
     from graphworks.types import AdjacencyMatrix
+
+DENSITY_CUTOFF: Final[float] = 0.5
 
 # ---------------------------------------------------------------------------
 # Degree helpers
@@ -37,7 +38,6 @@ def vertex_degree(graph: Graph, vertex: str) -> int:
     """
     adj = graph[vertex]
     degree = len(adj)
-    # each self-loop adds an extra 1
     degree += sum(1 for v in adj if v == vertex)
     return degree
 
@@ -88,8 +88,7 @@ def max_degree(graph: Graph) -> int:
 def is_degree_sequence(sequence: list[int]) -> bool:
     """Return whether *sequence* is a valid degree sequence.
 
-    A valid degree sequence has a non-negative, even sum and is
-    non-increasing.
+    A valid degree sequence has a non-negative, even sum and is non-increasing.
 
     :param sequence: Candidate degree sequence.
     :type sequence: list[int]
@@ -98,15 +97,17 @@ def is_degree_sequence(sequence: list[int]) -> bool:
     """
     if not sequence:
         return True
-    return sum(sequence) % 2 == 0 and sequence == sorted(sequence, reverse=True)
+    return sum(sequence) % 2 == 0 and sequence == sorted(
+        sequence,
+        reverse=True,
+    )
 
 
 def is_erdos_gallai(sequence: list[int]) -> bool:
     """Return whether *sequence* satisfies the Erdős–Gallai theorem.
 
-    A non-increasing sequence of non-negative integers is a valid degree
-    sequence of a simple graph if and only if its sum is even and the
-    Erdős–Gallai condition holds for every prefix.
+    A non-increasing sequence of non-negative integers is a valid degree sequence of a simple
+    graph if and only if its sum is even and the Erdős–Gallai condition holds for every prefix.
 
     :param sequence: Candidate degree sequence (need not be sorted).
     :type sequence: list[int]
@@ -169,11 +170,11 @@ def is_connected(
 
     :param graph: The graph to inspect.
     :type graph: Graph
-    :param start_vertex: Vertex to begin the traversal from.  Defaults to
-        the first vertex in :meth:`~graphworks.graph.Graph.vertices`.
+    :param start_vertex: Vertex to begin the traversal from.  Defaults to the first vertex in
+        :meth:`~graphworks.graph.Graph.vertices`.
     :type start_vertex: str | None
-    :param vertices_encountered: Set of already-visited vertices used by the
-        recursive calls.  Callers should leave this as ``None``.
+    :param vertices_encountered: Set of already-visited vertices used by the recursive calls.
+        Callers should leave this as ``None``.
     :type vertices_encountered: set[str] | None
     :return: ``True`` if all vertices are reachable from *start_vertex*.
     :rtype: bool
@@ -190,7 +191,9 @@ def is_connected(
     if len(vertices_encountered) != len(verts):
         for vertex in graph[start_vertex]:
             if vertex not in vertices_encountered and is_connected(
-                graph, vertex, vertices_encountered
+                graph,
+                vertex,
+                vertices_encountered,
             ):
                 return True
     else:
@@ -201,10 +204,8 @@ def is_connected(
 def is_complete(graph: Graph) -> bool:
     """Return whether the graph is complete.
 
-    A complete graph has every possible edge.  Checks that the edge count
-    equals ``V*(V-1)`` for directed graphs or ``V*(V-1)/2`` for undirected.
-
-    Runtime: O(n²).
+    A complete graph has every possible edge.  Checks that the edge count equals ``V*(V-1)`` for
+    directed graphs or ``V*(V-1)/2`` for undirected.
 
     :param graph: The graph to inspect.
     :type graph: Graph
@@ -213,7 +214,7 @@ def is_complete(graph: Graph) -> bool:
     """
     v_count = len(graph.vertices())
     max_edges = v_count**2 - v_count
-    if not graph.is_directed():
+    if not graph.directed:
         max_edges //= 2
 
     if len(graph.edges()) != max_edges:
@@ -230,20 +231,18 @@ def is_sparse(graph: Graph) -> bool:
     :return: ``True`` if the graph is sparse.
     :rtype: bool
     """
-    return graph.size() <= (graph.order() ** 2 / 2)
+    return graph.size <= (graph.order**2 / 2)
 
 
 def is_dense(graph: Graph) -> bool:
-    """Return whether the graph is dense (``|E| = Θ(|V|²)``).
-
-    Computed as density ≥ 0.5.
+    """Return whether the graph is dense (density ≥ 0.5).
 
     :param graph: The graph to inspect.
     :type graph: Graph
     :return: ``True`` if the graph is dense.
     :rtype: bool
     """
-    return density(graph) >= 0.5
+    return density(graph) >= DENSITY_CUTOFF
 
 
 # ---------------------------------------------------------------------------
@@ -254,8 +253,7 @@ def is_dense(graph: Graph) -> bool:
 def density(graph: Graph) -> float:
     """Return the density of the graph.
 
-    Density is ``2|E| / (|V|² - |V|)``.  Returns ``0.0`` for graphs with
-    fewer than two vertices.
+    Density is ``2|E| / (|V|² - |V|)``.  Returns ``0.0`` for graphs with fewer than two vertices.
 
     :param graph: The graph to inspect.
     :type graph: Graph
@@ -263,7 +261,7 @@ def density(graph: Graph) -> float:
     :rtype: float
     """
     v_count = len(graph.vertices())
-    if v_count < 2:
+    if v_count < 2:  # noqa: PLR2004
         return 0.0
     e_count = len(graph.edges())
     return 2.0 * (e_count / (v_count**2 - v_count))
@@ -273,6 +271,7 @@ def diameter(graph: Graph) -> int:
     """Return the diameter of the graph.
 
     The diameter is the length of the longest shortest path between any pair of vertices.
+    Returns ``0`` for disconnected graphs.
 
     :param graph: The graph to inspect.
     :type graph: Graph
@@ -286,7 +285,7 @@ def diameter(graph: Graph) -> int:
     for start, end in pairs:
         all_paths: list[list[str]] = find_all_paths(graph, start, end)
         if all_paths:
-            shortest_paths.append(min(all_paths, key=lambda path: len(path)))
+            shortest_paths.append(min(all_paths, key=lambda path: len(path)))  # noqa
 
     if not shortest_paths:
         return 0
@@ -315,17 +314,22 @@ def invert(matrix: AdjacencyMatrix) -> AdjacencyMatrix:
 def get_complement(graph: Graph) -> Graph:
     """Return the complement graph of *graph*.
 
-    The complement is the graph on the same vertex set whose edges are
-    exactly the edges *not* present in *graph*.
+    The complement is the graph on the same vertex set whose edges are exactly the edges *not*
+    present in *graph*.
+
+    .. note::
+        Because :func:`invert` flips the diagonal, the complement of an isolated graph contains
+        self-loops.  The complement is built via matrix round-trip, so original vertex names are
+        replaced with UUID strings.
 
     :param graph: The source graph.
     :type graph: Graph
     :return: Complement graph.
     :rtype: Graph
     """
-    adj = graph.get_adjacency_matrix()
+    adj = graph.adjacency_matrix()
     complement_matrix = invert(adj)
     return Graph(
-        label=f"{graph.get_label()} complement",
+        f"{graph.label} complement",
         input_matrix=complement_matrix,
     )

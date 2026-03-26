@@ -1,4 +1,9 @@
-"""This module implements DFS with arrival and departure times."""
+"""Graph traversal algorithms.
+
+Provides breadth-first search, depth-first search, and a DFS variant that records arrival and
+departure timestamps for each vertex.  All functions are pure — they take a
+:class:`~graphworks.graph.Graph` and return results without modifying the input.
+"""
 
 from __future__ import annotations
 
@@ -9,22 +14,20 @@ if TYPE_CHECKING:
 
 
 def breadth_first_search(graph: Graph, start: str) -> list[str]:
-    """Breadth-first search with arrival and departure times.
+    """Return vertices reachable from *start* in breadth-first order.
 
-    :param graph:
+    :param graph: The graph to traverse.
     :type graph: Graph
-    :param start: the vertex to start the traversal from
+    :param start: The vertex to begin the traversal from.
     :type start: str
-    :return: The list of vertex paths
+    :return: List of vertex names in BFS visit order.
     :rtype: list[str]
     """
-    # Mark all the vertices as not visited
     visited = dict.fromkeys(graph.vertices(), False)
-    # Mark the start vertices as visited and enqueue it
     visited[start] = True
 
     queue = [start]
-    walk = []
+    walk: list[str] = []
     while queue:
         cur = queue.pop(0)
         walk.append(cur)
@@ -37,25 +40,28 @@ def breadth_first_search(graph: Graph, start: str) -> list[str]:
 
 
 def depth_first_search(graph: Graph, start: str) -> list[str]:
-    """Depth-first search with arrival and departure times.
+    """Return vertices reachable from *start* in depth-first order.
 
-    :param graph:
+    :param graph: The graph to traverse.
     :type graph: Graph
-    :param start: the vertex to start the traversal from
+    :param start: The vertex to begin the traversal from.
     :type start: str
-    :return: The list of vertex paths
+    :return: List of vertex names in DFS visit order.
     :rtype: list[str]
     """
-    visited, stack = [], [start]
+    visited: list[str] = []
+    stack = [start]
     while stack:
         vertex = stack.pop()
         if vertex not in visited:
             visited.append(vertex)
-            stack.extend(filter(lambda x: x not in visited, graph[vertex]))
+            stack.extend(
+                filter(lambda x: x not in visited, graph[vertex]),
+            )
     return visited
 
 
-def arrival_departure_dfs(
+def arrival_departure_dfs(  # noqa: PLR0913
     graph: Graph,
     v: str,
     discovered: dict[str, bool],
@@ -63,36 +69,41 @@ def arrival_departure_dfs(
     departure: dict[str, int],
     time: int,
 ) -> int:
-    """Method for DFS with arrival and departure times for each vertex.
+    """Perform DFS recording arrival and departure times for each vertex.
 
-    O(V+E) -- E could be as big as V^2
+    This variant is used internally by :func:`~graphworks.algorithms.directed.is_dag` to detect
+    back-edges.  Complexity: O(V + E).
 
-    :param graph: The graph
+    :param graph: The graph to traverse.
     :type graph: Graph
-    :param v: The vertex to traverse from
+    :param v: The vertex to traverse from.
     :type v: str
-    :param discovered: The discovered vertex
+    :param discovered: Mutable map tracking which vertices have been visited.
     :type discovered: dict[str, bool]
-    :param arrival: The arrival vertex
+    :param arrival: Mutable map storing each vertex's arrival timestamp.
     :type arrival: dict[str, int]
-    :param departure: The departure vertex
+    :param departure: Mutable map storing each vertex's departure timestamp.
     :type departure: dict[str, int]
-    :param time: initialized to -1
+    :param time: Current timestamp counter (typically initialized to ``-1``).
     :type time: int
-    :return: The departure time
+    :return: The updated timestamp counter after this subtree is fully explored.
     :rtype: int
     """
     time += 1
-
-    # when did we arrive at vertex 'v'?
     arrival[v] = time
     discovered[v] = True
 
-    for n in graph.get_neighbors(v):
+    for n in graph.neighbors(v):
         if not discovered.get(n, False):
-            time = arrival_departure_dfs(graph, n, discovered, arrival, departure, time)
+            time = arrival_departure_dfs(
+                graph,
+                n,
+                discovered,
+                arrival,
+                departure,
+                time,
+            )
 
     time += 1
-    # increment time and then set departure
     departure[v] = time
     return time
