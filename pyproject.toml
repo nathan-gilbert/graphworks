@@ -137,6 +137,9 @@ multi_line_output = 3
 known_first_party = [ "graphworks",]
 skip = [ "src/graphworks/_version.py",]
 
+[tool.ty.src]
+exclude = [ "tests/", "examples/",]
+
 [tool.ty.environment]
 python-platform = "darwin"
 python-version = "3.14"

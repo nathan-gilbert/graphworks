@@ -1,7 +1,4 @@
-"""Unit tests for :class:`graphworks.edge.Edge`.
-
-:author: Nathan Gilbert
-"""
+"""Unit tests for :class:`graphworks.edge.Edge`."""
 
 from __future__ import annotations
 

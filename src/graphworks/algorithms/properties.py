@@ -285,7 +285,7 @@ def diameter(graph: Graph) -> int:
     for start, end in pairs:
         all_paths: list[list[str]] = find_all_paths(graph, start, end)
         if all_paths:
-            shortest_paths.append(min(all_paths, key=len))
+            shortest_paths.append(min(all_paths, key=lambda path: len(path)))  # noqa
 
     if not shortest_paths:
         return 0

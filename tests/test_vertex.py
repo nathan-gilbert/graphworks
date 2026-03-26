@@ -1,7 +1,4 @@
-"""Unit tests for :class:`graphworks.vertex.Vertex`.
-
-:author: Nathan Gilbert
-"""
+"""Unit tests for :class:`graphworks.vertex.Vertex`."""
 
 from __future__ import annotations
 

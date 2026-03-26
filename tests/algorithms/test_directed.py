@@ -30,7 +30,8 @@ class TestIsDag:
 class TestFindCircuit:
     def test_simple_circuit(self, circuit_graph) -> None:
         circuit = find_circuit(circuit_graph)
-        assert len(circuit) == 4 and circuit[0] == circuit[-1]
+        assert len(circuit) == 4
+        assert circuit[0] == circuit[-1]
 
     def test_visits_all_vertices(self, circuit_graph) -> None:
         assert set(find_circuit(circuit_graph)) == {"A", "B", "C"}
