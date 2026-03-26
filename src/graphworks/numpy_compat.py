@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    from graphworks.types import AdjacencyMatrix
+    from .types import AdjacencyMatrix
 
 try:
     import numpy as np

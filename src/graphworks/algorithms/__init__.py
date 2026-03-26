@@ -10,14 +10,14 @@ Submodules
 - :mod:`~graphworks.algorithms.sort` — sorting algorithms
 """
 
-from graphworks.algorithms.directed import find_circuit, is_dag
-from graphworks.algorithms.paths import (
+from .directed import find_circuit, is_dag
+from .paths import (
     find_all_paths,
     find_isolated_vertices,
     find_path,
     generate_edges,
 )
-from graphworks.algorithms.properties import (
+from .properties import (
     degree_sequence,
     density,
     diameter,
@@ -35,12 +35,12 @@ from graphworks.algorithms.properties import (
     min_degree,
     vertex_degree,
 )
-from graphworks.algorithms.search import (
+from .search import (
     arrival_departure_dfs,
     breadth_first_search,
     depth_first_search,
 )
-from graphworks.algorithms.sort import topological
+from .sort import topological
 
 __all__ = [
     "arrival_departure_dfs",

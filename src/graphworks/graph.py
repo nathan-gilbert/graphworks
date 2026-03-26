@@ -22,7 +22,7 @@ For numpy ``ndarray`` input, convert first with :func:`graphworks.numpy_compat.n
 Example::
 
     >>> import json
-    >>> from graphworks.graph import Graph
+    >>> from graphworks.graph import Graph  # noqa
     ...
     >>> data = {"label": "demo", "graph": {"A": ["B"], "B": []}}
     >>> g = Graph(input_graph=json.dumps(data))
@@ -40,13 +40,13 @@ import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from graphworks.edge import Edge
-from graphworks.vertex import Vertex
+from .edge import Edge
+from .vertex import Vertex
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from graphworks.types import AdjacencyMatrix
+    from .types import AdjacencyMatrix
 
 
 class Graph:

@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from graphworks.graph import Graph
+    from ..graph import Graph
 
 
 def breadth_first_search(graph: Graph, start: str) -> list[str]:

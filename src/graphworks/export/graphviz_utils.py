@@ -15,7 +15,7 @@ from graphviz import Digraph
 from graphviz import Graph as UndirectedGraphViz
 
 if TYPE_CHECKING:
-    from graphworks.graph import Graph
+    from ..graph import Graph
 
 
 def save_to_dot(graph: Graph, out_dir: str) -> None:

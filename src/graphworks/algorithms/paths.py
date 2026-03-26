@@ -10,8 +10,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from graphworks.edge import Edge
-    from graphworks.graph import Graph
+    from ..edge import Edge
+    from ..graph import Graph
 
 
 def generate_edges(graph: Graph) -> list[Edge]:

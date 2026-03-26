@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from graphworks.algorithms.search import arrival_departure_dfs
+from .search import arrival_departure_dfs
 
 if TYPE_CHECKING:
-    from graphworks.graph import Graph
+    from ..graph import Graph
 
 
 def is_dag(graph: Graph) -> bool:

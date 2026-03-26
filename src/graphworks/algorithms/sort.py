@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from graphworks.graph import Graph
+    from ..graph import Graph
 
 
 def topological(graph: Graph) -> list[str]:

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from graphworks.graph import Graph
+    from ..graph import Graph
 
 
 def save_to_json(graph: Graph, out_dir: str) -> None:

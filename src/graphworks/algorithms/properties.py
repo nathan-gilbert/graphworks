@@ -11,11 +11,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
 
-from graphworks.algorithms.paths import find_all_paths
-from graphworks.graph import Graph
+from ..graph import Graph
+from .paths import find_all_paths
 
 if TYPE_CHECKING:
-    from graphworks.types import AdjacencyMatrix
+    from ..types import AdjacencyMatrix
 
 DENSITY_CUTOFF: Final[float] = 0.5
 
