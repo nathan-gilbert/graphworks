@@ -80,7 +80,7 @@ prek run --all-files
 
 Version is managed automatically via git tags using `hatchling-vcs`.
 
-- Tag a commit: `git tag -a vX.Y.Z -m 'release message'`
+- Tag a commit: `git tag -a X.Y.Z -m 'release message'`
 - Push the tag: `git push --tags`
 - The GitHub Actions workflow will build and publish to PyPI automatically.
 
