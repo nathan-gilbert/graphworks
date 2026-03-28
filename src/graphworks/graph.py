@@ -386,32 +386,30 @@ class Graph:
         :raises TypeError: If an element is not a recognized edge specification.
         """
         for item in edges:
-            if isinstance(item, Edge):
-                self.add_edge(item)
-            elif isinstance(item, tuple):
-                if len(item) == 2:
-                    src, tgt = item
+            match item:
+                case Edge() as edge:
+                    self.add_edge(edge)
+                case (str(src), str(tgt)):
                     self.add_edge(src, tgt)
-                elif len(item) == 3:
-                    src, tgt, kwargs = item
-                    if not isinstance(kwargs, dict):
-                        msg = (
-                            f"Third element of edge tuple must be a dict, "
-                            f"got {type(kwargs).__name__}."
-                        )
-                        raise TypeError(msg)
+                case (str(src), str(tgt), dict(kwargs)):
                     self.add_edge(
                         src,
                         tgt,
                         weight=kwargs.get("weight"),
                         label=kwargs.get("label"),
                     )
-                else:
-                    msg = f"Edge tuple must have 2 or 3 elements, got {len(item)}."
+                case (str(), str(), invalid):
+                    msg = (
+                        f"Third element of edge tuple must be a dict, "
+                        f"got {type(invalid).__name__}."
+                    )
                     raise TypeError(msg)
-            else:
-                msg = f"Expected a tuple or Edge, got {type(item).__name__}."
-                raise TypeError(msg)
+                case tuple():
+                    msg = f"Edge tuple must have 2 or 3 str elements, got {len(item)}."
+                    raise TypeError(msg)
+                case _:
+                    msg = f"Expected a tuple or Edge, got {type(item).__name__}."
+                    raise TypeError(msg)
 
         return self
 

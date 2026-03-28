@@ -143,12 +143,12 @@ class TestAddEdges:
 
     def test_invalid_tuple_length_raises(self) -> None:
         g = Graph()
-        with pytest.raises(TypeError, match="2 or 3 elements"):
+        with pytest.raises(TypeError, match="2 or 3 str elements"):
             g.add_edges([("A",)])  # type: ignore[list-item]
 
     def test_invalid_tuple_four_elements_raises(self) -> None:
         g = Graph()
-        with pytest.raises(TypeError, match="2 or 3 elements"):
+        with pytest.raises(TypeError, match="2 or 3 str elements"):
             g.add_edges([("A", "B", {}, "extra")])  # type: ignore[list-item]
 
     def test_non_dict_third_element_raises(self) -> None:
