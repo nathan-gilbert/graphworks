@@ -146,9 +146,69 @@ class Graph:
             )
             raise ValueError(msg)
 
-    # ------------------------------------------------------------------
-    # Properties — metadata
-    # ------------------------------------------------------------------
+    def __repr__(self) -> str:
+        """Return a developer-friendly representation.
+
+        :return: String like ``Graph('my graph', order=5, size=7)``.
+        :rtype: str
+        """
+        return f"Graph({self._label!r}, order={self.order}, size={self.size})"
+
+    def __str__(self) -> str:
+        """Return a human-readable adjacency-list view of the graph.
+
+        Each line shows ``vertex -> neighbor_names`` (or ``-> 0`` for isolated vertices).  Lines
+        are sorted alphabetically by vertex name and preceded by the graph label.
+
+        :return: Multi-line adjacency list string.
+        :rtype: str
+        """
+        lines: list[str] = []
+        for name in sorted(self._vertices):
+            nbrs = self.neighbors(name)
+            rhs = "".join(nbrs) if nbrs else "0"
+            lines.append(f"{name} -> {rhs}")
+        return f"{self._label}\n" + "\n".join(lines)
+
+    def __iter__(self) -> Iterator[str]:
+        """Iterate over vertex names in insertion order.
+
+        :return: An iterator yielding vertex name strings.
+        :rtype: Iterator[str]
+        """
+        return iter(self._vertices)
+
+    def __getitem__(self, node: str) -> list[str]:
+        """Return neighbor names for *node*, or ``[]`` if absent.
+
+        This enables the common ``graph[v]`` idiom used throughout the algorithm modules.
+
+        :param node: Vertex name.
+        :type node: str
+        :return: List of neighbor vertex names.
+        :rtype: list[str]
+        """
+        if node not in self._vertices:
+            return []
+        return self.neighbors(node)
+
+    def __contains__(self, item: str) -> bool:
+        """Return ``True`` if *item* is a vertex name in this graph.
+
+        :param item: Vertex name to check.
+        :type item: str
+        :return: ``True`` if the vertex exists.
+        :rtype: bool
+        """
+        return item in self._vertices
+
+    def __len__(self) -> int:
+        """Return the number of vertices (same as :attr:`order`).
+
+        :return: Vertex count.
+        :rtype: int
+        """
+        return len(self._vertices)
 
     @property
     def label(self) -> str:
@@ -479,74 +539,6 @@ class Graph:
         :raises IndexError: If *index* is out of range.
         """
         return self.vertices()[index]
-
-    # ------------------------------------------------------------------
-    # Dunder methods
-    # ------------------------------------------------------------------
-
-    def __repr__(self) -> str:
-        """Return a developer-friendly representation.
-
-        :return: String like ``Graph('my graph', order=5, size=7)``.
-        :rtype: str
-        """
-        return f"Graph({self._label!r}, order={self.order}, size={self.size})"
-
-    def __str__(self) -> str:
-        """Return a human-readable adjacency-list view of the graph.
-
-        Each line shows ``vertex -> neighbor_names`` (or ``-> 0`` for isolated vertices).  Lines
-        are sorted alphabetically by vertex name and preceded by the graph label.
-
-        :return: Multi-line adjacency list string.
-        :rtype: str
-        """
-        lines: list[str] = []
-        for name in sorted(self._vertices):
-            nbrs = self.neighbors(name)
-            rhs = "".join(nbrs) if nbrs else "0"
-            lines.append(f"{name} -> {rhs}")
-        return f"{self._label}\n" + "\n".join(lines)
-
-    def __iter__(self) -> Iterator[str]:
-        """Iterate over vertex names in insertion order.
-
-        :return: An iterator yielding vertex name strings.
-        :rtype: Iterator[str]
-        """
-        return iter(self._vertices)
-
-    def __getitem__(self, node: str) -> list[str]:
-        """Return neighbor names for *node*, or ``[]`` if absent.
-
-        This enables the common ``graph[v]`` idiom used throughout the algorithm modules.
-
-        :param node: Vertex name.
-        :type node: str
-        :return: List of neighbor vertex names.
-        :rtype: list[str]
-        """
-        if node not in self._vertices:
-            return []
-        return self.neighbors(node)
-
-    def __contains__(self, item: str) -> bool:
-        """Return ``True`` if *item* is a vertex name in this graph.
-
-        :param item: Vertex name to check.
-        :type item: str
-        :return: ``True`` if the vertex exists.
-        :rtype: bool
-        """
-        return item in self._vertices
-
-    def __len__(self) -> int:
-        """Return the number of vertices (same as :attr:`order`).
-
-        :return: Vertex count.
-        :rtype: int
-        """
-        return len(self._vertices)
 
     # ------------------------------------------------------------------
     # Protected helpers
