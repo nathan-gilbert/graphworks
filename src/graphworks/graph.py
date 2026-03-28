@@ -17,6 +17,13 @@ A :class:`Graph` can be built from:
 * a stdlib adjacency matrix (``input_matrix``), or
 * programmatically via :meth:`add_vertex` / :meth:`add_edge`.
 
+Fluent chaining is supported — :meth:`add_vertex`, :meth:`add_edge`, and :meth:`add_edges` all
+return ``self`` so calls can be chained::
+
+    >>> g = Graph("demo")
+    >>> g.add_edge("A", "B").add_edge("B", "C").add_edge("C", "A")
+    Graph('demo', order=3, size=3)
+
 For numpy ``ndarray`` input, convert first with :func:`graphworks.numpy_compat.ndarray_to_matrix`.
 
 Example::
@@ -44,7 +51,8 @@ from .edge import Edge
 from .vertex import Vertex
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
+    from typing import Any, Self
 
     from .types import AdjacencyMatrix
 
@@ -211,21 +219,43 @@ class Graph:
         """
         return self._vertices.get(name)
 
-    def add_vertex(self, vertex: str | Vertex) -> None:
+    def add_vertex(
+        self,
+        vertex: str | Vertex,
+        *,
+        label: str | None = None,
+        attrs: dict[str, Any] | None = None,
+    ) -> Self:
         """Add a vertex to the graph if it does not already exist.
 
-        Accepts either a plain name string (which is wrapped in a
-        :class:`~graphworks.vertex.Vertex` automatically) or an existing
-        :class:`~graphworks.vertex.Vertex` instance.
+        Accepts a plain name string, a :class:`~graphworks.vertex.Vertex` instance, or a name
+        string with keyword arguments that are forwarded to :meth:`Vertex.create`.
+
+        When *vertex* is a :class:`Vertex` object, *label* and *attrs* are ignored — the object
+        is used as-is.
+
+        Returns ``self`` to support fluent call chaining::
+
+            >>> g = Graph()
+            >>> g.add_vertex("A").add_vertex("B").add_vertex("C")
+            Graph('', order=3, size=0)
 
         :param vertex: Vertex name or :class:`Vertex` object.
         :type vertex: str | Vertex
-        :return: Nothing.
-        :rtype: None
+        :param label: Human-readable display label.  Only used when *vertex* is a ``str``.
+        :type label: str | None
+        :param attrs: Arbitrary metadata dict.  Only used when *vertex* is a ``str``.  The dict is
+            defensively copied and frozen into a :class:`~types.MappingProxyType`.
+        :type attrs: dict[str, Any] | None
+        :return: This graph instance (for chaining).
+        :rtype: Self
         """
         if isinstance(vertex, Vertex):
             name = vertex.name
             obj = vertex
+        elif label is not None or attrs is not None:
+            name = vertex
+            obj = Vertex.create(name, label=label, attrs=attrs)
         else:
             name = vertex
             obj = Vertex(name)
@@ -233,6 +263,8 @@ class Graph:
         if name not in self._vertices:
             self._vertices[name] = obj
             self._adj[name] = {}
+
+        return self
 
     # ------------------------------------------------------------------
     # Edge access
@@ -271,37 +303,117 @@ class Graph:
 
     def add_edge(
         self,
-        source: str,
-        target: str,
+        source_or_edge: str | Edge,
+        target: str | None = None,
         *,
         weight: float | None = None,
         label: str | None = None,
-    ) -> None:
-        """Add an edge from *source* to *target*.
+    ) -> Self:
+        """Add an edge to the graph.
 
-        Both vertices are created automatically if they do not yet exist.
+        Accepts either two vertex-name strings **or** a pre-built :class:`~graphworks.edge.Edge`
+        object.  Both endpoint vertices are created automatically if they do not yet exist.
 
-        :param source: Source vertex name.
-        :type source: str
-        :param target: Destination vertex name.
-        :type target: str
-        :param weight: Optional numeric weight for the edge.
+        When an :class:`Edge` object is passed, *target*, *weight*, and *label* are ignored — the
+        edge is used as-is.
+
+        Returns ``self`` to support fluent call chaining::
+
+            >>> g = Graph("triangle")
+            >>> g.add_edge("A", "B").add_edge("B", "C").add_edge("C", "A")
+            Graph('triangle', order=3, size=3)
+
+        :param source_or_edge: Source vertex name **or** an :class:`Edge` instance.
+        :type source_or_edge: str | Edge
+        :param target: Destination vertex name.  Required when *source_or_edge* is a ``str``;
+            ignored when it is an :class:`Edge`.
+        :type target: str | None
+        :param weight: Optional numeric weight for the edge.  Ignored when *source_or_edge* is an
+            :class:`Edge`.
         :type weight: float | None
-        :param label: Optional human-readable label for the edge.
+        :param label: Optional human-readable label for the edge.  Ignored when *source_or_edge*
+            is an :class:`Edge`.
         :type label: str | None
-        :return: Nothing.
-        :rtype: None
+        :return: This graph instance (for chaining).
+        :rtype: Self
+        :raises TypeError: If *source_or_edge* is a ``str`` and *target* is ``None``.
         """
-        self.add_vertex(source)
-        self.add_vertex(target)
-        edge = Edge(
-            source=source,
-            target=target,
-            directed=self._directed,
-            weight=weight,
-            label=label,
-        )
-        self._adj[source][target] = edge
+        if isinstance(source_or_edge, Edge):
+            edge = source_or_edge
+            self.add_vertex(edge.source)
+            self.add_vertex(edge.target)
+            self._adj[edge.source][edge.target] = edge
+        else:
+            if target is None:
+                msg = "target is required when source_or_edge is a vertex name string."
+                raise TypeError(msg)
+            self.add_vertex(source_or_edge)
+            self.add_vertex(target)
+            edge = Edge(
+                source=source_or_edge,
+                target=target,
+                directed=self._directed,
+                weight=weight,
+                label=label,
+            )
+            self._adj[source_or_edge][target] = edge
+
+        return self
+
+    def add_edges(
+        self,
+        edges: Iterable[tuple[str, str] | tuple[str, str, dict[str, Any]] | Edge],
+    ) -> Self:
+        """Add multiple edges to the graph in one call.
+
+        Each element of *edges* can be:
+
+        * a ``(source, target)`` tuple,
+        * a ``(source, target, attrs_dict)`` tuple where *attrs_dict* may contain ``"weight"``
+          and/or ``"label"`` keys, or
+        * a pre-built :class:`~graphworks.edge.Edge` object.
+
+        Returns ``self`` to support fluent call chaining::
+
+            >>> g = Graph("square")
+            >>> g.add_edges([("A", "B"), ("B", "C"), ("C", "D"), ("D", "A")])
+            Graph('square', order=4, size=4)
+
+        :param edges: Iterable of edge specifications.
+        :type edges: Iterable[tuple[str, str] | tuple[str, str, dict[str, Any]] | Edge]
+        :return: This graph instance (for chaining).
+        :rtype: Self
+        :raises TypeError: If an element is not a recognized edge specification.
+        """
+        for item in edges:
+            if isinstance(item, Edge):
+                self.add_edge(item)
+            elif isinstance(item, tuple):
+                if len(item) == 2:
+                    src, tgt = item
+                    self.add_edge(src, tgt)
+                elif len(item) == 3:
+                    src, tgt, kwargs = item
+                    if not isinstance(kwargs, dict):
+                        msg = (
+                            f"Third element of edge tuple must be a dict, "
+                            f"got {type(kwargs).__name__}."
+                        )
+                        raise TypeError(msg)
+                    self.add_edge(
+                        src,
+                        tgt,
+                        weight=kwargs.get("weight"),
+                        label=kwargs.get("label"),
+                    )
+                else:
+                    msg = f"Edge tuple must have 2 or 3 elements, got {len(item)}."
+                    raise TypeError(msg)
+            else:
+                msg = f"Expected a tuple or Edge, got {type(item).__name__}."
+                raise TypeError(msg)
+
+        return self
 
     # ------------------------------------------------------------------
     # Neighbour access
