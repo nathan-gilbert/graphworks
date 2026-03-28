@@ -17,6 +17,13 @@ A :class:`Graph` can be built from:
 * a stdlib adjacency matrix (``input_matrix``), or
 * programmatically via :meth:`add_vertex` / :meth:`add_edge`.
 
+Fluent chaining is supported — :meth:`add_vertex`, :meth:`add_edge`, and :meth:`add_edges` all
+return ``self`` so calls can be chained::
+
+    >>> g = Graph("demo")
+    >>> g.add_edge("A", "B").add_edge("B", "C").add_edge("C", "A")
+    Graph('demo', order=3, size=3)
+
 For numpy ``ndarray`` input, convert first with :func:`graphworks.numpy_compat.ndarray_to_matrix`.
 
 Example::
@@ -44,7 +51,8 @@ from .edge import Edge
 from .vertex import Vertex
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
+    from typing import Any, Self
 
     from .types import AdjacencyMatrix
 
@@ -138,9 +146,167 @@ class Graph:
             )
             raise ValueError(msg)
 
-    # ------------------------------------------------------------------
-    # Properties — metadata
-    # ------------------------------------------------------------------
+    def __repr__(self) -> str:
+        """Return a developer-friendly representation.
+
+        :return: String like ``Graph('my graph', order=5, size=7)``.
+        :rtype: str
+        """
+        return f"Graph({self._label!r}, order={self.order}, size={self.size})"
+
+    def __str__(self) -> str:
+        """Return a human-readable adjacency-list view of the graph.
+
+        Each line shows ``vertex -> neighbor_names`` (or ``-> 0`` for isolated vertices).  Lines
+        are sorted alphabetically by vertex name and preceded by the graph label.
+
+        :return: Multi-line adjacency list string.
+        :rtype: str
+        """
+        lines: list[str] = []
+        for name in sorted(self._vertices):
+            nbrs = self.neighbors(name)
+            rhs = "".join(nbrs) if nbrs else "0"
+            lines.append(f"{name} -> {rhs}")
+        return f"{self._label}\n" + "\n".join(lines)
+
+    def __iter__(self) -> Iterator[str]:
+        """Iterate over vertex names in insertion order.
+
+        :return: An iterator yielding vertex name strings.
+        :rtype: Iterator[str]
+        """
+        return iter(self._vertices)
+
+    def __getitem__(self, node: str) -> list[str]:
+        """Return neighbor names for *node*, or ``[]`` if absent.
+
+        This enables the common ``graph[v]`` idiom used throughout the algorithm modules.
+
+        :param node: Vertex name.
+        :type node: str
+        :return: List of neighbor vertex names.
+        :rtype: list[str]
+        """
+        if node not in self._vertices:
+            return []
+        return self.neighbors(node)
+
+    def __contains__(self, item: str) -> bool:
+        """Return ``True`` if *item* is a vertex name in this graph.
+
+        :param item: Vertex name to check.
+        :type item: str
+        :return: ``True`` if the vertex exists.
+        :rtype: bool
+        """
+        return item in self._vertices
+
+    def __len__(self) -> int:
+        """Return the number of vertices (same as :attr:`order`).
+
+        :return: Vertex count.
+        :rtype: int
+        """
+        return len(self._vertices)
+
+    def __or__(self, other: object) -> Graph:
+        """Return the union of this graph and *other*.
+
+        Creates a **new** :class:`Graph` containing all vertices and edges from both operands.
+        When a vertex name appears in both graphs, the left operand's :class:`Vertex` object is
+        kept.  When the same edge ``(source, target)`` exists in both, the right operand's
+        :class:`Edge` object wins (last-write-wins, mirroring ``dict.__or__``).
+
+        The operands must agree on :attr:`directed`; mixing directed and undirected graphs raises
+        :class:`TypeError`.  The result is :attr:`weighted` if either operand is.
+
+        Example::
+
+            >>> g1 = Graph("left")
+            >>> g1.add_edge("A", "B")
+            Graph('left', order=2, size=1)
+            >>> g2 = Graph("right")
+            >>> g2.add_edge("B", "C")
+            Graph('right', order=2, size=1)
+            >>> merged = g1 | g2
+            >>> merged.order
+            3
+            >>> merged.size
+            2
+
+        :param other: Another :class:`Graph` to merge.
+        :type other: object
+        :return: A new graph containing the union of both operands.
+        :rtype: Graph
+        :raises TypeError: If *other* is not a :class:`Graph`, or if the graphs disagree on
+            :attr:`directed`.
+        """
+        try:
+            other = self._check_union_compat(other)
+        except TypeError:
+            return NotImplemented
+
+        label = f"{self._label} | {other._label}" if self._label or other._label else ""
+        result = Graph(
+            label,
+            directed=self._directed,
+            weighted=self._weighted or other._weighted,
+        )
+
+        # Seed with left's vertices (left takes precedence on name collision),
+        # then merge right via |=.
+        for v_obj in self._vertices.values():
+            result.add_vertex(v_obj)
+        for targets in self._adj.values():
+            for edge in targets.values():
+                result.add_edge(edge)
+
+        result |= other
+        return result
+
+    def __ior__(self, other: object) -> Self:
+        """Merge *other* into this graph in place (augmented union).
+
+        Adds all vertices and edges from *other* to ``self``.  Existing vertices in ``self``
+        are kept; new vertices from *other* are added.  Edges from *other* overwrite any
+        existing edges with the same ``(source, target)`` pair.
+
+        Returns ``self`` to support chaining and augmented assignment::
+
+            >>> g1 = Graph("base")
+            >>> g1.add_edge("A", "B")
+            Graph('base', order=2, size=1)
+            >>> g2 = Graph()
+            >>> g2.add_edge("B", "C")
+            Graph('', order=2, size=1)
+            >>> g1 |= g2
+            >>> g1.order
+            3
+
+        :param other: Another :class:`Graph` to merge into ``self``.
+        :type other: object
+        :return: This graph instance (for chaining).
+        :rtype: Self
+        :raises TypeError: If *other* is not a :class:`Graph`, or if the graphs disagree on
+            :attr:`directed`.
+        """
+        try:
+            other = self._check_union_compat(other)
+        except TypeError:
+            return NotImplemented
+
+        if other._weighted:
+            self._weighted = True
+
+        for v_obj in other._vertices.values():
+            self.add_vertex(v_obj)
+
+        for targets in other._adj.values():
+            for edge in targets.values():
+                self.add_edge(edge)
+
+        return self
 
     @property
     def label(self) -> str:
@@ -211,21 +377,43 @@ class Graph:
         """
         return self._vertices.get(name)
 
-    def add_vertex(self, vertex: str | Vertex) -> None:
+    def add_vertex(
+        self,
+        vertex: str | Vertex,
+        *,
+        label: str | None = None,
+        attrs: dict[str, Any] | None = None,
+    ) -> Self:
         """Add a vertex to the graph if it does not already exist.
 
-        Accepts either a plain name string (which is wrapped in a
-        :class:`~graphworks.vertex.Vertex` automatically) or an existing
-        :class:`~graphworks.vertex.Vertex` instance.
+        Accepts a plain name string, a :class:`~graphworks.vertex.Vertex` instance, or a name
+        string with keyword arguments that are forwarded to :meth:`Vertex.create`.
+
+        When *vertex* is a :class:`Vertex` object, *label* and *attrs* are ignored — the object
+        is used as-is.
+
+        Returns ``self`` to support fluent call chaining::
+
+            >>> g = Graph()
+            >>> g.add_vertex("A").add_vertex("B").add_vertex("C")
+            Graph('', order=3, size=0)
 
         :param vertex: Vertex name or :class:`Vertex` object.
         :type vertex: str | Vertex
-        :return: Nothing.
-        :rtype: None
+        :param label: Human-readable display label.  Only used when *vertex* is a ``str``.
+        :type label: str | None
+        :param attrs: Arbitrary metadata dict.  Only used when *vertex* is a ``str``.  The dict is
+            defensively copied and frozen into a :class:`~types.MappingProxyType`.
+        :type attrs: dict[str, Any] | None
+        :return: This graph instance (for chaining).
+        :rtype: Self
         """
         if isinstance(vertex, Vertex):
             name = vertex.name
             obj = vertex
+        elif label is not None or attrs is not None:
+            name = vertex
+            obj = Vertex.create(name, label=label, attrs=attrs)
         else:
             name = vertex
             obj = Vertex(name)
@@ -233,6 +421,8 @@ class Graph:
         if name not in self._vertices:
             self._vertices[name] = obj
             self._adj[name] = {}
+
+        return self
 
     # ------------------------------------------------------------------
     # Edge access
@@ -271,37 +461,115 @@ class Graph:
 
     def add_edge(
         self,
-        source: str,
-        target: str,
+        source_or_edge: str | Edge,
+        target: str | None = None,
         *,
         weight: float | None = None,
         label: str | None = None,
-    ) -> None:
-        """Add an edge from *source* to *target*.
+    ) -> Self:
+        """Add an edge to the graph.
 
-        Both vertices are created automatically if they do not yet exist.
+        Accepts either two vertex-name strings **or** a pre-built :class:`~graphworks.edge.Edge`
+        object.  Both endpoint vertices are created automatically if they do not yet exist.
 
-        :param source: Source vertex name.
-        :type source: str
-        :param target: Destination vertex name.
-        :type target: str
-        :param weight: Optional numeric weight for the edge.
+        When an :class:`Edge` object is passed, *target*, *weight*, and *label* are ignored — the
+        edge is used as-is.
+
+        Returns ``self`` to support fluent call chaining::
+
+            >>> g = Graph("triangle")
+            >>> g.add_edge("A", "B").add_edge("B", "C").add_edge("C", "A")
+            Graph('triangle', order=3, size=3)
+
+        :param source_or_edge: Source vertex name **or** an :class:`Edge` instance.
+        :type source_or_edge: str | Edge
+        :param target: Destination vertex name.  Required when *source_or_edge* is a ``str``;
+            ignored when it is an :class:`Edge`.
+        :type target: str | None
+        :param weight: Optional numeric weight for the edge.  Ignored when *source_or_edge* is an
+            :class:`Edge`.
         :type weight: float | None
-        :param label: Optional human-readable label for the edge.
+        :param label: Optional human-readable label for the edge.  Ignored when *source_or_edge*
+            is an :class:`Edge`.
         :type label: str | None
-        :return: Nothing.
-        :rtype: None
+        :return: This graph instance (for chaining).
+        :rtype: Self
+        :raises TypeError: If *source_or_edge* is a ``str`` and *target* is ``None``.
         """
-        self.add_vertex(source)
-        self.add_vertex(target)
-        edge = Edge(
-            source=source,
-            target=target,
-            directed=self._directed,
-            weight=weight,
-            label=label,
-        )
-        self._adj[source][target] = edge
+        if isinstance(source_or_edge, Edge):
+            edge = source_or_edge
+            self.add_vertex(edge.source)
+            self.add_vertex(edge.target)
+            self._adj[edge.source][edge.target] = edge
+        else:
+            if target is None:
+                msg = "target is required when source_or_edge is a vertex name string."
+                raise TypeError(msg)
+            self.add_vertex(source_or_edge)
+            self.add_vertex(target)
+            edge = Edge(
+                source=source_or_edge,
+                target=target,
+                directed=self._directed,
+                weight=weight,
+                label=label,
+            )
+            self._adj[source_or_edge][target] = edge
+
+        return self
+
+    def add_edges(
+        self,
+        edges: Iterable[tuple[str, str] | tuple[str, str, dict[str, Any]] | Edge],
+    ) -> Self:
+        """Add multiple edges to the graph in one call.
+
+        Each element of *edges* can be:
+
+        * a ``(source, target)`` tuple,
+        * a ``(source, target, attrs_dict)`` tuple where *attrs_dict* may contain ``"weight"``
+          and/or ``"label"`` keys, or
+        * a pre-built :class:`~graphworks.edge.Edge` object.
+
+        Returns ``self`` to support fluent call chaining::
+
+            >>> g = Graph("square")
+            >>> g.add_edges([("A", "B"), ("B", "C"), ("C", "D"), ("D", "A")])
+            Graph('square', order=4, size=4)
+
+        :param edges: Iterable of edge specifications.
+        :type edges: Iterable[tuple[str, str] | tuple[str, str, dict[str, Any]] | Edge]
+        :return: This graph instance (for chaining).
+        :rtype: Self
+        :raises TypeError: If an element is not a recognized edge specification.
+        """
+        for item in edges:
+            match item:
+                case Edge() as edge:
+                    self.add_edge(edge)
+                case (str(src), str(tgt)):
+                    self.add_edge(src, tgt)
+                case (str(src), str(tgt), dict(kwargs)):
+                    self.add_edge(
+                        src,
+                        tgt,
+                        weight=kwargs.get("weight"),
+                        label=kwargs.get("label"),
+                    )
+                case (str(), str(), invalid):
+                    msg = (
+                        f"Third element of edge tuple must be a dict, "
+                        f"got {type(invalid).__name__}."
+                    )
+                    raise TypeError(msg)
+                case tuple():
+                    msg = f"Edge tuple must have 2 or 3 str elements, got {len(item)}."
+                    raise TypeError(msg)
+                case _:
+                    msg = f"Expected a tuple or Edge, got {type(item).__name__}."
+                    raise TypeError(msg)
+
+        return self
 
     # ------------------------------------------------------------------
     # Neighbour access
@@ -369,74 +637,6 @@ class Graph:
         :raises IndexError: If *index* is out of range.
         """
         return self.vertices()[index]
-
-    # ------------------------------------------------------------------
-    # Dunder methods
-    # ------------------------------------------------------------------
-
-    def __repr__(self) -> str:
-        """Return a developer-friendly representation.
-
-        :return: String like ``Graph('my graph', order=5, size=7)``.
-        :rtype: str
-        """
-        return f"Graph({self._label!r}, order={self.order}, size={self.size})"
-
-    def __str__(self) -> str:
-        """Return a human-readable adjacency-list view of the graph.
-
-        Each line shows ``vertex -> neighbor_names`` (or ``-> 0`` for isolated vertices).  Lines
-        are sorted alphabetically by vertex name and preceded by the graph label.
-
-        :return: Multi-line adjacency list string.
-        :rtype: str
-        """
-        lines: list[str] = []
-        for name in sorted(self._vertices):
-            nbrs = self.neighbors(name)
-            rhs = "".join(nbrs) if nbrs else "0"
-            lines.append(f"{name} -> {rhs}")
-        return f"{self._label}\n" + "\n".join(lines)
-
-    def __iter__(self) -> Iterator[str]:
-        """Iterate over vertex names in insertion order.
-
-        :return: An iterator yielding vertex name strings.
-        :rtype: Iterator[str]
-        """
-        return iter(self._vertices)
-
-    def __getitem__(self, node: str) -> list[str]:
-        """Return neighbor names for *node*, or ``[]`` if absent.
-
-        This enables the common ``graph[v]`` idiom used throughout the algorithm modules.
-
-        :param node: Vertex name.
-        :type node: str
-        :return: List of neighbor vertex names.
-        :rtype: list[str]
-        """
-        if node not in self._vertices:
-            return []
-        return self.neighbors(node)
-
-    def __contains__(self, item: str) -> bool:
-        """Return ``True`` if *item* is a vertex name in this graph.
-
-        :param item: Vertex name to check.
-        :type item: str
-        :return: ``True`` if the vertex exists.
-        :rtype: bool
-        """
-        return item in self._vertices
-
-    def __len__(self) -> int:
-        """Return the number of vertices (same as :attr:`order`).
-
-        :return: Vertex count.
-        :rtype: int
-        """
-        return len(self._vertices)
 
     # ------------------------------------------------------------------
     # Protected helpers
@@ -549,3 +749,23 @@ class Graph:
                         directed=self._directed,
                     )
                     self._adj[names[r_idx]][names[c_idx]] = edge
+
+    def _check_union_compat(self, other: object) -> Graph:
+        """Validate that *other* is a compatible :class:`Graph` for union.
+
+        :param other: Candidate right-hand operand.
+        :type other: object
+        :return: *other*, narrowed to :class:`Graph`.
+        :rtype: Graph
+        :raises TypeError: If *other* is not a :class:`Graph` or has a different
+            :attr:`directed` flag.
+        """
+        if not isinstance(other, Graph):
+            raise TypeError  # sentinel; callers return NotImplemented instead
+        if self._directed != other._directed:
+            msg = (
+                f"Cannot union a {'directed' if self._directed else 'undirected'} graph "
+                f"with a {'directed' if other._directed else 'undirected'} graph."
+            )
+            raise TypeError(msg)
+        return other
