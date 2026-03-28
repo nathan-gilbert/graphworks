@@ -210,6 +210,104 @@ class Graph:
         """
         return len(self._vertices)
 
+    def __or__(self, other: object) -> Graph:
+        """Return the union of this graph and *other*.
+
+        Creates a **new** :class:`Graph` containing all vertices and edges from both operands.
+        When a vertex name appears in both graphs, the left operand's :class:`Vertex` object is
+        kept.  When the same edge ``(source, target)`` exists in both, the right operand's
+        :class:`Edge` object wins (last-write-wins, mirroring ``dict.__or__``).
+
+        The operands must agree on :attr:`directed`; mixing directed and undirected graphs raises
+        :class:`TypeError`.  The result is :attr:`weighted` if either operand is.
+
+        Example::
+
+            >>> g1 = Graph("left")
+            >>> g1.add_edge("A", "B")
+            Graph('left', order=2, size=1)
+            >>> g2 = Graph("right")
+            >>> g2.add_edge("B", "C")
+            Graph('right', order=2, size=1)
+            >>> merged = g1 | g2
+            >>> merged.order
+            3
+            >>> merged.size
+            2
+
+        :param other: Another :class:`Graph` to merge.
+        :type other: object
+        :return: A new graph containing the union of both operands.
+        :rtype: Graph
+        :raises TypeError: If *other* is not a :class:`Graph`, or if the graphs disagree on
+            :attr:`directed`.
+        """
+        try:
+            other = self._check_union_compat(other)
+        except TypeError:
+            return NotImplemented
+
+        label = f"{self._label} | {other._label}" if self._label or other._label else ""
+        result = Graph(
+            label,
+            directed=self._directed,
+            weighted=self._weighted or other._weighted,
+        )
+
+        # Seed with left's vertices (left takes precedence on name collision),
+        # then merge right via |=.
+        for v_obj in self._vertices.values():
+            result.add_vertex(v_obj)
+        for targets in self._adj.values():
+            for edge in targets.values():
+                result.add_edge(edge)
+
+        result |= other
+        return result
+
+    def __ior__(self, other: object) -> Self:
+        """Merge *other* into this graph in place (augmented union).
+
+        Adds all vertices and edges from *other* to ``self``.  Existing vertices in ``self``
+        are kept; new vertices from *other* are added.  Edges from *other* overwrite any
+        existing edges with the same ``(source, target)`` pair.
+
+        Returns ``self`` to support chaining and augmented assignment::
+
+            >>> g1 = Graph("base")
+            >>> g1.add_edge("A", "B")
+            Graph('base', order=2, size=1)
+            >>> g2 = Graph()
+            >>> g2.add_edge("B", "C")
+            Graph('', order=2, size=1)
+            >>> g1 |= g2
+            >>> g1.order
+            3
+
+        :param other: Another :class:`Graph` to merge into ``self``.
+        :type other: object
+        :return: This graph instance (for chaining).
+        :rtype: Self
+        :raises TypeError: If *other* is not a :class:`Graph`, or if the graphs disagree on
+            :attr:`directed`.
+        """
+        try:
+            other = self._check_union_compat(other)
+        except TypeError:
+            return NotImplemented
+
+        if other._weighted:
+            self._weighted = True
+
+        for v_obj in other._vertices.values():
+            self.add_vertex(v_obj)
+
+        for targets in other._adj.values():
+            for edge in targets.values():
+                self.add_edge(edge)
+
+        return self
+
     @property
     def label(self) -> str:
         """Human-readable name for this graph.
@@ -651,3 +749,23 @@ class Graph:
                         directed=self._directed,
                     )
                     self._adj[names[r_idx]][names[c_idx]] = edge
+
+    def _check_union_compat(self, other: object) -> Graph:
+        """Validate that *other* is a compatible :class:`Graph` for union.
+
+        :param other: Candidate right-hand operand.
+        :type other: object
+        :return: *other*, narrowed to :class:`Graph`.
+        :rtype: Graph
+        :raises TypeError: If *other* is not a :class:`Graph` or has a different
+            :attr:`directed` flag.
+        """
+        if not isinstance(other, Graph):
+            raise TypeError  # sentinel; callers return NotImplemented instead
+        if self._directed != other._directed:
+            msg = (
+                f"Cannot union a {'directed' if self._directed else 'undirected'} graph "
+                f"with a {'directed' if other._directed else 'undirected'} graph."
+            )
+            raise TypeError(msg)
+        return other
