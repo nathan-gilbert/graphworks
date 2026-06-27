@@ -643,7 +643,13 @@ class Graph:
     # Rendering
     # ------------------------------------------------------------------
 
-    def to_text(self) -> str:
+    def to_text(
+        self,
+        *,
+        vertex_labels: bool = True,
+        edge_labels: bool = True,
+        weights: bool | None = None,
+    ) -> str:
         """Render this graph as an indented ASCII/Unicode tree.
 
         Convenience wrapper around :func:`graphworks.export.text_utils.to_text`.  Draws the graph
@@ -659,10 +665,22 @@ class Graph:
                 ├── B
                 └── C
 
+        :param vertex_labels: Show each vertex's label when set, falling back to its name.
+        :type vertex_labels: bool
+        :param edge_labels: Show each edge's label when set.
+        :type edge_labels: bool
+        :param weights: Show edge weights.  ``None`` follows this graph's :attr:`weighted` flag;
+            ``True``/``False`` force the choice.
+        :type weights: bool | None
         :return: A multi-line string suitable for printing to a terminal.
         :rtype: str
         """
-        return _to_text(self)
+        return _to_text(
+            self,
+            vertex_labels=vertex_labels,
+            edge_labels=edge_labels,
+            weights=weights,
+        )
 
     # ------------------------------------------------------------------
     # Protected helpers

@@ -161,6 +161,89 @@ class TestToAscii:
         assert to_ascii(g) == to_ascii(g)
 
 
+class TestLabelsAndWeights:
+    """Label and weight display in the 2-D renderer."""
+
+    def test_vertex_label_appears(self) -> None:
+        """A vertex label is rendered in place of its name."""
+        g = Graph("g", directed=True)
+        g.add_vertex("A", label="Start")
+        g.add_edge("A", "B")
+        rendered = to_ascii(g)
+        assert "Start" in rendered
+        assert "A" not in rendered  # the label replaced the bare name
+
+    def test_vertex_labels_can_be_disabled(self) -> None:
+        """vertex_labels=False keeps the bare name."""
+        g = Graph("g", directed=True)
+        g.add_vertex("A", label="Start")
+        g.add_edge("A", "B")
+        assert "Start" not in to_ascii(g, vertex_labels=False)
+
+    def test_edge_weight_appears_at_midpoint(self) -> None:
+        """A weighted edge stamps its weight onto the canvas."""
+        g = Graph("g", directed=True, weighted=True)
+        g.add_edge("A", "B", weight=3)
+        assert "w=3" in to_ascii(g)
+
+    def test_edge_label_appears(self) -> None:
+        """An edge label is stamped onto the canvas."""
+        g = Graph("g", directed=True)
+        g.add_edge("A", "B", label="retry")
+        assert "retry" in to_ascii(g)
+
+    def test_weights_can_be_disabled(self) -> None:
+        """weights=False suppresses the mid-edge weight."""
+        g = Graph("g", directed=True, weighted=True)
+        g.add_edge("A", "B", weight=3)
+        assert "w=3" not in to_ascii(g, weights=False)
+
+    def test_weight_on_cyclic_graph(self) -> None:
+        """The circular layout (cyclic graph) also stamps edge weights."""
+        g = Graph("cyc", directed=True, weighted=True)
+        g.add_edges([("A", "B"), ("B", "C"), ("C", "A")])
+        g.add_edge("A", "B", weight=7)
+        assert "w=7" in to_ascii(g)
+
+
+class TestLayeredLayout:
+    """Barycenter ordering and dummy-node routing for DAGs."""
+
+    def test_long_span_edge_renders(self) -> None:
+        """An edge spanning multiple layers routes through dummies without dropping vertices."""
+        g = Graph("span", directed=True)
+        g.add_edges([("A", "B"), ("B", "C"), ("C", "D"), ("A", "D")])
+        rendered = to_ascii(g)
+        for vertex in ("A", "B", "C", "D"):
+            assert vertex in rendered
+        # A -> D spans three rows, so the drawing is at least that tall.
+        assert len(rendered.splitlines()) >= 5
+
+    def test_long_span_edge_is_deterministic(self) -> None:
+        """Dummy-routed layouts render identically across calls."""
+        g = Graph("span", directed=True)
+        g.add_edges([("A", "B"), ("B", "C"), ("C", "D"), ("A", "D")])
+        assert to_ascii(g) == to_ascii(g)
+
+    def test_single_layer_dag(self) -> None:
+        """A DAG with no edges (one layer) renders its vertices and skips ordering."""
+        g = Graph("flat", directed=True)
+        g.add_vertex("A")
+        g.add_vertex("B")
+        rendered = to_ascii(g)
+        assert "A" in rendered
+        assert "B" in rendered
+
+    def test_crossing_reduction_keeps_all_edges(self) -> None:
+        """A layout whose initial order crosses still renders every vertex after reordering."""
+        g = Graph("cross", directed=True)
+        # Declaring targets in an order that initially crosses exercises the barycenter sweeps.
+        g.add_edges([("A", "Y"), ("B", "X"), ("X", "Z"), ("Y", "Z")])
+        rendered = to_ascii(g)
+        for vertex in ("A", "B", "X", "Y", "Z"):
+            assert vertex in rendered
+
+
 class TestPublicSurface:
     """to_ascii is exposed at the package root (but not on Graph)."""
 

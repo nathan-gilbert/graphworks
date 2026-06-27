@@ -76,17 +76,55 @@ class TestToText:
         """Edge weights are shown when the graph is weighted."""
         g = Graph("weighted", weighted=True)
         g.add_edge("A", "B", weight=3).add_edge("B", "C", weight=1.5)
-        assert to_text(g) == "weighted\n└── A\n    └── B (w=3)\n        └── C (w=1.5)"
+        assert to_text(g) == "weighted\n└── A\n    └── B [w=3]\n        └── C [w=1.5]"
 
     def test_unweighted_graph_has_no_annotation(self, simple_edge_graph: Graph) -> None:
-        """Unweighted graphs carry no '(w=' annotations."""
-        assert "(w=" not in to_text(simple_edge_graph)
+        """Unweighted graphs carry no weight annotation."""
+        assert "w=" not in to_text(simple_edge_graph)
 
     def test_weighted_graph_edge_without_weight_unannotated(self) -> None:
         """A weighted graph still omits the annotation for edges that carry no weight."""
         g = Graph("weighted", weighted=True)
         g.add_edge("A", "B")  # no weight supplied
         assert to_text(g) == "weighted\n└── A\n    └── B"
+
+    def test_vertex_label_shown_by_default(self) -> None:
+        """A vertex's label replaces its name in the output when set."""
+        g = Graph("g", directed=True)
+        g.add_vertex("A", label="Start")
+        g.add_edge("A", "B")
+        assert to_text(g) == "g\n└── Start\n    └── B"
+
+    def test_vertex_labels_can_be_disabled(self) -> None:
+        """vertex_labels=False renders the name even when a label is set."""
+        g = Graph("g", directed=True)
+        g.add_vertex("A", label="Start")
+        g.add_edge("A", "B")
+        assert to_text(g, vertex_labels=False) == "g\n└── A\n    └── B"
+
+    def test_edge_label_shown_by_default(self) -> None:
+        """An edge's label is annotated in brackets."""
+        g = Graph("g", directed=True)
+        g.add_edge("A", "B", label="retry")
+        assert to_text(g) == "g\n└── A\n    └── B [retry]"
+
+    def test_edge_label_and_weight_combined(self) -> None:
+        """Label and weight share a single bracketed annotation."""
+        g = Graph("g", directed=True, weighted=True)
+        g.add_edge("A", "B", label="retry", weight=3)
+        assert to_text(g) == "g\n└── A\n    └── B [retry, w=3]"
+
+    def test_edge_labels_can_be_disabled(self) -> None:
+        """edge_labels=False hides labels but leaves weights intact."""
+        g = Graph("g", directed=True, weighted=True)
+        g.add_edge("A", "B", label="retry", weight=3)
+        assert to_text(g, edge_labels=False) == "g\n└── A\n    └── B [w=3]"
+
+    def test_weights_forced_on_unweighted_graph(self) -> None:
+        """weights=True shows weights even when the graph is not declared weighted."""
+        g = Graph("g", directed=True)
+        g.add_edge("A", "B", weight=3)
+        assert to_text(g, weights=True) == "g\n└── A\n    └── B [w=3]"
 
     def test_self_loop_marked(self) -> None:
         """A self-loop renders the vertex as a seen leaf beneath itself."""
@@ -114,6 +152,16 @@ class TestPublicSurface:
     def test_graph_method_matches_function(self, connected_graph: Graph) -> None:
         """Graph.to_text() delegates to the export function."""
         assert connected_graph.to_text() == to_text(connected_graph)
+
+    def test_graph_method_forwards_options(self) -> None:
+        """Graph.to_text() forwards its display options to the export function."""
+        g = Graph("g", directed=True, weighted=True)
+        g.add_vertex("A", label="Start")
+        g.add_edge("A", "B", weight=3)
+        assert g.to_text(vertex_labels=False, weights=False) == to_text(
+            g, vertex_labels=False, weights=False
+        )
+        assert g.to_text(vertex_labels=False, weights=False) == "g\n└── A\n    └── B"
 
     def test_top_level_export(self, simple_edge_graph: Graph) -> None:
         """to_text is importable directly from the package root."""

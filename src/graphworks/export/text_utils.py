@@ -29,6 +29,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ._labels import RenderStyle, edge_annotation, vertex_text
+
 if TYPE_CHECKING:
     from ..graph import Graph
 
@@ -43,7 +45,13 @@ _SPACE = "    "
 _SEEN = " ..."
 
 
-def to_text(graph: Graph) -> str:
+def to_text(
+    graph: Graph,
+    *,
+    vertex_labels: bool = True,
+    edge_labels: bool = True,
+    weights: bool | None = None,
+) -> str:
     """Render *graph* as an indented tree using box-drawing connectors.
 
     The graph is drawn as a depth-first spanning forest under a single root line (the graph
@@ -54,11 +62,21 @@ def to_text(graph: Graph) -> str:
     suppressed for readability.
 
     A vertex reached a second time is shown as a leaf with a trailing ``...`` and its subtree is
-    not repeated, so cycles and shared substructure render in finite space.  When the graph is
-    weighted, edge weights are annotated as ``(w=…)``.
+    not repeated, so cycles and shared substructure render in finite space.
+
+    Vertex and edge labels and edge weights are shown when present; an edge carrying either is
+    annotated as ``[label, w=…]``.  All three are on by default and are backward-compatible — a
+    graph with no custom labels and ``weighted=False`` renders identically to the bare structure.
 
     :param graph: The graph to render.
     :type graph: Graph
+    :param vertex_labels: Show each vertex's label when set, falling back to its name.
+    :type vertex_labels: bool
+    :param edge_labels: Show each edge's label when set.
+    :type edge_labels: bool
+    :param weights: Show edge weights.  ``None`` follows the graph's ``weighted`` flag;
+        ``True``/``False`` force the choice.
+    :type weights: bool | None
     :return: A multi-line string suitable for printing to a terminal.
     :rtype: str
     """
@@ -66,6 +84,11 @@ def to_text(graph: Graph) -> str:
     if graph.order == 0:
         return f"{root_token}\n(empty graph)"
 
+    style = RenderStyle(
+        vertex_labels=vertex_labels,
+        edge_labels=edge_labels,
+        weights=weights,
+    )
     candidates = _root_candidates(graph)
     roots = _select_roots(graph, candidates)
 
@@ -73,7 +96,7 @@ def to_text(graph: Graph) -> str:
     visited: set[str] = set()
     last_root = len(roots) - 1
     for idx, root in enumerate(roots):
-        _render(graph, root, None, "", idx == last_root, visited, lines)
+        _render(graph, root, None, "", idx == last_root, visited, lines, style)
     return "\n".join(lines)
 
 
@@ -151,6 +174,7 @@ def _render(  # noqa: PLR0913
     is_last: bool,
     visited: set[str],
     lines: list[str],
+    style: RenderStyle,
 ) -> None:
     """Append the lines for *node* and its subtree to *lines* (depth-first).
 
@@ -159,7 +183,7 @@ def _render(  # noqa: PLR0913
     :param node: The vertex to draw.
     :type node: str
     :param parent: The vertex *node* was reached from, or ``None`` for a root.  Used to suppress
-        the trivial back-edge in undirected graphs.
+        the trivial back-edge in undirected graphs and to resolve the incoming edge's annotation.
     :type parent: str | None
     :param prefix: The accumulated indentation string for this depth.
     :type prefix: str
@@ -169,24 +193,28 @@ def _render(  # noqa: PLR0913
     :type visited: set[str]
     :param lines: Output accumulator, mutated in place.
     :type lines: list[str]
+    :param style: The active display toggles.
+    :type style: RenderStyle
     :return: Nothing.
     :rtype: None
     """
     connector = _ELBOW if is_last else _TEE
-    weight = _weight_annotation(graph, parent, node)
+    display = vertex_text(graph, node, use_label=style.vertex_labels)
+    content = edge_annotation(graph, parent, node, style=style)
+    annotation = f" [{content}]" if content else ""
 
     if node in visited:
-        lines.append(f"{prefix}{connector}{node}{weight}{_SEEN}")
+        lines.append(f"{prefix}{connector}{display}{annotation}{_SEEN}")
         return
 
-    lines.append(f"{prefix}{connector}{node}{weight}")
+    lines.append(f"{prefix}{connector}{display}{annotation}")
     visited.add(node)
 
     children = _children(graph, node, parent)
     child_prefix = prefix + (_SPACE if is_last else _PIPE)
     last_child = len(children) - 1
     for idx, child in enumerate(children):
-        _render(graph, child, node, child_prefix, idx == last_child, visited, lines)
+        _render(graph, child, node, child_prefix, idx == last_child, visited, lines, style)
 
 
 def _children(graph: Graph, node: str, parent: str | None) -> list[str]:
@@ -207,25 +235,3 @@ def _children(graph: Graph, node: str, parent: str | None) -> list[str]:
     if graph.directed or parent is None:
         return graph.neighbors(node)
     return [tgt for tgt in graph.neighbors(node) if tgt != parent]
-
-
-def _weight_annotation(graph: Graph, source: str | None, target: str) -> str:
-    """Return a ``" (w=…)"`` suffix for the *source* → *target* edge, or ``""``.
-
-    Empty unless the graph is weighted and the edge carries a non-``None`` weight.
-
-    :param graph: The graph being rendered.
-    :type graph: Graph
-    :param source: The edge's source vertex, or ``None`` for a root (no incoming edge).
-    :type source: str | None
-    :param target: The edge's target vertex.
-    :type target: str
-    :return: The annotation string.
-    :rtype: str
-    """
-    if not graph.weighted or source is None:
-        return ""
-    edge = graph.edge(source, target)
-    if edge is None or edge.weight is None:
-        return ""
-    return f" (w={edge.weight})"

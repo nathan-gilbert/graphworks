@@ -5,17 +5,25 @@ space and draws edges as lines on a character grid — the "boxes and lines" vie
 
 Layout strategy
 ---------------
-* **DAGs** use a layered (Sugiyama-style) layout: each vertex is placed in a row equal to its
-  longest path from a source, reusing :func:`~graphworks.algorithms.sort.topological`.
+* **DAGs** use a layered (Sugiyama-style) layout:
+
+  1. *Layer assignment* — each vertex's row is its longest path from a source, reusing
+     :func:`~graphworks.algorithms.sort.topological`.
+  2. *Dummy nodes* — an edge spanning multiple rows is split into unit-length segments through
+     virtual nodes in the intervening rows, so it routes as a chain of short lines instead of one
+     long diagonal slashing across the layout.
+  3. *Ordering* — the left-to-right order within each row is refined by the **barycenter
+     heuristic** (iterative up/down sweeps, keeping the ordering with the fewest edge crossings).
+
 * **Cyclic or undirected** graphs fall back to a deterministic circular layout.
 
 .. note::
 
-   This is a deliberately simple **first cut**.  Edges are routed as naive straight lines via
-   Bresenham's algorithm, so dense graphs will show crossings and overlap.  Planned refinements:
-   crossing minimization (barycenter ordering within layers), orthogonal/edge-routed connectors,
-   self-loop rendering, and an optional high-resolution braille canvas.  The public surface
-   (:func:`to_ascii`) is stable; the rendered output is expected to improve.
+   Edge segments are still drawn as straight Bresenham lines (with slope-appropriate glyphs)
+   rather than orthogonal box-drawing connectors.  Remaining refinements: orthogonal/corner
+   routing, horizontal-coordinate assignment (Brandes–Köpf) for straighter chains, a force-
+   directed layout for the cyclic/undirected case, self-loop rendering, and a braille canvas.
+   The public surface (:func:`to_ascii`) is stable; the rendered output is expected to improve.
 
 Example::
 
@@ -26,20 +34,22 @@ Example::
     >>> print(to_ascii(g))  # doctest: +SKIP
     flow
     A
-    |\\
-    | C
-    B |
-     \\|
-      D
+    |\
+    B C
+    | /
+    D
 """
 
 from __future__ import annotations
 
 import math
+from collections import defaultdict
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ..algorithms.directed import is_dag
 from ..algorithms.sort import topological
+from ._labels import RenderStyle, edge_annotation, vertex_text
 
 if TYPE_CHECKING:
     from ..graph import Graph
@@ -47,6 +57,12 @@ if TYPE_CHECKING:
 # Pixel spacing applied when mapping logical layout cells onto the canvas.
 _X_GAP_PAD = 3  # horizontal gap added to the widest label
 _Y_GAP = 2  # blank row between layout rows, leaving space for edges
+
+# Number of barycenter down+up sweeps when ordering layered graphs.
+_SWEEPS = 4
+
+# Prefix marking a routing-only dummy node (never a real vertex name).
+_DUMMY = "\x00d"
 
 
 class _Canvas:
@@ -125,15 +141,50 @@ class _Canvas:
         return "\n".join("".join(row).rstrip() for row in self._grid)
 
 
-def to_ascii(graph: Graph) -> str:
+@dataclass(frozen=True, slots=True)
+class _Plot:
+    """A fully positioned layout ready to rasterise onto a :class:`_Canvas`.
+
+    :param ports: Each node id mapped to the pixel ``(x, y)`` it connects through.
+    :type ports: dict[str, tuple[int, int]]
+    :param labels: Each node id mapped to its display text (``""`` for routing dummies).
+    :type labels: dict[str, str]
+    :param links: Segment endpoints ``(a, b)`` to draw as lines.
+    :type links: list[tuple[str, str]]
+    :param notes: Edge annotations to stamp, as ``(x, y, text)``.
+    :type notes: list[tuple[int, int, str]]
+    """
+
+    ports: dict[str, tuple[int, int]]
+    labels: dict[str, str]
+    links: list[tuple[str, str]]
+    notes: list[tuple[int, int, str]]
+
+
+def to_ascii(
+    graph: Graph,
+    *,
+    vertex_labels: bool = True,
+    edge_labels: bool = True,
+    weights: bool | None = None,
+) -> str:
     """Render *graph* as 2-D ASCII art with vertices placed in a plane and edges drawn as lines.
 
-    DAGs are laid out top-down by layer; cyclic and undirected graphs use a circular layout.
-    The first line is the graph label (or ``"graph"``).  See the module docstring for the current
-    limitations of edge routing.
+    DAGs are laid out top-down by layer with barycenter ordering; cyclic and undirected graphs use
+    a circular layout.  The first line is the graph label (or ``"graph"``).
+
+    Vertex labels are shown inside the node text; edge labels and weights are stamped at the edge
+    midpoint as ``label, w=…``.  All three are on by default and backward-compatible.
 
     :param graph: The graph to render.
     :type graph: Graph
+    :param vertex_labels: Show each vertex's label when set, falling back to its name.
+    :type vertex_labels: bool
+    :param edge_labels: Show each edge's label when set.
+    :type edge_labels: bool
+    :param weights: Show edge weights.  ``None`` follows the graph's ``weighted`` flag;
+        ``True``/``False`` force the choice.
+    :type weights: bool | None
     :return: A multi-line string suitable for printing to a terminal.
     :rtype: str
     """
@@ -141,47 +192,292 @@ def to_ascii(graph: Graph) -> str:
     if graph.order == 0:
         return f"{root_token}\n(empty graph)"
 
-    cells = _layered_cells(graph) if is_dag(graph) else _circular_cells(graph)
-    canvas = _draw(graph, cells)
-    return f"{root_token}\n{canvas.render()}"
+    style = RenderStyle(
+        vertex_labels=vertex_labels,
+        edge_labels=edge_labels,
+        weights=weights,
+    )
+    plot = _layered_layout(graph, style) if is_dag(graph) else _circular_layout(graph, style)
+    return f"{root_token}\n{_render(plot)}"
 
 
-def _layered_cells(graph: Graph) -> dict[str, tuple[int, int]]:
-    """Assign each vertex an integer ``(col, row)`` cell using a longest-path layering.
+# ---------------------------------------------------------------------------
+# Layered (Sugiyama) layout for DAGs
+# ---------------------------------------------------------------------------
 
-    Row is the longest path from any source; vertices sharing a row are packed left-to-right in
-    insertion order.
+
+def _layered_layout(graph: Graph, style: RenderStyle) -> _Plot:
+    """Build a layered, barycenter-ordered layout for a directed acyclic *graph*.
 
     :param graph: A directed acyclic graph.
     :type graph: Graph
-    :return: Mapping of vertex name to ``(col, row)`` layout cell.
-    :rtype: dict[str, tuple[int, int]]
+    :param style: The active display toggles.
+    :type style: RenderStyle
+    :return: The positioned layout.
+    :rtype: _Plot
+    """
+    layer_of = _assign_layers(graph)
+    layers, segments, chains = _expand_with_dummies(graph, layer_of)
+    _order_layers(layers, segments)
+
+    labels = {nid: _node_label(graph, nid, style) for layer in layers for nid in layer}
+    x_gap = _x_gap(labels)
+    ports = _build_ports(layers, x_gap)
+    notes = _chain_notes(graph, chains, ports, style)
+    return _Plot(ports=ports, labels=labels, links=segments, notes=notes)
+
+
+def _assign_layers(graph: Graph) -> dict[str, int]:
+    """Return each vertex's row as its longest path from any source.
+
+    :param graph: A directed acyclic graph.
+    :type graph: Graph
+    :return: Mapping of vertex name to row index.
+    :rtype: dict[str, int]
     """
     layer = dict.fromkeys(graph.vertices(), 0)
     for u in topological(graph):
         base = layer[u] + 1
         for w in graph.neighbors(u):
             layer[w] = max(layer[w], base)
+    return layer
 
-    width_used: dict[int, int] = {}
-    cells: dict[str, tuple[int, int]] = {}
+
+def _expand_with_dummies(
+    graph: Graph,
+    layer_of: dict[str, int],
+) -> tuple[list[list[str]], list[tuple[str, str]], list[tuple[str, str, list[str]]]]:
+    """Place vertices into rows and split multi-row edges through dummy nodes.
+
+    :param graph: The graph being rendered.
+    :type graph: Graph
+    :param layer_of: Each vertex's row index.
+    :type layer_of: dict[str, int]
+    :return: The ordered ``layers``; the unit-length ``segments`` between adjacent rows; and the
+        ``chains`` (one ``(source, target, node_ids)`` per original edge) used for annotation.
+    :rtype: tuple[list[list[str]], list[tuple[str, str]], list[tuple[str, str, list[str]]]]
+    """
+    layers: list[list[str]] = [[] for _ in range(max(layer_of.values()) + 1)]
     for v in graph.vertices():
-        row = layer[v]
-        col = width_used.get(row, 0)
-        width_used[row] = col + 1
-        cells[v] = (col, row)
-    return cells
+        layers[layer_of[v]].append(v)
+
+    segments: list[tuple[str, str]] = []
+    chains: list[tuple[str, str, list[str]]] = []
+    counter = 0
+    for u in graph.vertices():
+        for w in graph.neighbors(u):
+            if u == w:
+                continue
+            chain = [u]
+            for row in range(layer_of[u] + 1, layer_of[w]):
+                dummy = f"{_DUMMY}{counter}"
+                counter += 1
+                layers[row].append(dummy)
+                chain.append(dummy)
+            chain.append(w)
+            chains.append((u, w, chain))
+            segments.extend(zip(chain, chain[1:], strict=False))
+    return layers, segments, chains
+
+
+def _order_layers(layers: list[list[str]], segments: list[tuple[str, str]]) -> None:
+    """Reorder nodes within each row to reduce edge crossings (barycenter heuristic).
+
+    Runs alternating down/up sweeps and keeps the ordering with the fewest crossings.  *layers* is
+    mutated in place.
+
+    :param layers: The rows of node ids, reordered in place.
+    :type layers: list[list[str]]
+    :param segments: Unit-length connections between adjacent rows.
+    :type segments: list[tuple[str, str]]
+    :return: Nothing.
+    :rtype: None
+    """
+    if len(layers) < 2:  # noqa: PLR2004
+        return
+
+    upward, downward = _adjacency(segments)
+    best = [list(layer) for layer in layers]
+    best_score = _count_crossings(layers, segments)
+    for _ in range(_SWEEPS):
+        for row in range(1, len(layers)):
+            _sort_layer(layers[row], upward, layers[row - 1])
+        for row in range(len(layers) - 2, -1, -1):
+            _sort_layer(layers[row], downward, layers[row + 1])
+        score = _count_crossings(layers, segments)
+        if score < best_score:
+            best_score = score
+            best = [list(layer) for layer in layers]
+
+    for row, ordered in enumerate(best):
+        layers[row][:] = ordered
+
+
+def _adjacency(
+    segments: list[tuple[str, str]],
+) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    """Return ``(upward, downward)`` neighbor maps from the segment list.
+
+    ``upward[b]`` holds the upper-row endpoints feeding into *b*; ``downward[a]`` holds the
+    lower-row endpoints fed from *a*.
+
+    :param segments: Unit-length connections between adjacent rows.
+    :type segments: list[tuple[str, str]]
+    :return: The upward and downward adjacency maps.
+    :rtype: tuple[dict[str, list[str]], dict[str, list[str]]]
+    """
+    upward: dict[str, list[str]] = defaultdict(list)
+    downward: dict[str, list[str]] = defaultdict(list)
+    for a, b in segments:
+        downward[a].append(b)
+        upward[b].append(a)
+    return upward, downward
+
+
+def _sort_layer(layer: list[str], neighbors: dict[str, list[str]], reference: list[str]) -> None:
+    """Sort *layer* in place by each node's barycenter over its *reference*-row neighbors.
+
+    Nodes with no neighbor in *reference* keep their current position.
+
+    :param layer: The row to reorder (mutated in place).
+    :type layer: list[str]
+    :param neighbors: Adjacency map from a node to its *reference*-row neighbors.
+    :type neighbors: dict[str, list[str]]
+    :param reference: The already-ordered adjacent row supplying positions.
+    :type reference: list[str]
+    :return: Nothing.
+    :rtype: None
+    """
+    position = {nid: index for index, nid in enumerate(reference)}
+    keyed: list[tuple[float, int, str]] = []
+    for index, nid in enumerate(layer):
+        seen = [position[n] for n in neighbors.get(nid, ()) if n in position]
+        key = sum(seen) / len(seen) if seen else float(index)
+        keyed.append((key, index, nid))
+    keyed.sort()
+    layer[:] = [nid for _, _, nid in keyed]
+
+
+def _count_crossings(layers: list[list[str]], segments: list[tuple[str, str]]) -> int:
+    """Return the total number of edge crossings across all adjacent-row boundaries.
+
+    :param layers: The current row orderings.
+    :type layers: list[list[str]]
+    :param segments: Unit-length connections between adjacent rows.
+    :type segments: list[tuple[str, str]]
+    :return: The crossing count.
+    :rtype: int
+    """
+    position = {nid: index for layer in layers for index, nid in enumerate(layer)}
+    level = {nid: row for row, layer in enumerate(layers) for nid in layer}
+    by_boundary: dict[int, list[tuple[int, int]]] = defaultdict(list)
+    for a, b in segments:
+        by_boundary[level[a]].append((position[a], position[b]))
+    return sum(_inversions(pairs) for pairs in by_boundary.values())
+
+
+def _inversions(pairs: list[tuple[int, int]]) -> int:
+    """Count pairs of segments that cross, given their ``(upper_pos, lower_pos)`` endpoints.
+
+    :param pairs: One ``(upper_pos, lower_pos)`` per segment on a single boundary.
+    :type pairs: list[tuple[int, int]]
+    :return: The number of crossing pairs.
+    :rtype: int
+    """
+    count = 0
+    for i in range(len(pairs)):
+        a_top, a_bottom = pairs[i]
+        for j in range(i + 1, len(pairs)):
+            b_top, b_bottom = pairs[j]
+            if (a_top - b_top) * (a_bottom - b_bottom) < 0:
+                count += 1
+    return count
+
+
+def _build_ports(layers: list[list[str]], x_gap: int) -> dict[str, tuple[int, int]]:
+    """Map each node id to its connection pixel from its ``(column, row)`` cell.
+
+    :param layers: The ordered rows of node ids.
+    :type layers: list[list[str]]
+    :param x_gap: Horizontal pixels per column.
+    :type x_gap: int
+    :return: Mapping of node id to ``(x, y)`` port pixel.
+    :rtype: dict[str, tuple[int, int]]
+    """
+    ports: dict[str, tuple[int, int]] = {}
+    for row, layer in enumerate(layers):
+        for column, nid in enumerate(layer):
+            ports[nid] = (column * x_gap + x_gap // 2, row * _Y_GAP)
+    return ports
+
+
+def _chain_notes(
+    graph: Graph,
+    chains: list[tuple[str, str, list[str]]],
+    ports: dict[str, tuple[int, int]],
+    style: RenderStyle,
+) -> list[tuple[int, int, str]]:
+    """Build the annotation placements for each edge, at the midpoint of its routed chain.
+
+    :param graph: The graph being rendered.
+    :type graph: Graph
+    :param chains: One ``(source, target, node_ids)`` per original edge.
+    :type chains: list[tuple[str, str, list[str]]]
+    :param ports: Node id to port pixel.
+    :type ports: dict[str, tuple[int, int]]
+    :param style: The active display toggles.
+    :type style: RenderStyle
+    :return: Annotations as ``(x, y, text)``.
+    :rtype: list[tuple[int, int, str]]
+    """
+    notes: list[tuple[int, int, str]] = []
+    for source, target, chain in chains:
+        text = edge_annotation(graph, source, target, style=style)
+        if not text:
+            continue
+        ax, ay = ports[chain[0]]
+        bx, by = ports[chain[-1]]
+        notes.append(((ax + bx) // 2 + 1, (ay + by) // 2, text))
+    return notes
+
+
+# ---------------------------------------------------------------------------
+# Circular layout for cyclic / undirected graphs
+# ---------------------------------------------------------------------------
+
+
+def _circular_layout(graph: Graph, style: RenderStyle) -> _Plot:
+    """Build a deterministic circular layout for a cyclic or undirected *graph*.
+
+    :param graph: The graph to lay out.
+    :type graph: Graph
+    :param style: The active display toggles.
+    :type style: RenderStyle
+    :return: The positioned layout.
+    :rtype: _Plot
+    """
+    cells = _circular_cells(graph)
+    labels = {v: vertex_text(graph, v, use_label=style.vertex_labels) for v in graph.vertices()}
+    x_gap = _x_gap(labels)
+    min_col = min(c for c, _ in cells.values())
+    min_row = min(r for _, r in cells.values())
+    ports = {
+        v: ((col - min_col) * x_gap + x_gap // 2, (row - min_row) * _Y_GAP)
+        for v, (col, row) in cells.items()
+    }
+    links, notes = _edge_links_and_notes(graph, ports, style)
+    return _Plot(ports=ports, labels=labels, links=links, notes=notes)
 
 
 def _circular_cells(graph: Graph) -> dict[str, tuple[int, int]]:
-    """Place vertices evenly on a circle and quantize to integer cells.
+    """Place vertices evenly on a circle and quantize to integer ``(column, row)`` cells.
 
     The radius grows with vertex count to keep neighbours from colliding.  Rows are squashed
     relative to columns to compensate for terminal characters being taller than they are wide.
 
     :param graph: The graph to lay out.
     :type graph: Graph
-    :return: Mapping of vertex name to ``(col, row)`` layout cell.
+    :return: Mapping of vertex name to ``(column, row)`` cell.
     :rtype: dict[str, tuple[int, int]]
     """
     verts = graph.vertices()
@@ -196,51 +492,26 @@ def _circular_cells(graph: Graph) -> dict[str, tuple[int, int]]:
     return cells
 
 
-def _draw(graph: Graph, cells: dict[str, tuple[int, int]]) -> _Canvas:
-    """Build and populate a canvas from layout *cells*: edges first, labels on top.
-
-    :param graph: The graph being rendered.
-    :type graph: Graph
-    :param cells: Mapping of vertex name to ``(col, row)`` layout cell.
-    :type cells: dict[str, tuple[int, int]]
-    :return: The populated canvas.
-    :rtype: _Canvas
-    """
-    label_width = max(len(v) for v in graph.vertices())
-    x_gap = label_width + _X_GAP_PAD
-    min_col = min(c for c, _ in cells.values())
-    min_row = min(r for _, r in cells.values())
-
-    anchors = {
-        v: ((col - min_col) * x_gap, (row - min_row) * _Y_GAP) for v, (col, row) in cells.items()
-    }
-    width = max(px for px, _ in anchors.values()) + label_width + 1
-    height = max(py for _, py in anchors.values()) + 1
-
-    canvas = _Canvas(width, height)
-    _draw_edges(canvas, graph, anchors)
-    _draw_labels(canvas, anchors)
-    return canvas
-
-
-def _draw_edges(
-    canvas: _Canvas,
+def _edge_links_and_notes(
     graph: Graph,
-    anchors: dict[str, tuple[int, int]],
-) -> None:
-    """Draw every edge once as a straight line between vertex-label centres.
+    ports: dict[str, tuple[int, int]],
+    style: RenderStyle,
+) -> tuple[list[tuple[str, str]], list[tuple[int, int, str]]]:
+    """Return each edge once as a direct link plus its midpoint annotation.
 
-    Self-loops are skipped (not yet supported); undirected edges are drawn a single time.
+    Self-loops are skipped; undirected edges are emitted a single time.
 
-    :param canvas: The canvas to draw on.
-    :type canvas: _Canvas
     :param graph: The graph being rendered.
     :type graph: Graph
-    :param anchors: Mapping of vertex name to its top-left pixel anchor.
-    :type anchors: dict[str, tuple[int, int]]
-    :return: Nothing.
-    :rtype: None
+    :param ports: Vertex name to port pixel.
+    :type ports: dict[str, tuple[int, int]]
+    :param style: The active display toggles.
+    :type style: RenderStyle
+    :return: The ``links`` to draw and the ``notes`` to stamp.
+    :rtype: tuple[list[tuple[str, str]], list[tuple[int, int, str]]]
     """
+    links: list[tuple[str, str]] = []
+    notes: list[tuple[int, int, str]] = []
     drawn: set[tuple[str, str]] = set()
     for u in graph.vertices():
         for w in graph.neighbors(u):
@@ -250,37 +521,105 @@ def _draw_edges(
             if key in drawn:
                 continue
             drawn.add(key)
-            ux, uy = _centre(u, anchors)
-            wx, wy = _centre(w, anchors)
-            canvas.line(ux, uy, wx, wy)
+            links.append((u, w))
+            text = edge_annotation(graph, u, w, style=style)
+            if text:
+                ax, ay = ports[u]
+                bx, by = ports[w]
+                notes.append(((ax + bx) // 2 + 1, (ay + by) // 2, text))
+    return links, notes
 
 
-def _draw_labels(canvas: _Canvas, anchors: dict[str, tuple[int, int]]) -> None:
-    """Stamp each vertex name at its anchor, over any edge glyphs already drawn.
+# ---------------------------------------------------------------------------
+# Shared helpers and rasterisation
+# ---------------------------------------------------------------------------
 
-    :param canvas: The canvas to draw on.
-    :type canvas: _Canvas
-    :param anchors: Mapping of vertex name to its top-left pixel anchor.
-    :type anchors: dict[str, tuple[int, int]]
-    :return: Nothing.
-    :rtype: None
+
+def _node_label(graph: Graph, nid: str, style: RenderStyle) -> str:
+    """Return the display text for node *nid* (``""`` for routing dummies).
+
+    :param graph: The graph being rendered.
+    :type graph: Graph
+    :param nid: A node id (a real vertex name or a dummy id).
+    :type nid: str
+    :param style: The active display toggles.
+    :type style: RenderStyle
+    :return: The label text, or ``""`` for a dummy node.
+    :rtype: str
     """
-    for name, (px, py) in anchors.items():
-        canvas.text(px, py, name)
+    if nid not in graph:
+        return ""
+    return vertex_text(graph, nid, use_label=style.vertex_labels)
 
 
-def _centre(name: str, anchors: dict[str, tuple[int, int]]) -> tuple[int, int]:
-    """Return the approximate centre pixel of *name*'s label.
+def _x_gap(labels: dict[str, str]) -> int:
+    """Return the horizontal pixels-per-column: the widest label plus padding.
 
-    :param name: Vertex name.
-    :type name: str
-    :param anchors: Mapping of vertex name to its top-left pixel anchor.
-    :type anchors: dict[str, tuple[int, int]]
-    :return: The ``(x, y)`` centre of the label.
+    :param labels: Node id to display text.
+    :type labels: dict[str, str]
+    :return: The column width in pixels.
+    :rtype: int
+    """
+    widths = [len(text) for text in labels.values() if text]
+    return (max(widths) if widths else 1) + _X_GAP_PAD
+
+
+def _label_x(port_x: int, text: str) -> int:
+    """Return the leftmost column at which *text* is centred on *port_x* (clamped to 0).
+
+    :param port_x: The node's port column.
+    :type port_x: int
+    :param text: The label text.
+    :type text: str
+    :return: The starting column for the label.
+    :rtype: int
+    """
+    return max(0, port_x - len(text) // 2)
+
+
+def _render(plot: _Plot) -> str:
+    """Rasterise *plot* onto a canvas: links first, then annotations, then labels on top.
+
+    :param plot: The positioned layout.
+    :type plot: _Plot
+    :return: The rendered grid.
+    :rtype: str
+    """
+    width, height = _plot_size(plot)
+    canvas = _Canvas(width, height)
+    for a, b in plot.links:
+        ax, ay = plot.ports[a]
+        bx, by = plot.ports[b]
+        canvas.line(ax, ay, bx, by)
+    for x, y, text in plot.notes:
+        canvas.text(x, y, text)
+    for nid, text in plot.labels.items():
+        if text:
+            px, py = plot.ports[nid]
+            canvas.text(_label_x(px, text), py, text)
+    return canvas.render()
+
+
+def _plot_size(plot: _Plot) -> tuple[int, int]:
+    """Compute the canvas dimensions needed to fit every port, label, and annotation.
+
+    :param plot: The positioned layout.
+    :type plot: _Plot
+    :return: The ``(width, height)`` of the canvas.
     :rtype: tuple[int, int]
     """
-    px, py = anchors[name]
-    return px + len(name) // 2, py
+    width = 1
+    height = 1
+    for nid, (px, py) in plot.ports.items():
+        width = max(width, px + 1)
+        height = max(height, py + 1)
+        text = plot.labels.get(nid, "")
+        if text:
+            width = max(width, _label_x(px, text) + len(text) + 1)
+    for x, y, text in plot.notes:
+        width = max(width, x + len(text) + 1)
+        height = max(height, y + 1)
+    return width, height
 
 
 def _line_glyph(dx: int, dy: int) -> str:
@@ -290,7 +629,7 @@ def _line_glyph(dx: int, dy: int) -> str:
     :type dx: int
     :param dy: Vertical delta (end minus start).
     :type dy: int
-    :return: One of ``-``, ``|``, ``\\`` or ``/``.
+    :return: One of ``-``, ``|``, ``\`` or ``/``.
     :rtype: str
     """
     if dx == 0:
