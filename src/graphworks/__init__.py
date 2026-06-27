@@ -23,11 +23,22 @@ from __future__ import annotations
 
 from ._version import __version__, __version_tuple__
 from .edge import Edge
+from .export.ascii_utils import to_ascii
+from .export.text_utils import to_text
 from .graph import Graph
 from .types import AdjacencyMatrix
 from .vertex import Vertex
 
-__all__ = ["AdjacencyMatrix", "Edge", "Graph", "Vertex", "__version__", "__version_tuple__"]
+__all__ = [
+    "AdjacencyMatrix",
+    "Edge",
+    "Graph",
+    "Vertex",
+    "__version__",
+    "__version_tuple__",
+    "to_ascii",
+    "to_text",
+]
 
 # ---- Package metadata (PEP 566 / importlib.metadata style) ----
 

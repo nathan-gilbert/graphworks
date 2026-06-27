@@ -1,6 +1,6 @@
 # Graphworks
 
-[![Python package](https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package-ci.yml/badge.svg)](https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package-ci.yml)
+[![Python package](https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package-ci.yml/badge.svg)][1]
 
 ## A Python module for efficient graph theoretic programming
 
@@ -128,3 +128,5 @@ Version is managed automatically via git tags using `hatchling-vcs`.
 - [ ] Thread safety (immutable graph views or locking around mutations)
 - [ ] Input validation hardening
 - [ ] Performance benchmarks
+
+[1]: https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package-ci.yml
