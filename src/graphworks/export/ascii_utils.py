@@ -264,10 +264,9 @@ def _expand_with_dummies(
     segments: list[tuple[str, str]] = []
     chains: list[tuple[str, str, list[str]]] = []
     counter = 0
+    # A DAG has no self-loops (they are back-edges), so every edge runs strictly downward.
     for u in graph.vertices():
         for w in graph.neighbors(u):
-            if u == w:
-                continue
             chain = [u]
             for row in range(layer_of[u] + 1, layer_of[w]):
                 dummy = f"{_DUMMY}{counter}"
