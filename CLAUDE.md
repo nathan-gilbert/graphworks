@@ -51,8 +51,8 @@ prek run --all-files
   same `Edge` object), so `neighbors()` is symmetric and `edges()` de-duplicates. Accepts JSON
   files/strings (neighbors may be bare names or `{"target", "weight", "label", "attrs"}` objects;
   optional `"vertices"` key for vertex labels/attrs) or stdlib adjacency matrices. Supports
-  directed, weighted, and labeled graphs, fluent `add_*` chaining, `|`/`|=` union, and structural
-  `==`.
+  directed, weighted, and labeled graphs, fluent `add_*`/`remove_*` chaining, `copy()`,
+  `predecessors()` (O(V) scan; there is no reverse index), `|`/`|=` union, and structural `==`.
 - **`vertex.py`** / **`edge.py`** — Frozen `Vertex` and `Edge` dataclasses; identity is the name
   (vertex) or `(source, target, directed)` (edge). `Edge.create` / `Vertex.create` accept a plain
   `attrs` dict.
@@ -92,9 +92,9 @@ in `tests/data/`. Markers: `@pytest.mark.unit`, `@pytest.mark.integration`, `@py
 - **Formatting:** black and ruff (line-length 100), isort (black profile)
 - **Type checking:** ty in strict mode
 - All algorithm functions are pure functions — no classes wrapping algorithms
-- Version is dynamic via `hatchling-vcs` (git tags like `vX.Y.Z`)
+- Version is dynamic via `hatchling-vcs` (git tags like `X.Y.Z`, no `v` prefix)
 
 ## Publishing
 
-Tag a commit with `git tag -a vX.Y.Z -m 'message'` and push tags to trigger PyPI publish via GitHub
+Tag a commit with `git tag -a X.Y.Z -m 'message'` and push tags to trigger PyPI publish via GitHub
 Actions.
