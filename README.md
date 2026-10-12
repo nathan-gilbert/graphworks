@@ -169,6 +169,10 @@ Version is managed automatically via git tags using `hatchling-vcs`.
          are silently ignored)
 - [ ] Read-only graph view (instead of locking for thread safety)
 - [ ] Performance benchmarks
+- [ ] Reverse adjacency index so `predecessors()` is O(in-degree) instead of O(V); then switch
+      `is_connected`, `find_circuit`, and `find_isolated_vertices` to it (they currently rebuild
+      in-edges by hand, which is faster than calling the O(V) `predecessors()` per vertex). Every
+      add/remove path and `copy()` must maintain the index.
 - [ ] Run docstring examples as tests (`--doctest-modules`) so examples cannot go stale
 
 ### Tier 7: Docs and releases
