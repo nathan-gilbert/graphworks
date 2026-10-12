@@ -129,10 +129,9 @@ Version is managed automatically via git tags using `hatchling-vcs`.
       export
 - [x] `add_edge` supports `weight` and `label` keyword arguments
 - [x] `edge()` lookup method for direct O(1) edge retrieval
-- [ ] `remove_vertex()` / `remove_edge()` (there is currently no way to delete anything)
-- [ ] `copy()` (today the only copy is `Graph() | g`)
-- [ ] `predecessors()` / in-neighbors for directed graphs (`is_connected`, `find_circuit`, and
-      `find_isolated_vertices` each recompute in-edges by hand)
+- [x] `remove_vertex()` / `remove_edge()` (chainable; removing a vertex drops its incident edges)
+- [x] `copy()` (independent structure, shared immutable `Vertex`/`Edge` objects)
+- [x] `predecessors()` for directed graphs (O(V); same as `neighbors()` when undirected)
 
 ### Tier 3: Lossless conversions
 

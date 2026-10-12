@@ -394,3 +394,112 @@ class TestGraphEquality:
     def test_unhashable(self) -> None:
         with pytest.raises(TypeError):
             hash(Graph())
+
+
+# ---------------------------------------------------------------------------
+# Removal, copy, and predecessors
+# ---------------------------------------------------------------------------
+
+
+class TestRemoveVertex:
+    def test_removes_incident_undirected_edges(self) -> None:
+        g = Graph().add_edges([("A", "B"), ("B", "C"), ("C", "A")]).remove_vertex("B")
+        assert g.vertices() == ["A", "C"]
+        assert g.neighbors("A") == ["C"]
+        assert g.neighbors("C") == ["A"]
+        assert g.size == 1
+
+    def test_removes_incoming_directed_edges(self) -> None:
+        g = Graph(directed=True).add_edges([("A", "B"), ("B", "C"), ("C", "B")])
+        g.remove_vertex("B")
+        assert g.neighbors("A") == []
+        assert g.neighbors("C") == []
+        assert g.size == 0
+
+    def test_self_loop(self) -> None:
+        g = Graph().add_edge("A", "A").add_edge("A", "B").remove_vertex("A")
+        assert g.vertices() == ["B"]
+        assert g.neighbors("B") == []
+
+    def test_missing_raises(self) -> None:
+        with pytest.raises(KeyError):
+            Graph().remove_vertex("Z")
+
+    def test_returns_self(self) -> None:
+        g = Graph().add_vertex("A")
+        assert g.remove_vertex("A") is g
+
+
+class TestRemoveEdge:
+    def test_undirected_either_order(self) -> None:
+        g = Graph().add_edge("A", "B").remove_edge("B", "A")
+        assert g.size == 0
+        assert g.neighbors("A") == []
+        assert g.neighbors("B") == []
+        assert g.vertices() == ["A", "B"]
+
+    def test_directed_only_one_way(self) -> None:
+        g = Graph(directed=True).add_edges([("A", "B"), ("B", "A")]).remove_edge("A", "B")
+        assert g.edge("A", "B") is None
+        assert g.edge("B", "A") is not None
+
+    def test_directed_wrong_direction_raises(self) -> None:
+        with pytest.raises(KeyError, match="No edge"):
+            Graph(directed=True).add_edge("A", "B").remove_edge("B", "A")
+
+    def test_self_loop(self) -> None:
+        g = Graph().add_edge("A", "A").remove_edge("A", "A")
+        assert g.size == 0
+
+    def test_missing_vertex_raises(self) -> None:
+        with pytest.raises(KeyError):
+            Graph().remove_edge("A", "B")
+
+    def test_returns_self(self) -> None:
+        g = Graph().add_edge("A", "B")
+        assert g.remove_edge("A", "B") is g
+
+
+class TestCopy:
+    def test_equal_but_independent(self) -> None:
+        g = Graph("orig", weighted=True).add_edge("A", "B", weight=2)
+        c = g.copy()
+        assert c == g
+        assert (c.label, c.directed, c.weighted) == ("orig", False, True)
+        c.add_edge("B", "C").remove_edge("A", "B")
+        assert g.size == 1
+        assert g.order == 2
+        assert g.edge("A", "B").weight == 2
+
+    def test_mutating_original_leaves_copy(self) -> None:
+        g = Graph(directed=True).add_edge("A", "B")
+        c = g.copy()
+        g.remove_vertex("A")
+        assert c.vertices() == ["A", "B"]
+        assert c.neighbors("A") == ["B"]
+
+    def test_preserves_vertex_and_edge_data(self) -> None:
+        g = Graph().add_vertex("A", label="Alpha").add_edge("A", "B", label="x")
+        c = g.copy()
+        assert c.vertex("A") == g.vertex("A")
+        assert c.vertex("A").label == "Alpha"
+        assert c.edge("B", "A").label == "x"
+
+
+class TestPredecessors:
+    def test_directed(self) -> None:
+        g = Graph(directed=True).add_edges([("A", "C"), ("B", "C"), ("C", "D")])
+        assert g.predecessors("C") == ["A", "B"]
+        assert g.predecessors("A") == []
+
+    def test_directed_self_loop(self) -> None:
+        assert Graph(directed=True).add_edge("A", "A").predecessors("A") == ["A"]
+
+    def test_undirected_same_as_neighbors(self) -> None:
+        g = Graph().add_edge("A", "B").add_edge("B", "C")
+        assert g.predecessors("B") == g.neighbors("B")
+
+    @pytest.mark.parametrize("directed", [True, False])
+    def test_missing_raises(self, directed: bool) -> None:
+        with pytest.raises(KeyError):
+            Graph(directed=directed).predecessors("Z")

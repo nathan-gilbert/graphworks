@@ -51,8 +51,8 @@ prek run --all-files
   same `Edge` object), so `neighbors()` is symmetric and `edges()` de-duplicates. Accepts JSON
   files/strings (neighbors may be bare names or `{"target", "weight", "label", "attrs"}` objects;
   optional `"vertices"` key for vertex labels/attrs) or stdlib adjacency matrices. Supports
-  directed, weighted, and labeled graphs, fluent `add_*` chaining, `|`/`|=` union, and structural
-  `==`.
+  directed, weighted, and labeled graphs, fluent `add_*`/`remove_*` chaining, `copy()`,
+  `predecessors()` (O(V) scan; there is no reverse index), `|`/`|=` union, and structural `==`.
 - **`vertex.py`** / **`edge.py`** — Frozen `Vertex` and `Edge` dataclasses; identity is the name
   (vertex) or `(source, target, directed)` (edge). `Edge.create` / `Vertex.create` accept a plain
   `attrs` dict.

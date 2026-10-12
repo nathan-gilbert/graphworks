@@ -27,8 +27,11 @@ A :class:`Graph` can be built from:
 * a stdlib adjacency matrix (``input_matrix``), or
 * programmatically via :meth:`add_vertex` / :meth:`add_edge`.
 
-Fluent chaining is supported — :meth:`add_vertex`, :meth:`add_edge`, and :meth:`add_edges` all
-return ``self`` so calls can be chained::
+Vertices and edges can be deleted with :meth:`remove_vertex` / :meth:`remove_edge`, and
+:meth:`copy` returns an independent copy.
+
+Fluent chaining is supported — :meth:`add_vertex`, :meth:`add_edge`, :meth:`add_edges`,
+:meth:`remove_vertex`, and :meth:`remove_edge` all return ``self`` so calls can be chained::
 
     >>> g = Graph("demo")
     >>> g.add_edge("A", "B").add_edge("B", "C").add_edge("C", "A")
@@ -401,6 +404,21 @@ class Graph:
         """
         return len(self.edges())
 
+    def copy(self) -> Graph:
+        """Return an independent copy of this graph.
+
+        The copy has the same label, flags, vertices, and edges.  Mutating either graph (adding or
+        removing vertices or edges) does not affect the other; the immutable
+        :class:`~graphworks.vertex.Vertex` and :class:`~graphworks.edge.Edge` objects are shared.
+
+        :return: A new graph equal to this one.
+        :rtype: Graph
+        """
+        result = Graph(self._label, directed=self._directed, weighted=self._weighted)
+        result._vertices = dict(self._vertices)
+        result._adj = {v: dict(targets) for v, targets in self._adj.items()}
+        return result
+
     # ------------------------------------------------------------------
     # Vertex access
     # ------------------------------------------------------------------
@@ -468,6 +486,27 @@ class Graph:
             self._vertices[name] = obj
             self._adj[name] = {}
 
+        return self
+
+    def remove_vertex(self, name: str) -> Self:
+        """Remove vertex *name* and every edge incident to it.
+
+        Returns ``self`` to support fluent call chaining::
+
+            >>> g = Graph().add_edge("A", "B").add_edge("B", "C")
+            >>> g.remove_vertex("B")
+            Graph('', order=2, size=0)
+
+        :param name: Vertex name.
+        :type name: str
+        :return: This graph instance (for chaining).
+        :rtype: Self
+        :raises KeyError: If *name* is not in the graph.
+        """
+        for source in self.predecessors(name):
+            del self._adj[source][name]
+        del self._adj[name]
+        del self._vertices[name]
         return self
 
     # ------------------------------------------------------------------
@@ -615,6 +654,33 @@ class Graph:
 
         return self
 
+    def remove_edge(self, source: str, target: str) -> Self:
+        """Remove the edge from *source* to *target*.
+
+        For undirected graphs the argument order does not matter.  Both vertices are kept.
+
+        Returns ``self`` to support fluent call chaining::
+
+            >>> g = Graph().add_edge("A", "B").add_edge("B", "C")
+            >>> g.remove_edge("B", "A")
+            Graph('', order=3, size=1)
+
+        :param source: Source vertex name.
+        :type source: str
+        :param target: Target vertex name.
+        :type target: str
+        :return: This graph instance (for chaining).
+        :rtype: Self
+        :raises KeyError: If there is no such edge.
+        """
+        if self.edge(source, target) is None:
+            msg = f"No edge from {source!r} to {target!r} in the graph."
+            raise KeyError(msg)
+        del self._adj[source][target]
+        if not self._directed:
+            self._adj[target].pop(source, None)  # absent for a self-loop
+        return self
+
     # ------------------------------------------------------------------
     # Neighbour access
     # ------------------------------------------------------------------
@@ -635,6 +701,25 @@ class Graph:
             msg = f"Vertex {v!r} is not in the graph."
             raise KeyError(msg)
         return list(self._adj[v])
+
+    def predecessors(self, v: str) -> list[str]:
+        """Return the names of all vertices with an edge *into* *v*.
+
+        For directed graphs these are the in-neighbors of *v*, in vertex insertion order.  For
+        undirected graphs this is the same as :meth:`neighbors`.  Runs in O(V).
+
+        :param v: Vertex name.
+        :type v: str
+        :return: List of vertex names with an edge to *v*.
+        :rtype: list[str]
+        :raises KeyError: If *v* is not in the graph.
+        """
+        if not self._directed:
+            return self.neighbors(v)
+        if v not in self._adj:
+            msg = f"Vertex {v!r} is not in the graph."
+            raise KeyError(msg)
+        return [u for u, targets in self._adj.items() if v in targets]
 
     # ------------------------------------------------------------------
     # Matrix representation (stdlib only — no numpy)
