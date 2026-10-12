@@ -68,3 +68,22 @@ class TestSaveToDot:
         content = gv_path.read_text(encoding="utf-8")
         for v in ("A", "B", "C"):
             assert v in content
+
+    def test_undirected_edge_written_once(self, tmp_dir: Path) -> None:
+        """An undirected edge appears once even though it is stored under both endpoints."""
+        graph = Graph("once").add_edge("A", "B")
+        content = save_to_dot(graph, str(tmp_dir)).read_text(encoding="utf-8")
+        assert content.count("--") == 1
+
+    def test_labels_and_weights_exported(self, tmp_dir: Path) -> None:
+        """Vertex labels, edge labels, and weights appear in the DOT source."""
+        graph = Graph("rich", directed=True)
+        graph.add_vertex("A", label="Alpha")
+        graph.add_edge("A", "B", weight=3, label="toll")
+        content = save_to_dot(graph, str(tmp_dir)).read_text(encoding="utf-8")
+        assert "Alpha" in content
+        assert "toll, w=3" in content
+
+    def test_label_made_filesystem_safe(self, tmp_dir: Path) -> None:
+        """An empty label still yields a named file inside out_dir."""
+        assert save_to_dot(Graph(), str(tmp_dir)) == tmp_dir / "graph.gv"

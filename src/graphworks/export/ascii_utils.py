@@ -8,7 +8,7 @@ Layout strategy
 * **DAGs** use a layered (Sugiyama-style) layout:
 
   1. *Layer assignment* — each vertex's row is its longest path from a source, reusing
-     :func:`~graphworks.algorithms.sort.topological`.
+     :func:`~graphworks.algorithms.sort.topological_sort`.
   2. *Dummy nodes* — an edge spanning multiple rows is split into unit-length segments through
      virtual nodes in the intervening rows, so it routes as a chain of short lines instead of one
      long diagonal slashing across the layout.
@@ -48,7 +48,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ..algorithms.directed import is_dag
-from ..algorithms.sort import topological
+from ..algorithms.sort import topological_sort
 from ._labels import RenderStyle, edge_annotation, vertex_text
 
 if TYPE_CHECKING:
@@ -236,7 +236,7 @@ def _assign_layers(graph: Graph) -> dict[str, int]:
     :rtype: dict[str, int]
     """
     layer = dict.fromkeys(graph.vertices(), 0)
-    for u in topological(graph):
+    for u in topological_sort(graph):
         base = layer[u] + 1
         for w in graph.neighbors(u):
             layer[w] = max(layer[w], base)

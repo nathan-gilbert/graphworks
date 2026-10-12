@@ -1,7 +1,7 @@
-"""Path-finding and edge-generation utilities.
+"""Path-finding utilities.
 
-Provides functions for discovering paths between vertices, generating edge lists, and finding
-structurally isolated vertices.  All functions operate on the adjacency-list representation and
+Provides functions for discovering paths between vertices and finding structurally isolated
+vertices.  All functions operate on the adjacency-list representation and
 require no external dependencies.
 """
 
@@ -10,44 +10,29 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..edge import Edge
+    from collections.abc import Iterator
+
     from ..graph import Graph
 
 
-def generate_edges(graph: Graph) -> list[Edge]:
-    """Return all edges in *graph*.
-
-    Convenience wrapper around :meth:`~graphworks.graph.Graph.edges`.
-
-    :param graph: The graph to enumerate edges from.
-    :type graph: Graph
-    :return: List of edges.
-    :rtype: list[Edge]
-    """
-    return graph.edges()
-
-
 def find_isolated_vertices(graph: Graph) -> list[str]:
-    """Return vertices that have no neighbours.
+    """Return vertices that have no incident edges (degree zero).
+
+    For directed graphs a vertex with only incoming edges is *not* isolated.
 
     :param graph: The graph to inspect.
     :type graph: Graph
     :return: List of vertex names with degree zero.
     :rtype: list[str]
     """
-    return [v for v in graph.vertices() if not graph[v]]
+    touched = {v for edge in graph.edges() for v in (edge.source, edge.target)}
+    return [v for v in graph.vertices() if v not in touched]
 
 
-def find_path(
-    graph: Graph,
-    start: str,
-    end: str,
-    path: list[str] | None = None,
-) -> list[str]:
+def find_path(graph: Graph, start: str, end: str) -> list[str]:
     """Find a single path between *start* and *end* using depth-first search.
 
-    Returns the first path found, not necessarily the shortest.  Returns an empty list if no path
-    exists or if *start* is not in the graph.
+    Returns the first path found, not necessarily the shortest.
 
     :param graph: The graph to search.
     :type graph: Graph
@@ -55,40 +40,19 @@ def find_path(
     :type start: str
     :param end: Destination vertex name.
     :type end: str
-    :param path: Accumulated path used by recursive calls.  Callers should leave this as ``None``.
-    :type path: list[str] | None
     :return: Ordered list of vertex names from *start* to *end*, or ``[]`` if no path exists.
     :rtype: list[str]
+    :raises KeyError: If *start* or *end* is not in the graph.
     """
-    if path is None:
-        path = []
-
-    if start not in graph.vertices():
-        return []
-
-    path = [*path, start]
-
-    if start == end:
-        return path
-
-    for node in graph[start]:
-        if node not in path:
-            new_path = find_path(graph, node, end, path)
-            if new_path:
-                return new_path
-    return []
+    _require_endpoints(graph, start, end)
+    paths = _simple_paths(graph, [start], end)
+    return next(paths, [])
 
 
-def find_all_paths(
-    graph: Graph,
-    start: str,
-    end: str,
-    path: list[str] | None = None,
-) -> list[list[str]]:
+def find_all_paths(graph: Graph, start: str, end: str) -> list[list[str]]:
     """Return all simple paths between *start* and *end*.
 
-    A simple path visits each vertex at most once.  Returns an empty list if no path exists or if
-    *start* is not in the graph.
+    A simple path visits each vertex at most once.
 
     :param graph: The graph to search.
     :type graph: Graph
@@ -96,25 +60,46 @@ def find_all_paths(
     :type start: str
     :param end: Destination vertex name.
     :type end: str
-    :param path: Accumulated path used by recursive calls.  Callers should leave this as ``None``.
-    :type path: list[str] | None
-    :return: List of all simple paths, each an ordered list of vertex names.
+    :return: List of all simple paths, each an ordered list of vertex names, or ``[]`` if none.
     :rtype: list[list[str]]
+    :raises KeyError: If *start* or *end* is not in the graph.
     """
-    if path is None:
-        path = []
+    _require_endpoints(graph, start, end)
+    return list(_simple_paths(graph, [start], end))
 
-    if start not in graph.vertices():
-        return []
 
-    path = [*path, start]
+def _simple_paths(graph: Graph, path: list[str], end: str) -> Iterator[list[str]]:
+    """Yield every simple path that extends *path* to *end*, depth-first.
 
-    if start == end:
-        return [path]
-
-    paths: list[list[str]] = []
-    for node in graph[start]:
+    :param graph: The graph to search.
+    :type graph: Graph
+    :param path: The path walked so far (non-empty).
+    :type path: list[str]
+    :param end: Destination vertex name.
+    :type end: str
+    :return: Iterator of complete paths.
+    :rtype: Iterator[list[str]]
+    """
+    if path[-1] == end:
+        yield path
+        return
+    for node in graph[path[-1]]:
         if node not in path:
-            new_paths = find_all_paths(graph, node, end, path)
-            paths.extend(new_paths)
-    return paths
+            yield from _simple_paths(graph, [*path, node], end)
+
+
+def _require_endpoints(graph: Graph, *names: str) -> None:
+    """Raise :class:`KeyError` for the first of *names* not in *graph*.
+
+    :param graph: The graph to check.
+    :type graph: Graph
+    :param names: Vertex names that must exist.
+    :type names: str
+    :return: Nothing.
+    :rtype: None
+    :raises KeyError: If a vertex is missing.
+    """
+    for name in names:
+        if name not in graph:
+            msg = f"Vertex {name!r} is not in the graph."
+            raise KeyError(msg)

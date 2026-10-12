@@ -8,6 +8,16 @@ adjacency structure:
 * ``_adj``: ``dict[str, dict[str, Edge]]`` — ``_adj[u][v]`` gives the
 :class:`~graphworks.edge.Edge` from *u* to *v* in O(1).
 
+In an undirected graph each edge is stored under **both** endpoints (``_adj[u][v]`` and
+``_adj[v][u]`` hold the same :class:`~graphworks.edge.Edge` object), so :meth:`Graph.neighbors`
+is symmetric and every algorithm sees ``u`` and ``v`` as adjacent to each other.
+
+Missing vertices
+----------------
+Lookups that *require* a vertex (``graph[v]``, :meth:`Graph.neighbors`,
+:meth:`Graph.vertex_to_index`, and the algorithm functions) raise :class:`KeyError`.  The
+``dict.get``-style accessors :meth:`Graph.vertex` and :meth:`Graph.edge` return ``None``.
+
 Construction
 ------------
 A :class:`Graph` can be built from:
@@ -35,9 +45,31 @@ Example::
     >>> g = Graph(input_graph=json.dumps(data))
     >>> g.vertices()   # ['A', 'B']
     >>> g.edges()      # [Edge('A' -- 'B')]
+    >>> g.neighbors("B")  # ['A']
     >>> g.label        # 'demo'
     >>> g.order        # 2
     >>> g.size         # 1
+
+JSON schema
+-----------
+``"graph"`` maps each vertex name to its neighbors.  A neighbor is either a bare name or an
+object carrying edge data; an optional ``"vertices"`` object carries vertex labels and
+attributes::
+
+    {
+        "label": "roads",
+        "directed": false,
+        "weighted": true,
+        "vertices": {"A": {"label": "Alpha", "attrs": {"x": 1}}},
+        "graph": {
+            "A": ["B", {"target": "C", "weight": 2.5, "label": "toll", "attrs": {}}],
+            "B": [],
+            "C": []
+        }
+    }
+
+In an undirected graph an edge only needs to be listed once (under either endpoint); if it is
+listed under both, the first occurrence wins.
 """
 
 from __future__ import annotations
@@ -48,7 +80,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .edge import Edge
-from .export.text_utils import to_text as _to_text
 from .vertex import Vertex
 
 if TYPE_CHECKING:
@@ -140,13 +171,6 @@ class Graph:
                 raise ValueError(msg)
             self._matrix_to_graph(input_matrix)
 
-        if not self._validate():
-            msg = (
-                "Graph is invalid: edge endpoints reference vertices that do not exist in the "
-                "vertex set."
-            )
-            raise ValueError(msg)
-
     def __repr__(self) -> str:
         """Return a developer-friendly representation.
 
@@ -158,8 +182,8 @@ class Graph:
     def __str__(self) -> str:
         """Return a human-readable adjacency-list view of the graph.
 
-        Each line shows ``vertex -> neighbor_names`` (or ``-> 0`` for isolated vertices).  Lines
-        are sorted alphabetically by vertex name and preceded by the graph label.
+        Each line shows ``vertex -> neighbor, neighbor`` (or ``-> 0`` for isolated vertices).
+        Lines are sorted alphabetically by vertex name and preceded by the graph label.
 
         :return: Multi-line adjacency list string.
         :rtype: str
@@ -167,7 +191,7 @@ class Graph:
         lines: list[str] = []
         for name in sorted(self._vertices):
             nbrs = self.neighbors(name)
-            rhs = "".join(nbrs) if nbrs else "0"
+            rhs = ", ".join(nbrs) if nbrs else "0"
             lines.append(f"{name} -> {rhs}")
         return f"{self._label}\n" + "\n".join(lines)
 
@@ -180,7 +204,7 @@ class Graph:
         return iter(self._vertices)
 
     def __getitem__(self, node: str) -> list[str]:
-        """Return neighbor names for *node*, or ``[]`` if absent.
+        """Return neighbor names for *node* (same as :meth:`neighbors`).
 
         This enables the common ``graph[v]`` idiom used throughout the algorithm modules.
 
@@ -188,10 +212,31 @@ class Graph:
         :type node: str
         :return: List of neighbor vertex names.
         :rtype: list[str]
+        :raises KeyError: If *node* is not in the graph.
         """
-        if node not in self._vertices:
-            return []
         return self.neighbors(node)
+
+    def __eq__(self, other: object) -> bool:
+        """Return ``True`` if *other* has the same structure.
+
+        Mirrors :class:`Vertex` and :class:`Edge` identity semantics: graphs are equal when they
+        agree on :attr:`directed`, the vertex names, and the edge endpoints.  Labels, weights, and
+        attributes are descriptive and are not compared.
+
+        :param other: Object to compare against.
+        :type other: object
+        :return: ``True`` if structurally equal.
+        :rtype: bool
+        """
+        if not isinstance(other, Graph):
+            return NotImplemented
+        return (
+            self._directed == other._directed
+            and self._vertices.keys() == other._vertices.keys()
+            and all(self._adj[v].keys() == other._adj[v].keys() for v in self._adj)
+        )
+
+    __hash__ = None  # type: ignore[assignment]  # mutable, so unhashable
 
     def __contains__(self, item: str) -> bool:
         """Return ``True`` if *item* is a vertex name in this graph.
@@ -443,8 +488,7 @@ class Graph:
     def edge(self, source: str, target: str) -> Edge | None:
         """Return the :class:`~graphworks.edge.Edge` from *source* to *target*.
 
-        For undirected graphs, checks both the ``source → target`` and ``target → source`` slots
-        in the adjacency structure.
+        For undirected graphs the argument order does not matter.
 
         :param source: Source vertex name.
         :type source: str
@@ -453,12 +497,7 @@ class Graph:
         :return: The edge object, or ``None`` if no such edge exists.
         :rtype: Edge | None
         """
-        found = self._adj.get(source, {}).get(target)
-        if found is not None:
-            return found
-        if not self._directed:
-            return self._adj.get(target, {}).get(source)
-        return None
+        return self._adj.get(source, {}).get(target)
 
     def add_edge(
         self,
@@ -496,18 +535,18 @@ class Graph:
         :return: This graph instance (for chaining).
         :rtype: Self
         :raises TypeError: If *source_or_edge* is a ``str`` and *target* is ``None``.
+        :raises ValueError: If an :class:`Edge`'s ``directed`` flag differs from the graph's.
         """
         if isinstance(source_or_edge, Edge):
             edge = source_or_edge
-            self.add_vertex(edge.source)
-            self.add_vertex(edge.target)
-            self._adj[edge.source][edge.target] = edge
+            if edge.directed != self._directed:
+                kind = "a directed" if self._directed else "an undirected"
+                msg = f"Cannot add {edge!r} to {kind} graph: directed flags differ."
+                raise ValueError(msg)
         else:
             if target is None:
                 msg = "target is required when source_or_edge is a vertex name string."
                 raise TypeError(msg)
-            self.add_vertex(source_or_edge)
-            self.add_vertex(target)
             edge = Edge(
                 source=source_or_edge,
                 target=target,
@@ -515,8 +554,12 @@ class Graph:
                 weight=weight,
                 label=label,
             )
-            self._adj[source_or_edge][target] = edge
 
+        self.add_vertex(edge.source)
+        self.add_vertex(edge.target)
+        self._adj[edge.source][edge.target] = edge
+        if not self._directed:
+            self._adj[edge.target][edge.source] = edge
         return self
 
     def add_edges(
@@ -579,17 +622,18 @@ class Graph:
     def neighbors(self, v: str) -> list[str]:
         """Return the names of all vertices adjacent to *v*.
 
-        Returns the out-neighbors of *v* as recorded in the adjacency structure.  For undirected
-        graphs, the JSON input (or programmatic :meth:`add_edge` calls) is expected to declare
-        both directions.
+        For directed graphs these are the out-neighbors of *v*.  For undirected graphs adjacency
+        is symmetric: if ``B`` is a neighbor of ``A`` then ``A`` is a neighbor of ``B``.
 
         :param v: Vertex name.
         :type v: str
         :return: List of adjacent vertex names.
         :rtype: list[str]
+        :raises KeyError: If *v* is not in the graph.
         """
         if v not in self._adj:
-            return []
+            msg = f"Vertex {v!r} is not in the graph."
+            raise KeyError(msg)
         return list(self._adj[v])
 
     # ------------------------------------------------------------------
@@ -600,7 +644,8 @@ class Graph:
         """Compute and return a stdlib adjacency matrix.
 
         Row and column indices correspond to :meth:`vertices` order. ``matrix[i][j] == 1`` means
-        an edge exists from ``vertices()[i]`` to ``vertices()[j]``; ``0`` means no edge.
+        an edge exists from ``vertices()[i]`` to ``vertices()[j]``; ``0`` means no edge.  The
+        matrix of an undirected graph is symmetric.
 
         The matrix is freshly computed on each call.
 
@@ -624,8 +669,11 @@ class Graph:
         :type v: str
         :return: Zero-based index into :meth:`vertices`.
         :rtype: int
-        :raises ValueError: If *v* is not in the graph.
+        :raises KeyError: If *v* is not in the graph.
         """
+        if v not in self._vertices:
+            msg = f"Vertex {v!r} is not in the graph."
+            raise KeyError(msg)
         return self.vertices().index(v)
 
     def index_to_vertex(self, index: int) -> str:
@@ -640,119 +688,75 @@ class Graph:
         return self.vertices()[index]
 
     # ------------------------------------------------------------------
-    # Rendering
-    # ------------------------------------------------------------------
-
-    def to_text(
-        self,
-        *,
-        vertex_labels: bool = True,
-        edge_labels: bool = True,
-        weights: bool | None = None,
-    ) -> str:
-        """Render this graph as an indented ASCII/Unicode tree.
-
-        Convenience wrapper around :func:`graphworks.export.text_utils.to_text`.  Draws the graph
-        as a depth-first spanning forest using box-drawing connectors (``├──``, ``└──``), marking
-        edges that close a cycle or revisit a vertex with a trailing ``...``::
-
-            >>> g = Graph("demo")
-            >>> g.add_edge("A", "B").add_edge("A", "C")
-            Graph('demo', order=3, size=2)
-            >>> print(g.to_text())
-            demo
-            └── A
-                ├── B
-                └── C
-
-        :param vertex_labels: Show each vertex's label when set, falling back to its name.
-        :type vertex_labels: bool
-        :param edge_labels: Show each edge's label when set.
-        :type edge_labels: bool
-        :param weights: Show edge weights.  ``None`` follows this graph's :attr:`weighted` flag;
-            ``True``/``False`` force the choice.
-        :type weights: bool | None
-        :return: A multi-line string suitable for printing to a terminal.
-        :rtype: str
-        """
-        return _to_text(
-            self,
-            vertex_labels=vertex_labels,
-            edge_labels=edge_labels,
-            weights=weights,
-        )
-
-    # ------------------------------------------------------------------
     # Protected helpers
     # ------------------------------------------------------------------
 
     def _collect_edges(self) -> list[Edge]:
         """Build and return the full edge list from ``_adj``.
 
-        For undirected graphs each pair ``(u, v)`` is returned once, preferring the
-        insertion-order direction.
+        Undirected edges are stored under both endpoints but returned once.
 
         :return: List of :class:`~graphworks.edge.Edge` instances.
         :rtype: list[Edge]
         """
         edges: list[Edge] = []
         seen: set[tuple[str, str]] = set()
-        for src, targets in self._adj.items():
-            for tgt, edge in targets.items():
-                if self._directed:
+        for targets in self._adj.values():
+            for edge in targets.values():
+                key = (edge.source, edge.target)
+                if key not in seen:
+                    seen.add(key)
                     edges.append(edge)
-                else:
-                    pair = (min(src, tgt), max(src, tgt))
-                    if pair not in seen:
-                        seen.add(pair)
-                        edges.append(edge)
         return edges
 
     def _extract_fields_from_json(self, json_data: dict) -> None:
         """Populate the graph from a parsed JSON dictionary.
 
-        Reads ``label``, ``directed``, ``weighted``, and ``graph`` keys from *json_data* and
-        builds the internal vertex/edge structures.
-
-        Only vertices that appear as **keys** in the ``"graph"`` dict are created.  If an
-        adjacency list references a vertex that is not a key, :meth:`_validate` will catch the
-        inconsistency.
+        Reads ``label``, ``directed``, ``weighted``, ``vertices``, and ``graph`` keys from
+        *json_data* (see the module docstring for the schema).
 
         :param json_data: Parsed JSON representation of the graph.
         :type json_data: dict
         :return: Nothing.
         :rtype: None
+        :raises ValueError: If an adjacency list references a vertex that is not a key of
+            ``"graph"``, or a neighbor entry is neither a string nor an object with ``"target"``.
         """
         self._label = json_data.get("label", "")
         self._directed = json_data.get("directed", False)
         self._weighted = json_data.get("weighted", False)
-        raw_graph: dict[str, list[str]] = json_data.get("graph", {})
+        raw_graph: dict[str, list[str | dict[str, Any]]] = json_data.get("graph", {})
+        raw_vertices: dict[str, dict[str, Any]] = json_data.get("vertices", {})
 
         for name in raw_graph:
-            self.add_vertex(name)
+            meta = raw_vertices.get(name, {})
+            self.add_vertex(name, label=meta.get("label"), attrs=meta.get("attrs"))
 
         for src, targets in raw_graph.items():
-            for tgt in targets:
-                edge = Edge(
-                    source=src,
-                    target=tgt,
-                    directed=self._directed,
-                )
-                self._adj[src][tgt] = edge
-
-    def _validate(self) -> bool:
-        """Verify that all edge endpoints reference existing vertices.
-
-        :return: ``True`` if the graph is internally consistent.
-        :rtype: bool
-        """
-        for src, targets in self._adj.items():
-            if src not in self._vertices:
-                return False
-            for tgt in targets:
+            for spec in targets:
+                match spec:
+                    case str(tgt):
+                        data: dict[str, Any] = {}
+                    case {"target": str(tgt), **data}:
+                        pass
+                    case _:
+                        msg = f"Invalid neighbor entry for {src!r}: {spec!r}."
+                        raise ValueError(msg)
                 if tgt not in self._vertices:
-                    return False
-        return True
+                    msg = f"Edge {src!r} -> {tgt!r} references a vertex not in the graph."
+                    raise ValueError(msg)
+                if not self._directed and tgt in self._adj and src in self._adj[tgt]:
+                    continue  # undirected edge already declared from the other side
+                self.add_edge(
+                    Edge.create(
+                        src,
+                        tgt,
+                        directed=self._directed,
+                        weight=data.get("weight"),
+                        label=data.get("label"),
+                        attrs=data.get("attrs"),
+                    )
+                )
 
     @staticmethod
     def _validate_matrix(matrix: AdjacencyMatrix) -> bool:
@@ -778,21 +782,15 @@ class Graph:
         :return: Nothing.
         :rtype: None
         """
-        n = len(matrix)
-        names = [str(uuid.uuid4()) for _ in range(n)]
+        names = [str(uuid.uuid4()) for _ in matrix]
 
         for name in names:
             self.add_vertex(name)
 
-        for r_idx in range(n):
-            for c_idx, val in enumerate(matrix[r_idx]):
+        for r_idx, row in enumerate(matrix):
+            for c_idx, val in enumerate(row):
                 if val > 0:
-                    edge = Edge(
-                        source=names[r_idx],
-                        target=names[c_idx],
-                        directed=self._directed,
-                    )
-                    self._adj[names[r_idx]][names[c_idx]] = edge
+                    self.add_edge(names[r_idx], names[c_idx])
 
     def _check_union_compat(self, other: object) -> Graph:
         """Validate that *other* is a compatible :class:`Graph` for union.

@@ -115,11 +115,15 @@ class TestAddEdges:
             [
                 ("A", "B"),
                 ("B", "C", {"weight": 5.0}),
-                Edge.create("C", "D", directed=True, label="arc"),
+                Edge.create("C", "D", label="arc"),
             ]
         )
         assert g.order == 4
         assert g.size == 3
+
+    def test_edge_directed_mismatch_raises(self) -> None:
+        with pytest.raises(ValueError, match="directed flags differ"):
+            Graph().add_edges([Edge("C", "D", directed=True)])
 
     def test_empty_iterable(self) -> None:
         g = Graph()
@@ -285,12 +289,20 @@ class TestAddEdgeObject:
         assert found.label == "bridge"
 
     def test_edge_object_preserves_directed(self) -> None:
-        g = Graph()
-        e = Edge("A", "B", directed=True)
-        g.add_edge(e)
+        g = Graph(directed=True)
+        g.add_edge(Edge("A", "B", directed=True))
         found = g.edge("A", "B")
         assert found is not None
         assert found.directed
+        assert g.edge("B", "A") is None
+
+    def test_edge_object_undirected_both_ways(self) -> None:
+        g = Graph().add_edge(Edge("A", "B", weight=2))
+        assert g.edge("A", "B") is g.edge("B", "A")
+
+    def test_directed_edge_into_undirected_graph_raises(self) -> None:
+        with pytest.raises(ValueError, match="an undirected graph"):
+            Graph().add_edge(Edge("A", "B", directed=True))
 
     def test_edge_object_preserves_attrs(self) -> None:
         g = Graph()

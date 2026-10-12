@@ -3,10 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from pathlib import Path
 
 import pytest
 
@@ -43,7 +40,7 @@ class TestGraphMetadata:
 
     def test_str_shows_adjacency_list(self, simple_edge_json) -> None:
         graph = Graph(input_graph=json.dumps(simple_edge_json))
-        assert str(graph) == "my graph\nA -> B\nB -> 0"
+        assert str(graph) == "my graph\nA -> B\nB -> A"
 
     def test_str_empty_vertex_shows_zero(self) -> None:
         graph = Graph("g")
@@ -55,6 +52,10 @@ class TestGraphMetadata:
         lines = str(Graph(input_graph=json.dumps(data))).splitlines()
         assert lines[1].startswith("A")
         assert lines[2].startswith("B")
+
+    def test_str_separates_neighbors(self) -> None:
+        g = Graph("s").add_edge("AB", "C").add_edge("AB", "D")
+        assert "AB -> C, D" in str(g)
 
 
 # ---------------------------------------------------------------------------
@@ -242,10 +243,16 @@ class TestGraphProperties:
 
     def test_neighbors(self, simple_edge_graph) -> None:
         assert simple_edge_graph.neighbors("A") == ["B"]
-        assert simple_edge_graph.neighbors("B") == []
+        assert simple_edge_graph.neighbors("B") == ["A"]
+
+    def test_neighbors_directed_one_way(self) -> None:
+        g = Graph(directed=True).add_edge("A", "B")
+        assert g.neighbors("A") == ["B"]
+        assert g.neighbors("B") == []
 
     def test_neighbors_missing_vertex(self) -> None:
-        assert Graph().neighbors("Z") == []
+        with pytest.raises(KeyError):
+            Graph().neighbors("Z")
 
 
 # ---------------------------------------------------------------------------
@@ -255,7 +262,7 @@ class TestGraphProperties:
 
 class TestAdjacencyMatrix:
     def test_values(self, simple_edge_graph) -> None:
-        assert simple_edge_graph.adjacency_matrix() == [[0, 1], [0, 0]]
+        assert simple_edge_graph.adjacency_matrix() == [[0, 1], [1, 0]]
 
     def test_square(self, big_graph) -> None:
         n = big_graph.order
@@ -267,6 +274,10 @@ class TestAdjacencyMatrix:
         for v in simple_edge_graph.vertices():
             idx = simple_edge_graph.vertex_to_index(v)
             assert simple_edge_graph.index_to_vertex(idx) == v
+
+    def test_vertex_to_index_missing(self, simple_edge_graph) -> None:
+        with pytest.raises(KeyError):
+            simple_edge_graph.vertex_to_index("Z")
 
     def test_directed_asymmetric(self) -> None:
         data = {"directed": True, "graph": {"A": ["B"], "B": []}}
@@ -289,7 +300,97 @@ class TestIteration:
         data = {"graph": {"A": ["B", "C", "D"], "B": [], "C": [], "D": []}}
         g = Graph(input_graph=json.dumps(data))
         assert len(g["A"]) == 3
-        assert g["B"] == []
+        assert g["B"] == ["A"]
 
     def test_getitem_missing(self) -> None:
-        assert Graph()["MISSING"] == []
+        with pytest.raises(KeyError):
+            Graph()["MISSING"]
+
+
+# ---------------------------------------------------------------------------
+# Undirected symmetry, JSON edge data, and equality
+# ---------------------------------------------------------------------------
+
+
+class TestUndirectedSymmetry:
+    def test_add_edge_is_symmetric(self) -> None:
+        g = Graph().add_edge("A", "B", weight=2)
+        assert g.neighbors("B") == ["A"]
+        assert g.edge("A", "B") is g.edge("B", "A")
+        assert g.size == 1
+
+    def test_json_one_direction_is_enough(self) -> None:
+        g = Graph(input_graph=json.dumps({"graph": {"A": ["B"], "B": []}}))
+        assert g.neighbors("B") == ["A"]
+
+    def test_json_both_directions_first_wins(self) -> None:
+        data = {
+            "graph": {
+                "A": [{"target": "B", "weight": 1}],
+                "B": [{"target": "A", "weight": 9}],
+            }
+        }
+        g = Graph(input_graph=json.dumps(data))
+        assert g.size == 1
+        assert g.edge("B", "A").weight == 1
+
+    def test_matrix_input_symmetric(self) -> None:
+        g = Graph(input_matrix=[[0, 1], [0, 0]])
+        assert g.adjacency_matrix() == [[0, 1], [1, 0]]
+        assert g.size == 1
+
+    def test_union_keeps_symmetry(self) -> None:
+        merged = Graph().add_edge("A", "B") | Graph().add_edge("B", "C")
+        assert sorted(merged.neighbors("B")) == ["A", "C"]
+
+
+class TestJsonEdgeData:
+    def test_neighbor_objects_parsed(self) -> None:
+        data = {
+            "weighted": True,
+            "vertices": {"A": {"label": "Alpha", "attrs": {"x": 1}}},
+            "graph": {"A": [{"target": "B", "weight": 2.5, "label": "toll"}], "B": []},
+        }
+        g = Graph(input_graph=json.dumps(data))
+        edge = g.edge("A", "B")
+        assert edge is not None
+        assert (edge.weight, edge.label) == (2.5, "toll")
+        vertex = g.vertex("A")
+        assert vertex is not None
+        assert vertex.label == "Alpha"
+        assert vertex.attrs["x"] == 1
+
+    def test_weighted_fixture(self) -> None:
+        g = Graph(input_file=str(Path(__file__).parent / "data" / "g4.json"))
+        assert g.edge("B", "C").weight == 3
+        assert g.edge("A", "A").weight == 1
+
+    def test_unknown_target_raises(self) -> None:
+        with pytest.raises(ValueError, match="not in the graph"):
+            Graph(input_graph=json.dumps({"graph": {"A": ["Z"]}}))
+
+    def test_invalid_neighbor_entry_raises(self) -> None:
+        with pytest.raises(ValueError, match="Invalid neighbor entry"):
+            Graph(input_graph=json.dumps({"graph": {"A": [{"weight": 1}], "B": []}}))
+
+
+class TestGraphEquality:
+    def test_equal_structure(self) -> None:
+        assert Graph("x").add_edge("A", "B") == Graph("y").add_edge("B", "A")
+
+    def test_weights_ignored(self) -> None:
+        assert Graph().add_edge("A", "B", weight=1) == Graph().add_edge("A", "B", weight=2)
+
+    def test_direction_matters(self) -> None:
+        assert Graph(directed=True).add_edge("A", "B") != Graph(directed=True).add_edge("B", "A")
+        assert Graph().add_edge("A", "B") != Graph(directed=True).add_edge("A", "B")
+
+    def test_vertices_matter(self) -> None:
+        assert Graph().add_vertex("A") != Graph().add_vertex("B")
+
+    def test_not_equal_to_other_types(self) -> None:
+        assert Graph() != "graph"
+
+    def test_unhashable(self) -> None:
+        with pytest.raises(TypeError):
+            hash(Graph())

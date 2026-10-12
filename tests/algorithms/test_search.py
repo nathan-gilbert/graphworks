@@ -4,17 +4,15 @@ from __future__ import annotations
 
 import json
 
-from graphworks.algorithms.search import (
-    arrival_departure_dfs,
-    breadth_first_search,
-    depth_first_search,
-)
+import pytest
+
+from graphworks.algorithms.search import breadth_first_search, depth_first_search
 from graphworks.graph import Graph
 
 
 class TestBreadthFirstSearch:
     def test_bfs_from_c(self, search_graph) -> None:
-        assert breadth_first_search(search_graph, "c") == ["c", "a", "d", "b"]
+        assert breadth_first_search(search_graph, "c") == ["c", "a", "b", "d"]
 
     def test_visits_all(self, search_graph) -> None:
         assert sorted(breadth_first_search(search_graph, "a")) == ["a", "b", "c", "d"]
@@ -30,10 +28,18 @@ class TestBreadthFirstSearch:
         walk = breadth_first_search(search_graph, "a")
         assert len(walk) == len(set(walk))
 
+    def test_missing_start(self, search_graph) -> None:
+        with pytest.raises(KeyError):
+            breadth_first_search(search_graph, "z")
+
+    def test_undirected_reaches_back(self) -> None:
+        g = Graph().add_edge("A", "B").add_edge("B", "C")
+        assert breadth_first_search(g, "C") == ["C", "B", "A"]
+
 
 class TestDepthFirstSearch:
     def test_dfs_from_c(self, search_graph) -> None:
-        assert depth_first_search(search_graph, "c") == ["c", "d", "a", "b"]
+        assert depth_first_search(search_graph, "c") == ["c", "d", "b", "a"]
 
     def test_visits_all(self, search_graph) -> None:
         assert sorted(depth_first_search(search_graph, "a")) == ["a", "b", "c", "d"]
@@ -50,34 +56,6 @@ class TestDepthFirstSearch:
         walk = depth_first_search(Graph(input_graph=json.dumps(data)), "a")
         assert walk.count("b") == 1
 
-
-class TestArrivalDepartureDFS:
-    def _run(self, graph):
-        arrival = dict.fromkeys(graph.vertices(), 0)
-        departure = dict.fromkeys(graph.vertices(), 0)
-        discovered = dict.fromkeys(graph.vertices(), False)
-        time = -1
-        for v in graph.vertices():
-            if not discovered[v]:
-                time = arrival_departure_dfs(graph, v, discovered, arrival, departure, time)
-        return arrival, departure, discovered
-
-    def test_times(self, disjoint_directed_graph) -> None:
-        arrival, departure, _ = self._run(disjoint_directed_graph)
-        result = list(zip(arrival.values(), departure.values(), strict=False))
-        expected = [(0, 11), (1, 2), (3, 10), (4, 7), (8, 9), (5, 6), (12, 15), (13, 14)]
-        assert result == expected
-
-    def test_all_discovered(self, disjoint_directed_graph) -> None:
-        _, _, discovered = self._run(disjoint_directed_graph)
-        assert all(discovered.values())
-
-    def test_departure_after_arrival(self, disjoint_directed_graph) -> None:
-        arrival, departure, _ = self._run(disjoint_directed_graph)
-        for v in disjoint_directed_graph.vertices():
-            assert departure[v] > arrival[v]
-
-    def test_unique_times(self, disjoint_directed_graph) -> None:
-        arrival, departure, _ = self._run(disjoint_directed_graph)
-        all_times = list(arrival.values()) + list(departure.values())
-        assert len(all_times) == len(set(all_times))
+    def test_missing_start(self, search_graph) -> None:
+        with pytest.raises(KeyError):
+            depth_first_search(search_graph, "z")

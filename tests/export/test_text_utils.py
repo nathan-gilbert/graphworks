@@ -147,21 +147,11 @@ class TestToText:
 
 
 class TestPublicSurface:
-    """The convenience wrappers exposed on Graph and the package root."""
+    """to_text is exposed at the package root and in graphworks.export."""
 
-    def test_graph_method_matches_function(self, connected_graph: Graph) -> None:
-        """Graph.to_text() delegates to the export function."""
-        assert connected_graph.to_text() == to_text(connected_graph)
-
-    def test_graph_method_forwards_options(self) -> None:
-        """Graph.to_text() forwards its display options to the export function."""
-        g = Graph("g", directed=True, weighted=True)
-        g.add_vertex("A", label="Start")
-        g.add_edge("A", "B", weight=3)
-        assert g.to_text(vertex_labels=False, weights=False) == to_text(
-            g, vertex_labels=False, weights=False
-        )
-        assert g.to_text(vertex_labels=False, weights=False) == "g\n└── A\n    └── B"
+    def test_not_a_graph_method(self) -> None:
+        """Rendering is a free function, like every other algorithm and exporter."""
+        assert not hasattr(Graph, "to_text")
 
     def test_top_level_export(self, simple_edge_graph: Graph) -> None:
         """to_text is importable directly from the package root."""
@@ -169,3 +159,9 @@ class TestPublicSurface:
 
         assert "to_text" in graphworks.__all__
         assert graphworks.to_text(simple_edge_graph) == to_text(simple_edge_graph)
+
+    def test_export_package(self, simple_edge_graph: Graph) -> None:
+        """to_text is importable from graphworks.export."""
+        from graphworks import export
+
+        assert export.to_text(simple_edge_graph) == to_text(simple_edge_graph)
