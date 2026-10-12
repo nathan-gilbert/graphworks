@@ -96,7 +96,16 @@ def to_text(
     visited: set[str] = set()
     last_root = len(roots) - 1
     for idx, root in enumerate(roots):
-        _render(graph, root, None, "", idx == last_root, visited, lines, style)
+        _render(
+            graph,
+            root,
+            parent=None,
+            prefix="",
+            is_last=idx == last_root,
+            visited=visited,
+            lines=lines,
+            style=style,
+        )
     return "\n".join(lines)
 
 
@@ -169,6 +178,7 @@ def _select_roots(graph: Graph, candidates: list[str]) -> list[str]:
 def _render(  # noqa: PLR0913
     graph: Graph,
     node: str,
+    *,
     parent: str | None,
     prefix: str,
     is_last: bool,
@@ -214,7 +224,16 @@ def _render(  # noqa: PLR0913
     child_prefix = prefix + (_SPACE if is_last else _PIPE)
     last_child = len(children) - 1
     for idx, child in enumerate(children):
-        _render(graph, child, node, child_prefix, idx == last_child, visited, lines, style)
+        _render(
+            graph,
+            child,
+            parent=node,
+            prefix=child_prefix,
+            is_last=idx == last_child,
+            visited=visited,
+            lines=lines,
+            style=style,
+        )
 
 
 def _children(graph: Graph, node: str, parent: str | None) -> list[str]:

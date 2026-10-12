@@ -29,6 +29,7 @@ from rich.tree import Tree
 
 from graphworks.algorithms import (
     breadth_first_search,
+    complement,
     degree_sequence,
     density,
     depth_first_search,
@@ -41,7 +42,7 @@ from graphworks.algorithms import (
     is_dag,
     is_regular,
     is_simple,
-    topological,
+    topological_sort,
     vertex_degree,
 )
 from graphworks.graph import Graph
@@ -286,11 +287,6 @@ def demo_paths(graph: Graph) -> None:
 def demo_complement(graph: Graph) -> None:
     """Show the complement graph.
 
-    The library's :func:`get_complement` returns a matrix-based graph with
-    UUID vertex names (the original names are lost in the matrix round-trip).
-    For display purposes we compute the missing edges directly so we can
-    show them with the original, human-readable vertex names.
-
     :param graph: An undirected graph.
     :type graph: Graph
     :return: Nothing.
@@ -298,20 +294,10 @@ def demo_complement(graph: Graph) -> None:
     """
     _section("6 · Complement graph")
 
-    verts = sorted(graph.vertices())
-    original_edges: set[tuple[str, str]] = set()
-    for v in verts:
-        for n in graph.neighbors(v):
-            edge = (min(v, n), max(v, n))
-            original_edges.add(edge)
+    comp = complement(graph)
+    complement_edges = sorted(tuple(sorted((e.source, e.target))) for e in comp.edges())
 
-    complement_edges: list[tuple[str, str]] = []
-    for i, v1 in enumerate(verts):
-        for v2 in verts[i + 1 :]:
-            if (min(v1, v2), max(v1, v2)) not in original_edges:
-                complement_edges.append((v1, v2))
-
-    _kv("original edges", len(original_edges))
+    _kv("original edges", graph.size)
     _kv("complement edges", len(complement_edges))
     console.print()
 
@@ -350,7 +336,7 @@ def demo_directed() -> None:
     dag = Graph(input_graph=json.dumps(dag_def))
 
     _kv("DAG?", is_dag(dag))
-    _kv("topo sort", " → ".join(topological(dag)))
+    _kv("topo sort", " → ".join(topological_sort(dag)))
 
     console.print()
     _graph_panel(dag, "build pipeline (DAG)", border_style="green")

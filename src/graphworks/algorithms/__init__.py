@@ -3,26 +3,20 @@
 Submodules
 ----------
 
-- :mod:`~graphworks.algorithms.properties` — structural predicates and metrics
-- :mod:`~graphworks.algorithms.paths` — path finding and edge utilities
+- :mod:`~graphworks.algorithms.properties` — structural predicates, metrics, and the complement
+- :mod:`~graphworks.algorithms.paths` — path finding and isolated vertices
 - :mod:`~graphworks.algorithms.search` — graph traversal
 - :mod:`~graphworks.algorithms.directed` — directed-graph algorithms
 - :mod:`~graphworks.algorithms.sort` — sorting algorithms
 """
 
 from .directed import find_circuit, is_dag
-from .paths import (
-    find_all_paths,
-    find_isolated_vertices,
-    find_path,
-    generate_edges,
-)
+from .paths import find_all_paths, find_isolated_vertices, find_path
 from .properties import (
+    complement,
     degree_sequence,
     density,
     diameter,
-    get_complement,
-    invert,
     is_complete,
     is_connected,
     is_degree_sequence,
@@ -35,16 +29,12 @@ from .properties import (
     min_degree,
     vertex_degree,
 )
-from .search import (
-    arrival_departure_dfs,
-    breadth_first_search,
-    depth_first_search,
-)
-from .sort import topological
+from .search import breadth_first_search, depth_first_search
+from .sort import topological_sort
 
 __all__ = [
-    "arrival_departure_dfs",
     "breadth_first_search",
+    "complement",
     "degree_sequence",
     "density",
     "depth_first_search",
@@ -53,9 +43,6 @@ __all__ = [
     "find_circuit",
     "find_isolated_vertices",
     "find_path",
-    "generate_edges",
-    "get_complement",
-    "invert",
     "is_complete",
     "is_connected",
     "is_dag",
@@ -67,6 +54,6 @@ __all__ = [
     "is_sparse",
     "max_degree",
     "min_degree",
-    "topological",
+    "topological_sort",
     "vertex_degree",
 ]
