@@ -43,7 +43,6 @@ Homepage = "https://github.com/nathan-gilbert/graphworks"
 Repository = "https://github.com/nathan-gilbert/graphworks"
 "Bug Tracker" = "https://github.com/nathan-gilbert/graphworks/issues"
 Changelog = "https://github.com/nathan-gilbert/graphworks/blob/main/CHANGELOG.md"
-Documentation = "https://graphworks.readthedocs.io"
 
 [project.scripts]
 demo = "examples.demo:main"

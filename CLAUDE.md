@@ -92,9 +92,9 @@ in `tests/data/`. Markers: `@pytest.mark.unit`, `@pytest.mark.integration`, `@py
 - **Formatting:** black and ruff (line-length 100), isort (black profile)
 - **Type checking:** ty in strict mode
 - All algorithm functions are pure functions — no classes wrapping algorithms
-- Version is dynamic via `hatchling-vcs` (git tags like `vX.Y.Z`)
+- Version is dynamic via `hatchling-vcs` (git tags like `X.Y.Z`, no `v` prefix)
 
 ## Publishing
 
-Tag a commit with `git tag -a vX.Y.Z -m 'message'` and push tags to trigger PyPI publish via GitHub
+Tag a commit with `git tag -a X.Y.Z -m 'message'` and push tags to trigger PyPI publish via GitHub
 Actions.

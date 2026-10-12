@@ -4,7 +4,6 @@
 
 ## A Python module for efficient graph theoretic programming
 
-[Documentation](https://graphworks.readthedocs.io) |
 [Wiki](https://github.com/nathan-gilbert/graphworks/wiki)
 
 ### Quick Start
@@ -130,6 +129,10 @@ Version is managed automatically via git tags using `hatchling-vcs`.
       export
 - [x] `add_edge` supports `weight` and `label` keyword arguments
 - [x] `edge()` lookup method for direct O(1) edge retrieval
+- [ ] `remove_vertex()` / `remove_edge()` (there is currently no way to delete anything)
+- [ ] `copy()` (today the only copy is `Graph() | g`)
+- [ ] `predecessors()` / in-neighbors for directed graphs (`is_connected`, `find_circuit`, and
+      `find_isolated_vertices` each recompute in-edges by hand)
 
 ### Tier 3: Lossless conversions
 
@@ -141,10 +144,11 @@ Version is managed automatically via git tags using `hatchling-vcs`.
 
 ### Tier 4: Algorithms
 
+- [ ] Unweighted shortest path via BFS (`find_path` returns *a* path, not the shortest;
+      `diameter` already computes BFS distances internally)
 - [ ] Dijkstra's shortest path (weighted)
 - [ ] Prim's / Kruskal's minimum spanning tree
-- [ ] Strongly connected components (Tarjan or Kosaraju)
-- [ ] Improved shortest-path implementations leveraging weighted edges
+- [ ] Strongly connected components (Tarjan or Kosaraju) and `is_strongly_connected`
 
 ### Tier 5: Export and CLI
 
@@ -157,8 +161,22 @@ Version is managed automatically via git tags using `hatchling-vcs`.
 
 ### Tier 6: Cross-cutting quality
 
-- [ ] Thread safety (immutable graph views or locking around mutations)
-- [ ] Input validation hardening
+- [ ] Iterative traversals: `find_path`, `find_all_paths`, and `topological_sort` are recursive and
+      raise `RecursionError` on a ~3,000-vertex chain
+- [ ] Input validation hardening:
+   - [ ] Reject non-list neighbor values in JSON (`{"A": "B"}` is silently read as the characters
+         of `"B"`)
+   - [ ] Raise when more than one of `input_file` / `input_graph` / `input_matrix` is given (extras
+         are silently ignored)
+- [ ] Read-only graph view (instead of locking for thread safety)
 - [ ] Performance benchmarks
+- [ ] Run docstring examples as tests (`--doctest-modules`) so examples cannot go stale
+
+### Tier 7: Docs and releases
+
+- [ ] `CHANGELOG.md` (linked from the PyPI metadata but missing), starting with the 0.10.0
+      breaking changes
+- [ ] Hosted API documentation (Sphinx deps exist in the `[docs]` extra, but there is no `docs/`
+      source and the Read the Docs site does not exist)
 
 [1]: https://github.com/nathan-gilbert/graphworks/actions/workflows/python-package-ci.yml
