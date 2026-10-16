@@ -109,3 +109,4 @@ venv.bak/
 .DS_Store
 _version.py
 .run
+.air/

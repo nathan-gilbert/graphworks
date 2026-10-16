@@ -122,6 +122,10 @@ class TestMatrixConstruction:
         with pytest.raises(ValueError):  # noqa: PT011
             Graph(input_matrix=[])
 
+    def test_multiple_inputs_raises(self) -> None:
+        with pytest.raises(ValueError, match="at most one"):
+            Graph(input_graph="{}", input_matrix=[[0]])
+
     def test_uuid_vertex_names(self) -> None:
         graph = Graph(input_matrix=[[0, 1], [1, 0]])
         assert all(len(v) == 36 for v in graph.vertices())
@@ -372,6 +376,10 @@ class TestJsonEdgeData:
     def test_invalid_neighbor_entry_raises(self) -> None:
         with pytest.raises(ValueError, match="Invalid neighbor entry"):
             Graph(input_graph=json.dumps({"graph": {"A": [{"weight": 1}], "B": []}}))
+
+    def test_non_list_neighbors_raises(self) -> None:
+        with pytest.raises(ValueError, match="must be a list"):
+            Graph(input_graph=json.dumps({"graph": {"A": "B", "B": []}}))
 
 
 class TestGraphEquality:

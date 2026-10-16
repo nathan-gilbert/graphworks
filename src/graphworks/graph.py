@@ -113,8 +113,9 @@ class Graph:
     :param weighted: Whether this graph uses weighted edges.  Defaults to ``False``.  Can be
         overridden by the ``"weighted"`` key in JSON input.
     :type weighted: bool
-    :raises ValueError: If *input_matrix* is not square, or if edge endpoints in a JSON graph
-        reference vertices that do not exist.
+    :raises ValueError: If more than one input source is given, if *input_matrix* is not square,
+        or if a JSON graph has a non-list neighbor value or edge endpoints that reference
+        vertices that do not exist.
     """
 
     __slots__ = (
@@ -137,7 +138,7 @@ class Graph:
     ) -> None:
         """Initialize a :class:`Graph`.
 
-        At most one of *input_file*, *input_graph*, or *input_matrix* should be provided.  If
+        At most one of *input_file*, *input_graph*, or *input_matrix* may be provided.  If
         none is given an empty graph is created.
 
         :param label: Human-readable name for this graph.
@@ -153,7 +154,8 @@ class Graph:
         :type directed: bool
         :param weighted: Whether this graph uses weighted edges.
         :type weighted: bool
-        :raises ValueError: If *input_matrix* is not square, or if edge endpoints in a JSON graph
+        :raises ValueError: If more than one input source is given, if *input_matrix* is not
+            square, or if a JSON graph has a non-list neighbor value or edge endpoints that
             reference vertices not in the vertex set.
         """
         self._label: str = label
@@ -162,6 +164,9 @@ class Graph:
         self._vertices: dict[str, Vertex] = {}
         self._adj: dict[str, dict[str, Edge]] = {}
 
+        if sum(x is not None for x in (input_file, input_graph, input_matrix)) > 1:
+            msg = "Provide at most one of input_file, input_graph, or input_matrix."
+            raise ValueError(msg)
         if input_file is not None:
             json_data = json.loads(Path(input_file).read_text(encoding="utf-8"))
             self._extract_fields_from_json(json_data)
@@ -805,7 +810,8 @@ class Graph:
         :return: Nothing.
         :rtype: None
         :raises ValueError: If an adjacency list references a vertex that is not a key of
-            ``"graph"``, or a neighbor entry is neither a string nor an object with ``"target"``.
+            ``"graph"``, a neighbor value is not a list, or a neighbor entry is neither a string
+            nor an object with ``"target"``.
         """
         self._label = json_data.get("label", "")
         self._directed = json_data.get("directed", False)
@@ -818,15 +824,11 @@ class Graph:
             self.add_vertex(name, label=meta.get("label"), attrs=meta.get("attrs"))
 
         for src, targets in raw_graph.items():
+            if not isinstance(targets, list):
+                msg = f"Neighbors of {src!r} must be a list, got {type(targets).__name__}."
+                raise ValueError(msg)  # noqa: TRY004 - match sibling JSON errors
             for spec in targets:
-                match spec:
-                    case str(tgt):
-                        data: dict[str, Any] = {}
-                    case {"target": str(tgt), **data}:
-                        pass
-                    case _:
-                        msg = f"Invalid neighbor entry for {src!r}: {spec!r}."
-                        raise ValueError(msg)
+                tgt, data = self._parse_neighbor(src, spec)
                 if tgt not in self._vertices:
                     msg = f"Edge {src!r} -> {tgt!r} references a vertex not in the graph."
                     raise ValueError(msg)
@@ -842,6 +844,27 @@ class Graph:
                         attrs=data.get("attrs"),
                     )
                 )
+
+    @staticmethod
+    def _parse_neighbor(src: str, spec: str | dict[str, Any]) -> tuple[str, dict[str, Any]]:
+        """Split a JSON neighbor entry into its target name and edge data.
+
+        :param src: Name of the vertex whose adjacency list holds *spec* (for error messages).
+        :type src: str
+        :param spec: A bare target name, or an object with ``"target"`` and optional edge fields.
+        :type spec: str | dict[str, Any]
+        :return: The target name and the remaining edge fields.
+        :rtype: tuple[str, dict[str, Any]]
+        :raises ValueError: If *spec* is neither a string nor an object with ``"target"``.
+        """
+        match spec:
+            case str(tgt):
+                return tgt, {}
+            case {"target": str(tgt), **data}:
+                return tgt, data
+            case _:
+                msg = f"Invalid neighbor entry for {src!r}: {spec!r}."
+                raise ValueError(msg)
 
     @staticmethod
     def _validate_matrix(matrix: AdjacencyMatrix) -> bool:

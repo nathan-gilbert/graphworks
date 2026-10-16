@@ -162,10 +162,10 @@ Version is managed automatically via git tags using `hatchling-vcs`.
 
 - [ ] Iterative traversals: `find_path`, `find_all_paths`, and `topological_sort` are recursive and
       raise `RecursionError` on a ~3,000-vertex chain
-- [ ] Input validation hardening:
-   - [ ] Reject non-list neighbor values in JSON (`{"A": "B"}` is silently read as the characters
+- [x] Input validation hardening:
+   - [x] Reject non-list neighbor values in JSON (`{"A": "B"}` is silently read as the characters
          of `"B"`)
-   - [ ] Raise when more than one of `input_file` / `input_graph` / `input_matrix` is given (extras
+   - [x] Raise when more than one of `input_file` / `input_graph` / `input_matrix` is given (extras
          are silently ignored)
 - [ ] Read-only graph view (instead of locking for thread safety)
 - [ ] Performance benchmarks
